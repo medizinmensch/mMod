@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<!--== OpenJSCAD.org, Copyright (c) 2016, Licensed under MIT License ==
+ in conjunction with other libraries by various authors (see the individual files)
+
+Purpose:
+ This application provides an example of how to show JSCAD designs with minimal HTML and CSS.
+
+History:
+ 2016/06/27: 0.5.1: Changes for 0.5.1 libraries by Z3 Dev
+ 2016/05/01: 0.5.0: Changes for 0.5.0 libraries by Z3 Dev
+ 2016/02/02: 0.4.0: Initial version by Z3 Dev-->
+
+<head>
+    <meta http-equiv=content-type content="text/html; charset=UTF-8">
+    <title>Customizer</title>
+    <script src=scripts/js/jquery/jquery-3.1.1.min.js></script>
+    <script src=scripts/js/jquery/jquery.hammer.js></script>
+    <script src=scripts/js/jscad/lightgl.js></script>
+    <script src=scripts/js/jscad/csg.js></script>
+    <script src=scripts/js/jscad/formats.js></script>
+    <script src=scripts/js/jscad/openjscad.js></script>
+    <script src=scripts/js/jscad/openscad.js></script>
+    <script src=scripts/js/jscad/jscad-function.js charset=utf-8></script>
+    <script src=scripts/js/threejs/three.js></script>
+    <script src=scripts/js/threejs/threecsg.js></script>
+    <script src=scripts/js/threejs/STLLoader.js></script>
+    <script src=scripts/js/bezier/bezier.js></script>
+    <script src=scripts/js/bezier/beziercontrol.js></script>
+    <script src=scripts/js/pixelGrid.js></script>
+    <script src=scripts/js/configurator.js></script>
+    <link rel=stylesheet href=css/main.css type=text/css>
+    <!--<link rel=stylesheet href=css/vender.css type=text/css>-->
+</head>
+
+<body>
+    <!--setup display of the errors as required by OpenJSCAD.js-->
+    <div class="container">
+        <div class="jscad-container">
+            <!--<div id="header">-->
+            <div id="errordiv" class="has-error">Error</div>
+            <!--</div>-->
+            <!--setup display of the viewer, i.e. canvas-->
+            <div oncontextmenu="return false;" id="viewerContext"></div>
+            <!--setup display of the design parameters, as required by OpenJSCAD.js-->
+            <!--set display: block to display this-->
+            <div id="parametersdiv" style="display: block;"></div>
+            <!--setup display of the status, as required by OpenJSCAD.js-->
+            <!--set display: block to display this-->
+            <div id="tail" style="display:none;">
+                <div id="statusdiv"></div>
+            </div>
+        </div>
+        <div id="bezier-container1">
+            <div class="bezier-container" id="bezier-container">
+                <canvas></canvas>
+                <button class="add_button">+</button>
+                <button class="remove_button">-</button>
+            </div>
+            <!--todo get the pixelgrid-container width -->
+            <div class="pixelgrid-container" id="pixelgrid-container">
+                    <canvas id=pixelgrid class=pixelgrid-canvas></canvas><br>
+                    <button id="clearButton" class="clear-btn">Clear</button>
+            </div>
+
+            <button class="threeyd-upload" onclick=upload()>Print it!</button>
+        </div>
+    </div>
+    <!--OpenJSCAD and BezierControl setup-->
+    <script>
+    var jscad_script = "scripts/jscad_scripts/bauble.js";
+    // var stlfiles = {bear: "models/bear.stl", house: "models/house.stl"};
+    configurator = new Configurator(jscad_script) // new Configurator(jscad_script, stlfiles);
+</script>
+    <!--3YOURMIND upload--><script>
+
+      var QueryString = function () {
+        // Helper to get URL paraeters
+        var query_string = {};
+        var query = window.location.search.substring(1);
+        var vars = query.split("&");
+        for (var i=0;i<vars.length;i++) {
+          var pair = vars[i].split("=");
+              // If first entry with this name
+          if (typeof query_string[pair[0]] === "undefined") {
+            query_string[pair[0]] = decodeURIComponent(pair[1]);
+              // If second entry with this name
+          } else if (typeof query_string[pair[0]] === "string") {
+            var arr = [ query_string[pair[0]],decodeURIComponent(pair[1]) ];
+            query_string[pair[0]] = arr;
+              // If third or later entry with this name
+          } else {
+            query_string[pair[0]].push(decodeURIComponent(pair[1]));
+          }
+        }
+      return query_string;
+    }();
+
+
+    function upload() {
+        var form_data = new FormData();
+        form_data.append('file', configurator.get_stl(), 'generated-model.stl');
+        form_data.append('origin', 'jscad_app');
+        form_data.append('domain', QueryString.domain);
+
+        // API call via AJAX (POST)
+        var req = $.ajax({
+            headers: {Accept: 'application/json'},
+            url: 'https://api.3yourmind.com/upload',
+            type: 'POST',
+            data: form_data,
+            processData: false,
+            contentType: false
+        });
+
+        req.done(function (results) {
+            if (results.success) {
+                console.log(results.url);
+                var iframe_url = results.url.replace("/uploads/", "/iframe/u/");
+                window.location = iframe_url;
+            } else {
+                console.log(results)
+            }
+        });
+
+        req.fail(function (results) {
+            console.log("error sending request");
+            console.log(results);
+        });
+
+    }
+</script>
+</body>
+
+</html>
