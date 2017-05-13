@@ -64,7 +64,7 @@ gulp.task('deploy', function () {
 
 gulp.task('js', function() {
   gulp.src('src/scripts/**/*.js')
-    // .pipe(uglify())
+    .pipe(uglify())
     .pipe(size({ gzip: true, showFiles: true }))
     .pipe(gulp.dest('dist/scripts'))
     .pipe(reload({stream:true}));
@@ -100,7 +100,7 @@ gulp.task('watch', function() {
   gulp.watch('src/*.html', ['html']);
   gulp.watch('images/*', ['imgmin']);
 });
-
+ 
 gulp.task('imgmin', function () {
     return gulp.src('src/images/*')
         .pipe(imagemin({
