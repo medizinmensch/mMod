@@ -1,8 +1,7 @@
-# 3D Configurator
+# 3D Configurator Web-App
 
+## Install - npm available - Quick Start
 
-
-If you already have npm, more simple to start from here:
 
 ```
 $ cd 3d-configurator
@@ -11,7 +10,7 @@ $ npm install
 $ gulp serve
 ```
 
-## Install npm
+## Complete Installation - npm not yet available
 
 npm need node.js to be install. Follow [this guide](https://docs.npmjs.com/getting-started/installing-node) to install node.js in your computer. If you already have installed node.js run `node -v` to check the version of your NPM version. The version should be higher than 0.12.0
 
