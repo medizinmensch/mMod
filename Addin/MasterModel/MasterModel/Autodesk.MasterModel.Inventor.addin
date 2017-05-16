@@ -1,0 +1,14 @@
+<Addin Type="Standard">
+  <!--Created for Autodesk Inventor Version 22.0-->
+  <ClassId>{b7604cb8-7da8-40b8-bed8-4671fdc9c758}</ClassId>
+  <ClientId>{b7604cb8-7da8-40b8-bed8-4671fdc9c758}</ClientId>
+  <DisplayName>MasterModel</DisplayName>
+  <Description>MasterModel</Description>
+  <Assembly>MasterModel.dll</Assembly>
+  <LoadOnStartUp>1</LoadOnStartUp>
+  <UserUnloadable>1</UserUnloadable>
+  <Hidden>0</Hidden>
+  <SupportedSoftwareVersionGreaterThan>21..</SupportedSoftwareVersionGreaterThan>
+  <DataVersion>1</DataVersion>
+  <UserInterfaceVersion>1</UserInterfaceVersion>
+</Addin>
