@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+
+  <assemblyIdentity name="MasterModel" version="1.0.0.0"></assemblyIdentity>
+
+  <clrClass clsid="{b7604cb8-7da8-40b8-bed8-4671fdc9c758}" progid="MasterModel.StandardAddInServer" threadingModel="Both" name="MasterModel.StandardAddInServer" runtimeVersion=""></clrClass>
+
+  <file name="MasterModel.dll" hashalg="SHA1"></file>
+
+</assembly>
