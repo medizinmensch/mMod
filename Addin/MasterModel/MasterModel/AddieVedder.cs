@@ -6,11 +6,8 @@ using System.Threading.Tasks;
 
 namespace InvAddIn
 {
-    public class Shakespeare
+    class MasterM
     {
-        public Shakespeare(MasterM MM)
-        {
-            //test
-        }
+        
     }
 }

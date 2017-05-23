@@ -6,11 +6,7 @@ using System.Threading.Tasks;
 
 namespace InvAddIn
 {
-    public class Shakespeare
+    class BenjaminBUTTON
     {
-        public Shakespeare(MasterM MM)
-        {
-            //test
-        }
     }
 }
