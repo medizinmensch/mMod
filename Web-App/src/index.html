@@ -45,9 +45,9 @@ History:
                     <a href="#">Parametric Grille</a>
                 </div>
             </div>
-            <button class="testButton">Test Button 1</button>
-            <button class="testButton">Test Button 2</button>
-            <button class="testButton">Test Button 3</button>
+            <button class="testButton" onclick="switchMasterModel()">Reset</button>
+            <button class="testButton" onclick="switchMasterModel2()">Reset2</button>
+            <button class="testButton" onclick="upload()">Print it!</button>
         </div>
         <div id="parametersdiv" style="display: block;"></div>
         <div id="tail" style="display:none;">
@@ -59,8 +59,10 @@ History:
     <script>
         var jscad_script = "scripts/jscad_scripts/parametricAxisCoupler.js";
         // var stlfiles = {bear: "models/bear.stl", house: "models/house.stl"};
-        configurator = new Configurator(jscad_script) // new Configurator(jscad_script, stlfiles);
+        configurator = new Configurator(jscad_script); // new Configurator(jscad_script, stlfiles);
     </script>
+
+
     <!--3YOURMIND upload-->
     <script>
         var QueryString = function () {
@@ -141,6 +143,31 @@ toggle between hiding and showing the dropdown content */
                     }
                 }
             }
+        }
+
+        function switchMasterModel() {
+            alert("jetzt gehts los");
+            var jscad_script2 = "scripts/jscad_scripts/bauble_copy.js";
+            var configurator2 = new Configurator(jscad_script2);
+
+            var gProcessor = new OpenJsCad.Processor(document.getElementById("viewerContext"), {useAsync: false});
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", jscad_script2, true);
+            xhr.onload = function () {
+                var source = this.responseText;
+                gProcessor.processor.setJsCad(source, jscad_script2);
+            };
+            xhr.send();
+
+            configurator.refresh();
+        }
+
+        function switchMasterModel2() {
+            alert("jetzt gehts los");
+            var jscad_script3 = "scripts/jscad_scripts/bauble_copy.js";
+            var configurator3 = new Configurator(jscad_script3);
+
+            configurator3.refresh();
         }
     </script>
 </body>
