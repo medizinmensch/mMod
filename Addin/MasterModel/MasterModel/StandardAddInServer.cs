@@ -15,7 +15,7 @@ using System.Windows.Forms;
 
 namespace MasterModel
 {
-    /// <summary>
+    /// <summary> .
     /// This is the primary AddIn Server class that implements the ApplicationAddInServer interface
     /// that all Inventor AddIns are required to implement. The communication between Inventor and
     /// the AddIn is via the methods on this interface.
