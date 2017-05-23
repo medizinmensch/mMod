@@ -1,7 +1,17 @@
 using System;
+using System.Text;
+using System.Linq;
+using System.Reflection;
+using System.ComponentModel;
+using System.Collections;
+using System.Collections.Generic;
+using System.Windows;
+using System.Drawing;
+using System.IO;
 using System.Runtime.InteropServices;
 using Inventor;
 using Microsoft.Win32;
+using System.Windows.Forms;
 
 namespace MasterModel
 {
@@ -16,6 +26,7 @@ namespace MasterModel
 
         // Inventor application object.
         private Inventor.Application m_inventorApplication;
+        private Inventor.ApplicationEvents m_appEvents;
 
         public StandardAddInServer()
         {
@@ -34,6 +45,8 @@ namespace MasterModel
 
             // TODO: Add ApplicationAddInServer.Activate implementation.
             // e.g. event initialization, command creation etc.
+            m_appEvents = m_inventorApplication.ApplicationEvents;
+            m_appEvents.OnActivateDocument += new ApplicationEventsSink_OnActivateDocumentEventHandler(ApplicationEvents_OnActivateDocument);
         }
 
         public void Deactivate()
@@ -46,9 +59,27 @@ namespace MasterModel
 
             // Release objects.
             m_inventorApplication = null;
+            m_appEvents.OnActivateDocument -= new ApplicationEventsSink_OnActivateDocumentEventHandler(ApplicationEvents_OnActivateDocument);
+
+            m_appEvents = null;
 
             GC.Collect();
             GC.WaitForPendingFinalizers();
+        }
+
+
+
+        private void ApplicationEvents_OnActivateDocument(_Document DocumentObject,EventTimingEnum BeforeOrAfter,NameValueMap Context, out HandlingCodeEnum HandlingCode)
+        {
+            HandlingCode = Inventor.HandlingCodeEnum.kEventNotHandled;
+
+            if (BeforeOrAfter != Inventor.EventTimingEnum.kAfter)
+            {
+                return;
+            }
+
+            HandlingCode =Inventor.HandlingCodeEnum.kEventHandled;
+            MessageBox.Show(DocumentObject.DisplayName,"C# - OnActivateDocument",MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         public void ExecuteCommand(int commandID)
