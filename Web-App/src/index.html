@@ -50,17 +50,19 @@ History:
             <div id="tail" style="display:none;">
                 <div id="statusdiv"></div>
             </div>
-        
+            <div class="TestButtons" style="display: block;">
+                <button class="threeyd-upload" onclick=upload()>Test Button 1</button>
+                <button class="threeyd-upload" onclick=upload()>Test Button 2</button>
+                <button class="threeyd-upload" onclick=upload()>Test Button 3</button>
+                <button class="threeyd-upload" onclick=upload()>Test Button 4</button>
+                <button class="threeyd-upload" onclick=upload()>Test Button 5</button>
+                <button class="threeyd-upload" onclick=upload()>Test Button 6</button>
+            </div>
     </div>
-
-
-
-
-
 
     <!--OpenJSCAD and BezierControl setup-->
     <script>
-    var jscad_script = "scripts/jscad_scripts/bauble.js";
+    var jscad_script = "scripts/jscad_scripts/parametricAxisCoupler.js";
     // var stlfiles = {bear: "models/bear.stl", house: "models/house.stl"};
     configurator = new Configurator(jscad_script) // new Configurator(jscad_script, stlfiles);
 </script>
