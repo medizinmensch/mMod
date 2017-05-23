@@ -85,4 +85,6 @@ gulp dist
 ```
 
 You can find all the code in `dist/` directory, gzipped, minified, and it's ready to ship ðŸ›³
-Test
+
+
+15:29
