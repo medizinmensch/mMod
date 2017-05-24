@@ -21,29 +21,23 @@ git clone https://github.com/medizinmensch/mMod.git
 The directory explained as follows:
 
 
-- dist                # deploy files 
-* src                 # source file for project
-    * images          
-    * scripts         # all the javascript files go here
-    * scss            # css style files
-    * index.html 
-* .gitgnore
-* README.md           # this file you are reading
-* gulpfile.js         # gulp tasks
-* package.json        # npm dependency 
-
-
-
 ```
-|-- dist                # deploy files 
-|-- src                 # source file for project
-|   |-- images          
-|   |-- scripts         # all the javascript files go here
-|   |-- scss            # css style files
-|   |-- index.html 
+|-- AddIn                       # Inventor Addin files go here
+|-- Web-App                     # source file for project
+|   |-- dist                    # deploy files   
+|   |-- scr                     # source file for project
+|   |   |-- images          
+|   |   |-- scripts             # all the javascript files go here
+|   |   |   |-- js
+|   |   |   |-- jscad_scripts   # all the new models you want to add
+|   |   |-- scss                # css style files
+|   |   |-- index.html          # main/startup html file
 |-- .gitgnore
-|-- README.md           # this file you are reading
-|-- gulpfile.js         # gulp tasks
-|-- package.json        # npm dependency 
-
+|-- README.md                   # this file you are reading
+|-- gulpfile.js                 # gulp tasks
 ```
+
+
+##Credits
+
+@joostn - we took several jsCad Files as placeholders
