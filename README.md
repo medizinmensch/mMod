@@ -10,13 +10,15 @@ Then, this File can be added to this [Folder](Web-App/src/scripts/jscad_scripts)
 
 For further information see the seperate folders.
 
-**Git clone the project**
+## Git clone the project
 
 Clone the project on your local machine:
 
 ```
 git clone https://github.com/medizinmensch/mMod.git
 ```
+
+## Directory Explaination
 
 The directory explained as follows:
 
@@ -37,7 +39,14 @@ The directory explained as follows:
 |-- gulpfile.js                 # gulp tasks
 ```
 
+## How we collaborate
 
-##Credits
+1. clone (dont fork) your local copy
+2. make your branch (by `git branch myBranch`)
+3. set your branch as active (by `git checkout myBranch`)
+4. set your upstream (by `it branch --set-upstream-to=origin/myBranch myBranch`)
+
+
+## Credits
 
 @joostn - we took several jsCad Files as placeholders
