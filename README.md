@@ -1,42 +1,39 @@
 # 3D Configurator Web-App
 
-## Install - npm available - Quick Start
+## What is This?
 
+mMod is a Tool to prepare and edit a 3D-Model in the Browser.
 
-```
-$ cd 3d-configurator
-$ npm install -g gulp
-$ npm install
-$ gulp serve
-```
+The `Inventor Addin` helps you marking parameters in an Inventor model and then export it as a jsCad-File.
 
-## Complete Installation - npm not yet available
+Then, this File can be added to this [Folder](Web-App/src/scripts/jscad_scripts). The `Web-App` will include your model in the Select-Dropdown menu.
 
-npm need node.js to be install. Follow [this guide](https://docs.npmjs.com/getting-started/installing-node) to install node.js in your computer. If you already have installed node.js run `node -v` to check the version of your NPM version. The version should be higher than 0.12.0
-
-**Updating npm**
-
-Node comes with npm installed so you should have a version of npm. However, npm gets updated more frequently than Node does, so you'll want to make sure it's the latest version.
-
-```
-npm install npm@latest -g
-```
-Alternative:
-```
-npm install -g npm
-
-```
-Test: Run `npm -v`. The version should be higher than 2.1.8.
+For further information see the seperate folders.
 
 **Git clone the project**
 
 Clone the project on your local machine:
 
 ```
-git clone git@bitbucket.org:3yourmind/3d-configurator.git
+git clone https://github.com/medizinmensch/mMod.git
 ```
 
 The directory explained as follows:
+
+```
+* dist                # deploy files 
+* src                 # source file for project
+    * images          
+    * scripts         # all the javascript files go here
+    * scss            # css style files
+    * index.html 
+*.gitgnore
+* README.md           # this file you are reading
+* gulpfile.js         # gulp tasks
+* package.json        # npm dependency 
+
+```
+
 
 ```
 |-- dist                # deploy files 
