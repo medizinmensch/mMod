@@ -44,9 +44,16 @@ History:
                     <a href="#">Bauble</a>
                     <a href="#">Parametric Grille</a>
                 </div>
+                <form>
+                    <form action="#">
+                        <select class="dropDownTest">
+	    	    		<option value="P101">3 Part - Axis decoupler</option>
+                        <option value="P102">Bauble</option>
+                        <option value="P102">Parametric Grille</option>
+		        	</select>
+                    </form>
             </div>
             <button class="testButton" onclick="switchMasterModel()">Reset</button>
-            <button class="testButton" onclick="switchMasterModel2()">Reset2</button>
             <button class="testButton" onclick="upload()">Print it!</button>
         </div>
         <div id="parametersdiv" style="display: block;"></div>
@@ -150,7 +157,7 @@ toggle between hiding and showing the dropdown content */
             var jscad_script2 = "scripts/jscad_scripts/bauble_copy.js";
             var configurator2 = new Configurator(jscad_script2);
 
-            var gProcessor = new OpenJsCad.Processor(document.getElementById("viewerContext"), {useAsync: false});
+            var gProcessor = new OpenJsCad.Processor(document.getElementById("viewerContext"), { useAsync: false });
             var xhr = new XMLHttpRequest();
             xhr.open("GET", jscad_script2, true);
             xhr.onload = function () {
