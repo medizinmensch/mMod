@@ -30,6 +30,7 @@ namespace MasterModel
 
         public StandardAddInServer()
         {
+
         }
 
         #region ApplicationAddInServer Members
