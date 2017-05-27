@@ -13,6 +13,8 @@ namespace InvAddIn
 
         private List<Sketch> sketchyList;
 
+        private List<String> varList = new List<string>();
+
         private static String jscadPath = "C:\\Users\\Davin\\test.jscad";
 
         StreamWriter outputFile;
@@ -30,91 +32,107 @@ namespace InvAddIn
 
             using (outputFile)
             {
-                outputFile.WriteLine("function main(){");
-                outputFile.WriteLine("return ");
+                outputFile.WriteLine("function main(){");     
             }
 
+            int i = 1;
             foreach (Sketch sketch in sketchyList)
             {
                 List<SketchEntity> sketchParts = MM.SketchyParts(sketch);
                 foreach (SketchEntity part in sketchyList)
                 {
-                    if (part is SketchCircle) {
-                        exportCircle((SketchCircle)part);
+                    String var = "";
+                    if (part is SketchCircle)
+                    {
+                        exportCircle((SketchCircle)part, "circle"+i);
+                        var = "circle";
                     } else if (part is SketchArc)
                     {
-                        exportArc((SketchArc)part);
+                        exportArc((SketchArc)part, "arc"+i);
+                        var = "arc";
                     }
+                    else if (part is SketchEllipse)
+                    {
+                        exportEllipseFull((SketchEllipse)part, "ellipse" + i);
+                        var = "ellipse";
+                    }
+                    else if (part is SketchEllipticalArc)
+                    {
+                        exportEllipticalArc((SketchEllipticalArc)part, "ellipseArc" + i);
+                        var = "ellipseArc";
+                    }
+                    varList.Add(var + i);
+                    i++;
                 }
             }
+            using (outputFile)
+            {
+                outputFile.WriteLine("return [ ");
+                double len = varList.Count();
+                int count = 0;
+                foreach(String name in varList)
+                {
+                    if(count == len - 1)
+                    {
+                        outputFile.WriteLine(name);
+                    }else
+                    {
+                        outputFile.WriteLine(name + ",");
+                    }
+                    
+                    count++;
+                }
+                outputFile.WriteLine("]; ");
+            }
+                
         }
+
         // Circle
-        public void exportCircle(SketchCircle circle)
+        public void exportCircle(SketchCircle circle, String varname)
         {
             double radius = circle.Radius;
             using (StreamWriter outputFile = new StreamWriter(jscadPath, true))
             {
-                outputFile.WriteLine("circle({r: " + convertCommaToDot(radius) + "}); ");
+                outputFile.WriteLine("var " + varname + "= circle({r: " + convertCommaToDot(radius) + "})); ");
             }
         }
 
+        // Rectangle
+        public void exportRectangle(SketchLine[] lines, String varname)
+        {
+            
+        }
+
         // Arc
-        public void exportArc(SketchArc arc)
+        public void exportArc(SketchArc arc, String varname)
         {
             double centerX = arc.CenterSketchPoint.Geometry.X;
             double centerY = arc.CenterSketchPoint.Geometry.Y;
-        
-            double startX = arc.StartSketchPoint.Geometry.X;
-            double startY = arc.StartSketchPoint.Geometry.Y;
 
-            double endX = arc.EndSketchPoint.Geometry.X;
-            double endY = arc.EndSketchPoint.Geometry.Y;
-
-            double startAngle = arc.StartAngle * (180 / Math.PI);
-            double sweepAngle = arc.SweepAngle * (180 / Math.PI);
             double radius = arc.Radius;
         
             using (StreamWriter outputFile = new StreamWriter(jscadPath, true))
             {
-                outputFile.WriteLine("CSG.Path2D.arc({");
+                outputFile.WriteLine("var " + varname + "= CSG.Path2D.arc({");
                 outputFile.WriteLine("center: [" + convertCommaToDot(centerX) + "," + convertCommaToDot(centerY) + ",0],");
                 outputFile.WriteLine("radius: " + convertCommaToDot(radius) + ",");
-                outputFile.WriteLine("startangle: " + convertCommaToDot(startAngle) + ",");
-                outputFile.WriteLine("endangle: " + convertCommaToDot(sweepAngle));
+                outputFile.WriteLine("startangle: 0,");
+                outputFile.WriteLine("endangle: 180");
                 outputFile.WriteLine("}).close().innerToCAG();");
-            }
-        }
-        // Line 
-        public void exportLine(SketchLine line)
-        {
-            double length = line.Length;
-
-            using (StreamWriter outputFile = new StreamWriter(jscadPath, true))
-            {
-                outputFile.WriteLine("length: " + convertCommaToDot(length) + ",");
-                outputFile.WriteLine("function main(){");
-                outputFile.WriteLine("return ");
             }
         }
 
         // Ellipsefull
-        public void exportEllipseFull(SketchEllipse ellipsefull)
-        {
-            double centerX = ellipsefull.CenterSketchPoint.Geometry.X;
-            double centerY = ellipsefull.CenterSketchPoint.Geometry.Y;
-            
+        public void exportEllipseFull(SketchEllipse ellipsefull, String varname)
+        {        
             double majorradius = ellipsefull.MajorRadius;
             double minorradius = ellipsefull.MinorRadius;
 
             using (StreamWriter outputFile = new StreamWriter(jscadPath, true))
             {
-                outputFile.WriteLine("majorradius: " + convertCommaToDot(majorradius) + ",");
-                outputFile.WriteLine("minorradius: " + convertCommaToDot(minorradius) + ",");
-                outputFile.WriteLine("center: [" + convertCommaToDot(centerX) + "," + convertCommaToDot(centerY) + ",0],");
-                outputFile.WriteLine("function main(){");
-                outputFile.WriteLine("return ");
-                outputFile.WriteLine("ellipsefull({r: " + majorradius.ToString().Replace(",", ".") + "});");
-                outputFile.WriteLine("ellipsefull({r: " + minorradius.ToString().Replace(",", ".") + "});");
+                outputFile.WriteLine(("var " + varname + "= scale([" + convertCommaToDot(majorradius) + ",");
+                outputFile.WriteLine(convertCommaToDot(minorradius) + "],");
+                outputFile.WriteLine("circle(" + convertCommaToDot(minorradius) + "));");
             }
         }
 
@@ -135,35 +153,27 @@ namespace InvAddIn
         }
 
         // EllipticalArc
-        public void exportEllipticalArc(SketchEllipticalArc ellipticalarc)
+        public void exportEllipticalArc(SketchEllipticalArc ellipticalarc, String varname)
         {
             double centerX = ellipticalarc.CenterSketchPoint.Geometry.X;
             double centerY = ellipticalarc.CenterSketchPoint.Geometry.Y;
 
-            double startX = ellipticalarc.StartSketchPoint.Geometry.X;
-            double startY = ellipticalarc.StartSketchPoint.Geometry.Y;
-
-            double endX = ellipticalarc.EndSketchPoint.Geometry.X;
-            double endY = ellipticalarc.EndSketchPoint.Geometry.Y;
-
             double startAngle = ellipticalarc.StartAngle * (180 / Math.PI);
             double sweepAngle = ellipticalarc.SweepAngle * (180 / Math.PI);
+
+            double startX = ellipticalarc.StartSketchPoint.Geometry.X;
+            double startY = ellipticalarc.StartSketchPoint.Geometry.Y;
 
             double majorradius = ellipticalarc.MajorRadius;
             double minorradius = ellipticalarc.MinorRadius;
 
+            double radius = (majorradius / 2) / Math.Cos(sweepAngle);
+
             using (StreamWriter outputFile = new StreamWriter(jscadPath, true))
             {
-
-                outputFile.WriteLine("majorradius: " + convertCommaToDot(majorradius) + ",");
-                outputFile.WriteLine("minorradius: " + convertCommaToDot(minorradius) + ",");
-                outputFile.WriteLine("center: [" + convertCommaToDot(centerX) + "," + convertCommaToDot(centerY) + ",0],");
-                outputFile.WriteLine("function main(){");
-                outputFile.WriteLine("return ");
-                outputFile.WriteLine("ellipticalarc({r: " + majorradius.ToString().Replace(",", ".") + "});");
-                outputFile.WriteLine("ellipticalarc({r: " + minorradius.ToString().Replace(",", ".") + "});");
-                outputFile.WriteLine("CSG.Path2D.arc({");
-                outputFile.WriteLine("center: [" + convertCommaToDot(centerX) + "," + convertCommaToDot(centerY) + ",0],");
+                outputFile.WriteLine("var " + varname + "= CSG.Path2D.arc({");
+                outputFile.WriteLine("center: [0,0,0],");
+                outputFile.WriteLine("radius: " + convertCommaToDot(radius) + ",");
                 outputFile.WriteLine("startangle: " + convertCommaToDot(startAngle) + ",");
                 outputFile.WriteLine("endangle: " + convertCommaToDot(sweepAngle));
                 outputFile.WriteLine("}).close().innerToCAG();");
