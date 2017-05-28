@@ -42,27 +42,31 @@ History:
             <div id="viewerContext" oncontextmenu="return false;" ></div>
             <!--setup display of the design parameters, as required by OpenJSCAD.js-->
             <!--set display: block to display this-->
-            <div id="parametersdiv" style="display: block;">
-                <button class="threeyd-upload" onclick=upload()>Upload to 3yourMind!</button>
-            </div>
+            <div id="parametersdiv" style="display: block;"></div>
             <!--setup display of the status, as required by OpenJSCAD.js-->
             <!--set display: block to display this-->
             <div id="tail" style="display:none;">
                 <div id="statusdiv"></div>
             </div>
-            <div class="TestButtons" style="display: block;">
-                <button class="threeyd-upload" onclick=upload()>Test Button 1</button>
-                <button class="threeyd-upload" onclick=upload()>Test Button 2</button>
-                <button class="threeyd-upload" onclick=upload()>Test Button 3</button>
-                <button class="threeyd-upload" onclick=upload()>Test Button 4</button>
-                <button class="threeyd-upload" onclick=upload()>Test Button 5</button>
-                <button class="threeyd-upload" onclick=upload()>Test Button 6</button>
+        </div>
+        <div id="bezier-container1">
+            <div class="bezier-container" id="bezier-container">
+                <canvas></canvas>
+                <button class="add_button">+</button>
+                <button class="remove_button">-</button>
             </div>
-    </div>
+            <!--todo get the pixelgrid-container width -->
+            <div class="pixelgrid-container" id="pixelgrid-container">
+                    <canvas id=pixelgrid class=pixelgrid-canvas></canvas><br>
+                    <button id="clearButton" class="clear-btn">Clear</button>
+            </div>
 
+            <button class="threeyd-upload" onclick=upload()>Print it!</button>
+        </div>
+    </div>
     <!--OpenJSCAD and BezierControl setup-->
     <script>
-    var jscad_script = "scripts/jscad_scripts/parametricAxisCoupler.js";
+    var jscad_script = "scripts/jscad_scripts/bauble.js";
     // var stlfiles = {bear: "models/bear.stl", house: "models/house.stl"};
     configurator = new Configurator(jscad_script) // new Configurator(jscad_script, stlfiles);
 </script>

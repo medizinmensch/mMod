@@ -37,7 +37,7 @@ namespace MasterModel
         private UserInterfaceEvents m_userInterfaceEvents;
 
         // ribbon panel
-        RibbonPanel m_partSketchSlotRibbonPanel;
+        RibbonPanel partSketchMasterRibbonPanel;
 
         //event handler delegates
         //to make changes in comandbar or enviroment ui
@@ -79,7 +79,7 @@ namespace MasterModel
                 m_userInterfaceEvents.OnResetRibbonInterface += UserInterfaceEventsSink_OnResetRibbonInterfaceEventDelegate;
 
                 //load image icons for UI items
-                Icon addSlotOptionIcon = new Icon(this.GetType(), "CreateMasterM.ico");
+                Icon createMasterMIcon = new Icon(this.GetType(), "CreateMasterM.ico");
 
                 //retrieve the GUID for this class
                 GuidAttribute addInCLSID;
@@ -91,12 +91,12 @@ namespace MasterModel
                 ButtON = new BenjaminBUTTON(
                     "Create a Master Model", "MasterModel:StandardAddInServer:BenjaminBUTTON", CommandTypesEnum.kShapeEditCmdType,
                     addInCLSIDString, "Create a Master Model File",
-                    "keep the model simple", addSlotOptionIcon, addSlotOptionIcon, ButtonDisplayEnum.kDisplayTextInLearningMode);
+                    "keep the model simple", createMasterMIcon, createMasterMIcon, ButtonDisplayEnum.kDisplayTextInLearningMode);
 
                 //create the command category
-                CommandCategory slotCmdCategory = m_inventorApplication.CommandManager.CommandCategories.Add("Master Model", "MasterModel:StandardAddInServer:BenjaminBUTTON", addInCLSIDString);
+                CommandCategory MasterMCmdCategory = m_inventorApplication.CommandManager.CommandCategories.Add("Master Model", "MasterModel:StandardAddInServer:BenjaminBUTTON", addInCLSIDString);
 
-                slotCmdCategory.Add(ButtON.ButtonDefinition);
+                MasterMCmdCategory.Add(ButtON.ButtonDefinition);
 
                 if (firstTime == true)
                 {
@@ -111,18 +111,18 @@ namespace MasterModel
                     if (interfaceStyle == InterfaceStyleEnum.kClassicInterface)
                     {
                         //create toolbar
-                        CommandBar slotCommandBar;
-                        slotCommandBar = userInterfaceManager.CommandBars.Add("Master Model", "MasterModel:StandardAddInServer:BenjaminBUTTONToolbar", CommandBarTypeEnum.kRegularCommandBar, addInCLSIDString);
+                        CommandBar MasterCommander;
+                        MasterCommander = userInterfaceManager.CommandBars.Add("Master Model", "MasterModel:StandardAddInServer:BenjaminBUTTONToolbar", CommandBarTypeEnum.kRegularCommandBar, addInCLSIDString);
 
                         //add buttons to toolbar
-                        slotCommandBar.Controls.AddButton(ButtON.ButtonDefinition, 0);
+                        MasterCommander.Controls.AddButton(ButtON.ButtonDefinition, 0);
 
                         //Get the 2d sketch environment base object
                         Inventor.Environment partSketchEnvironment;
                         partSketchEnvironment = userInterfaceManager.Environments["PMxPartSketchEnvironment"];
 
                         //make this command bar accessible in the panel menu for the 2d sketch environment.
-                        partSketchEnvironment.PanelBar.CommandBarList.Add(slotCommandBar);
+                        partSketchEnvironment.PanelBar.CommandBarList.Add(MasterCommander);
                     }
                     //create the UI for ribbon interface
                     else
@@ -145,19 +145,19 @@ namespace MasterModel
                         RibbonPanels ribbonPanels;
                         ribbonPanels = partSketchRibbonTab.RibbonPanels;
 
-                        m_partSketchSlotRibbonPanel = ribbonPanels.Add("Master Model", "MasterModel:StandardAddInServer:BenjaminBUTTONRibbonPanel", "{DB59D9A7-EE4C-434A-BB5A-F93E8866E872}", "", false);
+                        partSketchMasterRibbonPanel = ribbonPanels.Add("Master Model", "MasterModel:StandardAddInServer:BenjaminBUTTONRibbonPanel", "{DB59D9A7-EE4C-434A-BB5A-F93E8866E872}", "", false);
 
-                        //add controls to the slot panel
-                        CommandControls partSketchSlotRibbonPanelCtrls;
-                        partSketchSlotRibbonPanelCtrls = m_partSketchSlotRibbonPanel.CommandControls;
+                        //add controls to the MasterModel panel
+                        CommandControls partSketchMasterRibbonPanelCtrls;
+                        partSketchMasterRibbonPanelCtrls = partSketchMasterRibbonPanel.CommandControls;
 
                         //add the buttons to the ribbon panel
-                        CommandControl slotOptionCmdBtnCmdCtrl;
-                        slotOptionCmdBtnCmdCtrl = partSketchSlotRibbonPanelCtrls.AddButton(ButtON.ButtonDefinition, false, true, "", false);
+                        CommandControl MasterMoRiPaCtrl;
+                        MasterMoRiPaCtrl = partSketchMasterRibbonPanelCtrls.AddButton(ButtON.ButtonDefinition, false, true, "", false);
                     }
                 }
 
-                MessageBox.Show("MASTER MODEL To access the commands of the sample addin, activate a 2d sketch of a part \n document and select the \"AddInSlot\" toolbar within the panel menu");
+                MessageBox.Show("MASTER MODEL check");
             }
             catch (Exception e)
             {
@@ -290,16 +290,16 @@ namespace MasterModel
                 RibbonPanels ribbonPanels;
                 ribbonPanels = partSketchRibbonTab.RibbonPanels;
 
-                m_partSketchSlotRibbonPanel = ribbonPanels.Add("Slot", "MasterModel:StandardAddInServer:BenjaminBUTTONRibbonPanel",
+                partSketchMasterRibbonPanel = ribbonPanels.Add("MasterModel", "MasterModel:StandardAddInServer:BenjaminBUTTONRibbonPanel",
                                                              "{DB59D9A7-EE4C-434A-BB5A-F93E8866E872}", "", false);
 
-                //add controls to the slot panel
-                CommandControls partSketchSlotRibbonPanelCtrls;
-                partSketchSlotRibbonPanelCtrls = m_partSketchSlotRibbonPanel.CommandControls;
+                //add controls to the MasterModel panel
+                CommandControls partSketchMasterMoRiPaCtrl;
+                partSketchMasterMoRiPaCtrl = partSketchMasterRibbonPanel.CommandControls;
 
                 //add the buttons to the ribbon panel
-                CommandControl slotOptionCmdBtnCmdCtrl;
-                slotOptionCmdBtnCmdCtrl = partSketchSlotRibbonPanelCtrls.AddButton(ButtON.ButtonDefinition, false, true, "", false);
+                CommandControl MasterCommander;
+                MasterCommander = partSketchMasterMoRiPaCtrl.AddButton(ButtON.ButtonDefinition, false, true, "", false);
             }
             catch (Exception e)
             {
