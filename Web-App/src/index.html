@@ -38,7 +38,9 @@ History:
         <div id="viewerContext" oncontextmenu="return false;"></div>
         <div class="button-container">
             <div class="dropdown">
-                <button onclick="myFunction()" class="dropbtn">Choose Mastermodell</button>
+                <!--ein weiteres dropdown menü, dass etwas schicker aussieht und später verwendet wird.
+                zum jetztigen zeitpunkt noch nicht eingebunden-->
+                <button onclick="myFunction()" class="dropbtn">funktioniert noch nicht</button>
                 <div id="myDropdown" class="dropdown-content">
                     <a href="#">3 Part - Axis decoupler</a>
                     <a href="#">Bauble</a>
@@ -46,14 +48,15 @@ History:
                 </div>
                 <form>
                     <form action="#">
-                        <select class="dropDownTest">
-	    	    		<option value="P101">3 Part - Axis decoupler</option>
-                        <option value="P102">Bauble</option>
-                        <option value="P102">Parametric Grille</option>
+                        <select class="dropDownTest" onchange="switchMasterModel(this)">
+	    	    		<option value="scripts/jscad_scripts/parametricAxisCoupler.js">3 Part - Axis decoupler</option>
+                        <option value="scripts/jscad_scripts/parametricGrille.js">Parametric Grille</option>
+                        <option value="scripts/jscad_scripts/involuteGear.js">Involute Gear</option>
 		        	</select>
                     </form>
             </div>
-            <button class="testButton" onclick="switchMasterModel()">Reset</button>
+            <input type="hidden" name="hiddenInput" id="hiddenInput" value="" />
+            <button class="testButton" onclick="reset()">Reset</button>
             <button class="testButton" onclick="upload()">Print it!</button>
         </div>
         <div id="parametersdiv" style="display: block;"></div>
@@ -64,9 +67,9 @@ History:
 
     <!--OpenJSCAD and BezierControl setup-->
     <script>
+
         var jscad_script = "scripts/jscad_scripts/parametricAxisCoupler.js";
-        // var stlfiles = {bear: "models/bear.stl", house: "models/house.stl"};
-        configurator = new Configurator(jscad_script); // new Configurator(jscad_script, stlfiles);
+        configurator = new Configurator(jscad_script);
     </script>
 
 
@@ -132,7 +135,7 @@ History:
 
 
         /* When the user clicks on the button, 
-toggle between hiding and showing the dropdown content */
+        toggle between hiding and showing the dropdown content */
         function myFunction() {
             document.getElementById("myDropdown").classList.toggle("show");
         }
@@ -152,29 +155,36 @@ toggle between hiding and showing the dropdown content */
             }
         }
 
-        function switchMasterModel() {
-            alert("jetzt gehts los");
-            var jscad_script2 = "scripts/jscad_scripts/bauble_copy.js";
-            var configurator2 = new Configurator(jscad_script2);
+        function switchMasterModel(objDropDown) {
+            //sicherheitsabfrage einbauen
+            alert("Ihr Mastermodell wird geändert.");
 
-            var gProcessor = new OpenJsCad.Processor(document.getElementById("viewerContext"), { useAsync: false });
+            var actualPath = objDropDown.value;
             var xhr = new XMLHttpRequest();
-            xhr.open("GET", jscad_script2, true);
+            xhr.open("GET", actualPath, true);
             xhr.onload = function () {
                 var source = this.responseText;
-                gProcessor.processor.setJsCad(source, jscad_script2);
+                configurator.processor.setJsCad(source, actualPath);
             };
             xhr.send();
 
-            configurator.refresh();
+            //globale variable den aktuellen pfad geben
+            jscad_script = actualPath;
         }
 
-        function switchMasterModel2() {
-            alert("jetzt gehts los");
-            var jscad_script3 = "scripts/jscad_scripts/bauble_copy.js";
-            var configurator3 = new Configurator(jscad_script3);
+        function reset() {
+            //sicherheitsabfrage einbauen
+            alert("Ihr Mastermodell wird zurückgesetzt. Bitte warten...");
 
-            configurator3.refresh();
+            var actualPath = jscad_script;
+            //var actualPath = "scripts/jscad_scripts/parametricGrille.js";
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", actualPath, true);
+            xhr.onload = function () {
+                var source = this.responseText;
+                configurator.processor.setJsCad(source, actualPath);
+            };
+            xhr.send();
         }
     </script>
 </body>
