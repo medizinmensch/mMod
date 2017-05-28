@@ -21,7 +21,7 @@ namespace InvAddIn
                 MessageBox.Show(sketchy.AttributeSets.ToString());
             }
             //Parameter
-            //partypart.params = suspect.ComponentDefinition.Parameters;
+            partypart.param = suspect.ComponentDefinition.Parameters;
         }
         public void ShowShakespeare()
         {
