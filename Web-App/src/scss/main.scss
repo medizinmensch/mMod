@@ -1,181 +1,97 @@
 /*
  * min_alt.css for OpenJSCAD.org viewer
+ https://color.adobe.com/de/create/color-wheel/?base=2&rule=Shades&selected=0&name=Mein%20Color-Thema&mode=rgb&rgbvalues=0.17254901960784313,0.4,0.7686274509803922,0.11224489795918363,0.2602040816327041,0.5,0.22448979591836726,0.5204081632654082,1,0.056122448979591816,0.13010204081635204,0.25,0.20204081632653054,0.4683673469388674,0.9&swatchOrder=0,1,2,3,4
+ * Einstellung: Schattierungen
+ * Farbgebung: 
+ * Hauptfarbe (ganz links): 2c66c4 
+ * Von Hell nach dunkel: 
+ * Hell: 3985FF, 2C66C4, 3477E5
+ * Dunkel: 1D427F, 0E2140
  */
 
 a {
   font-size: 16px;
 }
 
-.container {
-  background: #fff;
-  max-width: 1000px;
-  margin: 10px auto;
-  padding: 15px;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.jscad-container {
-  color: #000;
-  font-weight: bold;
-  font-family: Helvetica, Arial, Sans;
-  float: left;
-  position: relative;
-  width: 60%;
-  @media (max-width: 720px){
-    width: 100%;
-  }
-}
-
-
-/*bezier style*/
-
-#bezier-container1 {
-  width: 40%;
-  float: left;
-  position: relative;
-  @media (max-width: 720px){
-    width: 100%;
-  }
-}
-
-.bezier-container {
-  float: left;
-  width: 100%;
-  /*margin: 0 -15px;*/
-  position: relative;
-  @media (max-width: 720px) {
-    width: 50%;
-  }
-  @media (max-width: 320px) {
-    width: 100%;
-  }
-}
-
-.bezier-container canvas {
-  background: #292929;
-  padding: 0;
-  float: left;
-}
-
-.add_button,
-.remove_button {
-  width: 48px;
-  height: 48px;
-  border-radius: 24px;
-  position: absolute;
-  top: 24px;
-  background: #fff;
-  border: 0;
-  right: 14px;
-}
-
-.remove_button {
-  top: 80px;
-}
-
-.button-active {
-  background: #2c66c4;
-  color: #fff;
-}
-
-
-/*pixelgrid  style*/
-
-.pixelgrid-container {
-  background: #292929;
-  width: 100%;
-  float:left;
-  /*text-align: center;*/
-  @media (max-width: 720px) {
-    width: 50%;
-  }
-  @media (max-width: 320px) {
-    width: 100%;
-  }
-}
-
-.pixelgrid-container canvas {
-  width: 100%;
-}
-
-
-.pixelgrid-container canvas:hover{
-  cursor: cell;
-}
-.clear-btn {
-  width: 100%;
-  border: 0;
-  background:#ff3535;
-  color: #fff;
-  font-size: 14px;
-  padding: 8px 0;
-  text-align: center;
-}
-.clear-btn:hover{
-  cursor: pointer;
-}
-
-.threeyd-upload {
-  background: #2c66c4;
-  background-size: 24px;
-  font-size: 16px;
-  border: 0;
-  color: #fff;
-  width: 100%;
-  line-height: 24px;
-  margin-top: 8px;
-  padding: 12px 18px;
-}
 
 #header {
   padding: 5px;
   /* not inherited */
 }
 
-#viewerContext {
-  background: white;
+html, body {
+   margin: 0px;             /* not inherited */
+   border: 0px none black;  /* not inherited */
+   padding: 0px;            /* not inherited */
+   font-family: Helvetica, Arial, Sans;
+
+   /* ensure that the document uses the whole width and height of the browser */
+  //  min-height: 100%;
+   height: 100%;
+   min-width: 100%;
+   width: 100%;
+
+   /* viewer/canvas is full screen so when window
+      is resized all remains intact, but we make sure no scrollbar appears */
+   overflow: hidden;
+}
+
+.container {
+  background:whitesmoke;
   width: 100%;
-  height: 400px;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+#viewerContext {
+  float: left;
+  width: 65%;
+  height: 662px;
+  min-height: 100%;
   top: 0px;
   bottom: 0px;
 }
 
-// #viewerContext {
-//    margin: 0px;             /* not inherited */
-//    border: 0px none black;  /* not inherited */
-//    padding: 0px;            /* not inherited */
-
-//    /* ensure that the canvas uses the whole width and height of the document */
-//    background: white;
-//    height: 100%;
-//    width: 100%;
-
-//    top: 0px;
-//    bottom: 0px;
-// }
-
 #viewerContext canvas {
-  background: #fff;
+  background: blue;
 }
 .jscad-container canvas {
   margin: 0px;
   padding: 0px;
-  background: #fff;
+  background: blueviolet;
   width: 100%;
   height: 100%;
   cursor: move;
 }
 
+
+
+#updateButton,
 #instantUpdate,
 #instantUpdateLabel {
   display: none;
 }
 
-#parametersdiv {
+// parametersdiv
+
+
+
+.button-container{
+  float: right;
+  width: 35%;
+  height: 230px;
+  min-height: 30%;
+  overflow-y: auto;
+}
+
+#parametersdiv{
+  float: right;
   padding: 20px; 
+  width: 35%;
+  height: 432px;
+  overflow-y: scroll;
   box-sizing: border-box;
-  width: 100%;
+  //background:linear-gradient(transparent 100px, grey, black);
 }
 
 #parametersdiv table {
@@ -187,12 +103,9 @@ a {
 }
 
 #parametersdiv th {
-  margin: 0px;
-  /* not inherited */
+  margin: 5px;
   line-height: 2em;
   border: 0px none gray;
-  /* not inherited */
-  /* not inherited */
   font-weight: bold;
 }
 
@@ -221,18 +134,7 @@ a {
   border: none;
 }
 
-#updateButton {
-  margin: 5px;
-  /* not inherited */
-  border: thin solid Black;
-  /* not inherited */
-  padding: 2px;
-  /* not inherited */
-  border-radius: 4px;
-  background: white;
-  display: none;
-  margin-left: 1em;
-}
+//   Stuff
 
 #tail {
   margin: 5px;
@@ -243,4 +145,105 @@ a {
   vertical-align: middle;
 }
 
-/*  Youri Edit */
+
+.button-container button{
+  background: #2c66c4;
+  background-size: 24px;
+  font-size: 16px;
+  border: 0;
+  color: #fff;
+  width: 100%;
+  line-height: 24px;
+  margin-top: 8px;
+  text-align: right;
+  padding: 12px 18px;
+}
+
+/* Dropdown Button */
+
+/* Dropdown button on hover & focus */
+.button-container button:hover, .button-container button:focus{
+  background-color: #0F2444;
+}
+
+/* The container <div> - needed to position the dropdown content */
+.dropdown {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+}
+
+/* Dropdown Content (Hidden by Default) */
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    width: 100%;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+}
+
+/* Links inside the dropdown */
+.dropdown-content a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    border-bottom: 1px solid grey;
+}
+
+/* Change color of dropdown links on hover */
+.dropdown-content a:hover {background-color: #777777}
+
+/* Show the dropdown menu (use JS to add this class to the .dropdown-content container when the user clicks on the dropdown button) */
+.show {display:block;}
+
+
+
+
+//Scrollbar
+
+::-webkit-scrollbar
+{
+  width: 8;  /* for vertical scrollbars */
+  height: 12px; /* for horizontal scrollbars */
+}
+
+::-webkit-scrollbar-track
+{
+  background: rgba(0, 0, 0, 0.1);
+}
+
+::-webkit-scrollbar-thumb
+{
+  background: rgba(0, 0, 0, 0.5);
+}
+
+
+// Dropbdown Test:
+
+.dropDownTest {
+  width:100%;
+  border: 1px solid #bbb;
+  border-top: 8px;
+  padding:.75em 1em .5em 1em;
+  box-shadow: 0 2px 1px 0 rgba(0,0,0,0.2);
+  background-color:#2c66c4;
+  background-image:url(select-arrow.png);
+  background-position: right;
+  background-repeat: no-repeat;
+  text-align: center;
+  color: White;
+  font-size: 16px;
+  margin-top: 8px;
+}
+
+option {
+  background:#1D427F;
+  border-top:5px solid #444;
+  // padding:.6em 2em .6em 2em;
+  padding: 10px;
+}
+
+// Dropdown Test

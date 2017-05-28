@@ -74,7 +74,7 @@ After you install everything, it's ready to gulp. Run:
 gulp serve
 ```
 
-Gulp will open browser and you can start coding now ðŸ’¼
+Gulp will open browser and you can start coding now
 
 ## Deploy
 
@@ -84,4 +84,6 @@ Just run:
 gulp dist
 ```
 
-You can find all the code in `dist/` directory, gzipped, minified, and it's ready to ship ðŸ›³
+
+You can find all the code in `dist/` directory, gzipped, minified, and it's ready to ship
+
