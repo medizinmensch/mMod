@@ -10,7 +10,7 @@ namespace InvAddIn
     public class MasterM
     {
         public List<Sketch> SketchyList = new List<Sketch>();
-        //public Parameter params;
+        public Parameters param;
         public List<SketchEntity> SketchyParts(Sketch sketchy)
         {
             List<SketchEntity> SketchyP = new List<SketchEntity>();
