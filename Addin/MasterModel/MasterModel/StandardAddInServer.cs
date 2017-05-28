@@ -79,7 +79,7 @@ namespace MasterModel
                 m_userInterfaceEvents.OnResetRibbonInterface += UserInterfaceEventsSink_OnResetRibbonInterfaceEventDelegate;
 
                 //load image icons for UI items
-                Icon addSlotOptionIcon = new Icon(this.GetType(), "AddSlotOption.ico");
+                Icon addSlotOptionIcon = new Icon(this.GetType(), "CreateMasterM.ico");
 
                 //retrieve the GUID for this class
                 GuidAttribute addInCLSID;
