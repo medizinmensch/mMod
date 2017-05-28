@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -27,6 +27,7 @@ namespace InvAddIn
 
         public Shakespeare(MasterM MM)
         {
+
             sketchyList = MM.SketchyList;
             outputFile = new StreamWriter(jscadPath, true);
 

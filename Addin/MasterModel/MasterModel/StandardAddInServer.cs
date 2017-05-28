@@ -12,6 +12,7 @@ using System.Runtime.InteropServices;
 using Inventor;
 using Microsoft.Win32;
 using System.Windows.Forms;
+using InvAddIn;
 
 namespace MasterModel
 {
@@ -23,10 +24,28 @@ namespace MasterModel
     [GuidAttribute("b7604cb8-7da8-40b8-bed8-4671fdc9c758")]
     public class StandardAddInServer : Inventor.ApplicationAddInServer
     {
+        #region Data Members
 
         // Inventor application object.
         private Inventor.Application m_inventorApplication;
         private Inventor.ApplicationEvents m_appEvents;
+
+        //buttons
+        private BenjaminBUTTON ButtON;
+
+        //user interface event
+        private UserInterfaceEvents m_userInterfaceEvents;
+
+        // ribbon panel
+        RibbonPanel m_partSketchSlotRibbonPanel;
+
+        //event handler delegates
+        //to make changes in comandbar or enviroment ui
+        private Inventor.UserInterfaceEventsSink_OnResetCommandBarsEventHandler UserInterfaceEventsSink_OnResetCommandBarsEventDelegate;
+        private Inventor.UserInterfaceEventsSink_OnResetEnvironmentsEventHandler UserInterfaceEventsSink_OnResetEnvironmentsEventDelegate;
+        private Inventor.UserInterfaceEventsSink_OnResetRibbonInterfaceEventHandler UserInterfaceEventsSink_OnResetRibbonInterfaceEventDelegate;
+
+        #endregion
 
         public StandardAddInServer()
         {
@@ -37,17 +56,113 @@ namespace MasterModel
 
         public void Activate(Inventor.ApplicationAddInSite addInSiteObject, bool firstTime)
         {
-            // This method is called by Inventor when it loads the addin.
-            // The AddInSiteObject provides access to the Inventor Application object.
-            // The FirstTime flag indicates if the addin is loaded for the first time.
+            try
+            {
+                //the Activate method is called by Inventor when it loads the addin
+                //the AddInSiteObject provides access to the Inventor Application object
+                //the FirstTime flag indicates if the addin is loaded for the first time
 
-            // Initialize AddIn members.
-            m_inventorApplication = addInSiteObject.Application;
+                //initialize AddIn members
+                m_inventorApplication = addInSiteObject.Application;
+                InvAddIn.Button.InventorApplication = m_inventorApplication;
 
-            // TODO: Add ApplicationAddInServer.Activate implementation.
-            // e.g. event initialization, command creation etc.
-            m_appEvents = m_inventorApplication.ApplicationEvents;
-            m_appEvents.OnActivateDocument += new ApplicationEventsSink_OnActivateDocumentEventHandler(ApplicationEvents_OnActivateDocument);
+                //initialize event delegates
+                m_userInterfaceEvents = m_inventorApplication.UserInterfaceManager.UserInterfaceEvents;
+
+                UserInterfaceEventsSink_OnResetCommandBarsEventDelegate = new UserInterfaceEventsSink_OnResetCommandBarsEventHandler(UserInterfaceEvents_OnResetCommandBars);
+                m_userInterfaceEvents.OnResetCommandBars += UserInterfaceEventsSink_OnResetCommandBarsEventDelegate;
+
+                UserInterfaceEventsSink_OnResetEnvironmentsEventDelegate = new UserInterfaceEventsSink_OnResetEnvironmentsEventHandler(UserInterfaceEvents_OnResetEnvironments);
+                m_userInterfaceEvents.OnResetEnvironments += UserInterfaceEventsSink_OnResetEnvironmentsEventDelegate;
+
+                UserInterfaceEventsSink_OnResetRibbonInterfaceEventDelegate = new UserInterfaceEventsSink_OnResetRibbonInterfaceEventHandler(UserInterfaceEvents_OnResetRibbonInterface);
+                m_userInterfaceEvents.OnResetRibbonInterface += UserInterfaceEventsSink_OnResetRibbonInterfaceEventDelegate;
+
+                //load image icons for UI items
+                Icon addSlotOptionIcon = new Icon(this.GetType(), "CreateMasterM.ico");
+
+                //retrieve the GUID for this class
+                GuidAttribute addInCLSID;
+                addInCLSID = (GuidAttribute)GuidAttribute.GetCustomAttribute(typeof(StandardAddInServer), typeof(GuidAttribute));
+                string addInCLSIDString;
+                addInCLSIDString = "{" + addInCLSID.Value + "}";
+
+                //create buttons
+                ButtON = new BenjaminBUTTON(
+                    "Create a Master Model", "MasterModel:StandardAddInServer:BenjaminBUTTON", CommandTypesEnum.kShapeEditCmdType,
+                    addInCLSIDString, "Create a Master Model File",
+                    "keep the model simple", addSlotOptionIcon, addSlotOptionIcon, ButtonDisplayEnum.kDisplayTextInLearningMode);
+
+                //create the command category
+                CommandCategory slotCmdCategory = m_inventorApplication.CommandManager.CommandCategories.Add("Master Model", "MasterModel:StandardAddInServer:BenjaminBUTTON", addInCLSIDString);
+
+                slotCmdCategory.Add(ButtON.ButtonDefinition);
+
+                if (firstTime == true)
+                {
+                    //access user interface manager
+                    UserInterfaceManager userInterfaceManager;
+                    userInterfaceManager = m_inventorApplication.UserInterfaceManager;
+
+                    InterfaceStyleEnum interfaceStyle;
+                    interfaceStyle = userInterfaceManager.InterfaceStyle;
+
+                    //create the UI for classic interface
+                    if (interfaceStyle == InterfaceStyleEnum.kClassicInterface)
+                    {
+                        //create toolbar
+                        CommandBar slotCommandBar;
+                        slotCommandBar = userInterfaceManager.CommandBars.Add("Master Model", "MasterModel:StandardAddInServer:BenjaminBUTTONToolbar", CommandBarTypeEnum.kRegularCommandBar, addInCLSIDString);
+
+                        //add buttons to toolbar
+                        slotCommandBar.Controls.AddButton(ButtON.ButtonDefinition, 0);
+
+                        //Get the 2d sketch environment base object
+                        Inventor.Environment partSketchEnvironment;
+                        partSketchEnvironment = userInterfaceManager.Environments["PMxPartSketchEnvironment"];
+
+                        //make this command bar accessible in the panel menu for the 2d sketch environment.
+                        partSketchEnvironment.PanelBar.CommandBarList.Add(slotCommandBar);
+                    }
+                    //create the UI for ribbon interface
+                    else
+                    {
+                        //get the ribbon associated with part document
+                        Inventor.Ribbons ribbons;
+                        ribbons = userInterfaceManager.Ribbons;
+
+                        Inventor.Ribbon partRibbon;
+                        partRibbon = ribbons["Part"];
+
+                        //get the tabls associated with part ribbon
+                        RibbonTabs ribbonTabs;
+                        ribbonTabs = partRibbon.RibbonTabs;
+
+                        RibbonTab partSketchRibbonTab;
+                        partSketchRibbonTab = ribbonTabs["id_TabSketch"];
+
+                        //create a new panel with the tab
+                        RibbonPanels ribbonPanels;
+                        ribbonPanels = partSketchRibbonTab.RibbonPanels;
+
+                        m_partSketchSlotRibbonPanel = ribbonPanels.Add("Master Model", "MasterModel:StandardAddInServer:BenjaminBUTTONRibbonPanel", "{DB59D9A7-EE4C-434A-BB5A-F93E8866E872}", "", false);
+
+                        //add controls to the slot panel
+                        CommandControls partSketchSlotRibbonPanelCtrls;
+                        partSketchSlotRibbonPanelCtrls = m_partSketchSlotRibbonPanel.CommandControls;
+
+                        //add the buttons to the ribbon panel
+                        CommandControl slotOptionCmdBtnCmdCtrl;
+                        slotOptionCmdBtnCmdCtrl = partSketchSlotRibbonPanelCtrls.AddButton(ButtON.ButtonDefinition, false, true, "", false);
+                    }
+                }
+
+                MessageBox.Show("MASTER MODEL To access the commands of the sample addin, activate a 2d sketch of a part \n document and select the \"AddInSlot\" toolbar within the panel menu");
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.ToString());
+            }
         }
 
         public void Deactivate()
@@ -102,8 +217,97 @@ namespace MasterModel
                 return null;
             }
         }
+        private void UserInterfaceEvents_OnResetCommandBars(ObjectsEnumerator commandBars, NameValueMap context)
+        {
+            try
+            {
+                CommandBar commandBar;
+                for (int commandBarCt = 1; commandBarCt <= commandBars.Count; commandBarCt++)
+                {
+                    commandBar = (Inventor.CommandBar)commandBars[commandBarCt];
+                    if (commandBar.InternalName == "MasterModel:StandardAddInServer:BenjaminBUTTONToolbar")
+                    {
+
+                        //add buttons to toolbar
+                        commandBar.Controls.AddButton(ButtON.ButtonDefinition, 0);
+
+                        return;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.ToString());
+            }
+        }
+
+        private void UserInterfaceEvents_OnResetEnvironments(ObjectsEnumerator environments, NameValueMap context)
+        {
+            try
+            {
+                Inventor.Environment environment;
+                for (int environmentCt = 1; environmentCt <= environments.Count; environmentCt++)
+                {
+                    environment = (Inventor.Environment)environments[environmentCt];
+                    if (environment.InternalName == "PMxPartSketchEnvironment")
+                    {
+                        //make this command bar accessible in the panel menu for the 2d sketch environment.
+                        environment.PanelBar.CommandBarList.Add(m_inventorApplication.UserInterfaceManager.CommandBars["MasterModel:StandardAddInServer:BenjaminBUTTONToolbar"]);
+
+                        return;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.ToString());
+            }
+        }
+
+        private void UserInterfaceEvents_OnResetRibbonInterface(NameValueMap context)
+        {
+            try
+            {
+
+                UserInterfaceManager userInterfaceManager;
+                userInterfaceManager = m_inventorApplication.UserInterfaceManager;
+
+                //get the ribbon associated with part document
+                Inventor.Ribbons ribbons;
+                ribbons = userInterfaceManager.Ribbons;
+
+                Inventor.Ribbon partRibbon;
+                partRibbon = ribbons["Part"];
+
+                //get the tabls associated with part ribbon
+                RibbonTabs ribbonTabs;
+                ribbonTabs = partRibbon.RibbonTabs;
+
+                RibbonTab partSketchRibbonTab;
+                partSketchRibbonTab = ribbonTabs["id_TabSketch"];
+
+                //create a new panel with the tab
+                RibbonPanels ribbonPanels;
+                ribbonPanels = partSketchRibbonTab.RibbonPanels;
+
+                m_partSketchSlotRibbonPanel = ribbonPanels.Add("Slot", "MasterModel:StandardAddInServer:BenjaminBUTTONRibbonPanel",
+                                                             "{DB59D9A7-EE4C-434A-BB5A-F93E8866E872}", "", false);
+
+                //add controls to the slot panel
+                CommandControls partSketchSlotRibbonPanelCtrls;
+                partSketchSlotRibbonPanelCtrls = m_partSketchSlotRibbonPanel.CommandControls;
+
+                //add the buttons to the ribbon panel
+                CommandControl slotOptionCmdBtnCmdCtrl;
+                slotOptionCmdBtnCmdCtrl = partSketchSlotRibbonPanelCtrls.AddButton(ButtON.ButtonDefinition, false, true, "", false);
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.ToString());
+            }
+        }
 
         #endregion
-
     }
+
 }
