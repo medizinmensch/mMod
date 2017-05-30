@@ -34,7 +34,7 @@ OpenJsCad.log = function(txt) {
 // Note: leave for compatibility
 OpenJsCad.status = function(s) {
   OpenJsCad.log(s);
-}
+};
 
 OpenJsCad.env = function() {
   var env = "OpenJSCAD "+OpenJsCad.version;
@@ -95,7 +95,8 @@ OpenJsCad.Viewer = function(containerelement) {
     lines:   false,             // draw outlines or not
     overlay: false,             // use overlay when drawing lines or not
     smooth:  false,             // use smoothing or not
-    color:   [1,.4,1,1],        // default color
+      //changes color ob object
+    color:   [1, 0.4, 1, 1]       // default color
   };
 
   // Set up WebGL state
@@ -114,7 +115,8 @@ OpenJsCad.Viewer = function(containerelement) {
 
   this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
   // TODO: changed this.gl.clearColor(0.93, 0.93, 0.93, 1);
-  this.gl.clearColor(0, 0, 0, 1);
+    //changes background color
+  this.gl.clearColor(1, 1, 1, 1);
   this.gl.enable(this.gl.DEPTH_TEST);
   this.gl.enable(this.gl.CULL_FACE);
 
