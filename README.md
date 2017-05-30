@@ -17,6 +17,14 @@ Clone the project on your local machine:
 ```
 git clone https://github.com/medizinmensch/mMod.git
 ```
+## Git branches
+
+Create your branch via website
+Then switch to your branch in console:
+`Git clone URL`
+`Git branch myBranch` (shows the branch in your console) 
+`Git checkout myBranch ` (switch to different branch)
+
 
 ## Directory Explaination
 
