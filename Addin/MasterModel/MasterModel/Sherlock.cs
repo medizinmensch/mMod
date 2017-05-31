@@ -10,7 +10,7 @@ namespace InvAddIn
 {
     public class Sherlock
     {
-        PartDocument suspect;
+        public Document suspect;
         MasterM partypart = new MasterM();
         public void Investigate()
         {

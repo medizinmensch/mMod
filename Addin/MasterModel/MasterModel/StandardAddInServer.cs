@@ -13,6 +13,9 @@ using Inventor;
 using Microsoft.Win32;
 using System.Windows.Forms;
 using InvAddIn;
+using InvAddIn.Properties;
+using Application = Inventor.Application;
+using IPictureDisp = stdole.IPictureDisp;
 
 namespace MasterModel
 {
@@ -79,7 +82,9 @@ namespace MasterModel
                 m_userInterfaceEvents.OnResetRibbonInterface += UserInterfaceEventsSink_OnResetRibbonInterfaceEventDelegate;
 
                 //load image icons for UI items
-                Icon createMasterMIcon = new Icon(this.GetType(), "CreateMasterM.ico");
+                //Icon createMasterMIcon = new Icon(this.GetType(), "CreateMasterM.ico");
+                IPictureDisp createMasterMIcon = AxHostConverter.ImageToPictureDisp(Resources.CreateMasterM.ToBitmap());
+                IPictureDisp createMasterMICON = AxHostConverter.ImageToPictureDisp(Resources.CreateMasterM.ToBitmap());
 
                 //retrieve the GUID for this class
                 GuidAttribute addInCLSID;
@@ -91,8 +96,8 @@ namespace MasterModel
                 ButtON = new BenjaminBUTTON(
                     "Create a Master Model", "MasterModel:StandardAddInServer:BenjaminBUTTON", CommandTypesEnum.kShapeEditCmdType,
                     addInCLSIDString, "Create a Master Model File",
-                    "keep the model simple", createMasterMIcon, createMasterMIcon, ButtonDisplayEnum.kDisplayTextInLearningMode);
-
+                    "keep the model simple", createMasterMIcon, createMasterMICON, ButtonDisplayEnum.kDisplayTextInLearningMode);
+                ButtON.HeySherlock = m_inventorApplication.ActiveDocument;
                 //create the command category
                 CommandCategory MasterMCmdCategory = m_inventorApplication.CommandManager.CommandCategories.Add("Master Model", "MasterModel:StandardAddInServer:BenjaminBUTTON", addInCLSIDString);
 
@@ -308,6 +313,25 @@ namespace MasterModel
         }
 
         #endregion
+    }
+    internal class AxHostConverter : AxHost
+    {
+        private AxHostConverter()
+            : base("")
+        {
+        }
+
+
+        public static IPictureDisp ImageToPictureDisp(Image image)
+        {
+            return (IPictureDisp)GetIPictureDispFromPicture(image);
+        }
+
+
+        public static Image PictureDispToImage(IPictureDisp pictureDisp)
+        {
+            return GetPictureFromIPicture(pictureDisp);
+        }
     }
 
 }

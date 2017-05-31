@@ -11,9 +11,10 @@ namespace InvAddIn
 {
     internal class BenjaminBUTTON : Button
     {
+        public Document HeySherlock;
         #region "Methods"
 
-        public BenjaminBUTTON(string displayName, string internalName, CommandTypesEnum commandType, string clientId, string description, string tooltip, Icon standardIcon, Icon largeIcon, ButtonDisplayEnum buttonDisplayType)
+        public BenjaminBUTTON(string displayName, string internalName, CommandTypesEnum commandType, string clientId, string description, string tooltip, stdole.IPictureDisp standardIcon, stdole.IPictureDisp largeIcon, ButtonDisplayEnum buttonDisplayType)
 			: base(displayName, internalName, commandType, clientId, description, tooltip, standardIcon, largeIcon, buttonDisplayType)
 		{
 
@@ -29,6 +30,7 @@ namespace InvAddIn
             try
             {
                 Sherlock sher = new Sherlock();
+                sher.suspect = HeySherlock;
                 sher.Investigate();
                 sher.ShowShakespeare();
             }
