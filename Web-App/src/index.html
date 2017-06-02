@@ -2,10 +2,8 @@
 <html>
 <!--== OpenJSCAD.org, Copyright (c) 2016, Licensed under MIT License ==
  in conjunction with other libraries by various authors (see the individual files)
-
 Purpose:
  This application provides an example of how to show JSCAD designs with minimal HTML and CSS.
-
 History:
  2016/06/27: 0.5.1: Changes for 0.5.1 libraries by Z3 Dev
  2016/05/01: 0.5.0: Changes for 0.5.0 libraries by Z3 Dev
@@ -68,7 +66,6 @@ History:
 
     <!--OpenJSCAD and BezierControl setup-->
     <script>
-
         var jscad_script = "scripts/jscad_scripts/example.js";
         configurator = new Configurator(jscad_script);
     </script>
@@ -97,14 +94,11 @@ History:
             }
             return query_string;
         }();
-
-
         function upload() {
             var form_data = new FormData();
             form_data.append('file', configurator.get_stl(), 'generated-model.stl');
             form_data.append('origin', 'jscad_app');
             form_data.append('domain', QueryString.domain);
-
             // API call via AJAX (POST)
             var req = $.ajax({
                 headers: { Accept: 'application/json' },
@@ -114,7 +108,6 @@ History:
                 processData: false,
                 contentType: false
             });
-
             req.done(function (results) {
                 if (results.success) {
                     console.log(results.url);
@@ -124,27 +117,19 @@ History:
                     console.log(results)
                 }
             });
-
             req.fail(function (results) {
                 console.log("error sending request");
                 console.log(results);
             });
-
         }
-
-
-
-
         /* When the user clicks on the button, 
         toggle between hiding and showing the dropdown content */
         function myFunction() {
             document.getElementById("myDropdown").classList.toggle("show");
         }
-
         // Close the dropdown menu if the user clicks outside of it
         window.onclick = function (event) {
             if (!event.target.matches('.dropbtn')) {
-
                 var dropdowns = document.getElementsByClassName("dropdown-content");
                 var i;
                 for (i = 0; i < dropdowns.length; i++) {
@@ -155,11 +140,9 @@ History:
                 }
             }
         }
-
         function switchMasterModel(objDropDown) {
             //sicherheitsabfrage einbauen
             alert("Ihr Mastermodell wird geändert.");
-
             var actualPath = objDropDown.value;
             var xhr = new XMLHttpRequest();
             xhr.open("GET", actualPath, true);
@@ -168,15 +151,12 @@ History:
                 configurator.processor.setJsCad(source, actualPath);
             };
             xhr.send();
-
             //globale variable den aktuellen pfad geben
             jscad_script = actualPath;
         }
-
         function reset() {
             //sicherheitsabfrage einbauen
             alert("Ihr Mastermodell wird zurückgesetzt. Bitte warten...");
-
             var actualPath = jscad_script;
             //var actualPath = "scripts/jscad_scripts/parametricGrille.js";
             var xhr = new XMLHttpRequest();
