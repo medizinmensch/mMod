@@ -131,7 +131,7 @@ namespace InvAddIn
 
             using (StreamWriter outputFile = new StreamWriter(jscadPath, true))
             {
-                outputFile.WriteLine(("var " + varname + "= scale([" + convertCommaToDot(majorradius) + ",");
+                outputFile.WriteLine(("var " + varname + "= scale([" + convertCommaToDot(majorradius) + ","));
                 outputFile.WriteLine(convertCommaToDot(minorradius) + "],");
                 outputFile.WriteLine("circle(" + convertCommaToDot(minorradius) + "));");
             }
