@@ -47,10 +47,11 @@ History:
                 <form>
                     <form action="#">
                         <select class="dropDownTest" onchange="switchMasterModel(this)">
-	    	    		<option value="scripts/jscad_scripts/parametricAxisCoupler.js">3 Part - Axis decoupler</option>
-                        <option value="scripts/jscad_scripts/parametricGrille.js">Parametric Grille</option>
-                        <option value="scripts/jscad_scripts/involuteGear.js">Involute Gear</option>
-		        	</select>
+                            <option value="scripts/jscad_scripts/example.js">Example</option>
+	    	    		    <option value="scripts/jscad_scripts/parametricAxisCoupler.js">3 Part - Axis decoupler</option>
+                            <option value="scripts/jscad_scripts/parametricGrille.js">Parametric Grille</option>
+                            <option value="scripts/jscad_scripts/involuteGear.js">Involute Gear</option>
+		        	    </select>
                     </form>
             </div>
             <input type="hidden" name="hiddenInput" id="hiddenInput" value="" />
@@ -65,7 +66,7 @@ History:
 
     <!--OpenJSCAD and BezierControl setup-->
     <script>
-        var jscad_script = "scripts/jscad_scripts/parametricAxisCoupler.js";
+        var jscad_script = "scripts/jscad_scripts/example.js";
         configurator = new Configurator(jscad_script);
     </script>
 
