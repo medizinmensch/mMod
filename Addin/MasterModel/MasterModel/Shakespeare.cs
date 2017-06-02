@@ -200,5 +200,19 @@ namespace InvAddIn
             }
         }
 
+        //oskar edit:
+        public string writeFullParameterFunction() {
+            outputFile.WriteLine("function getParameterDefinitions() {");
+            outputFile.WriteLine("return [");
+
+            foreach (var parameter in parameterList) {
+                outputFile.WriteLine(parameter.getParameterString() + ",");
+            }
+
+            outputFile.WriteLine("];");
+            outputFile.WriteLine("}");
+
+        }
+
     }
 }
