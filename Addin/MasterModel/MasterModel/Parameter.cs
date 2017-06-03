@@ -8,7 +8,7 @@ using System.IO;
 
 namespace InvAddIn
 {
-    public class Parameter
+    public class ParameterDef
     {
         //https://en.wikibooks.org/wiki/OpenJSCAD_Quick_Reference#Parameter_Types
 
@@ -17,15 +17,28 @@ namespace InvAddIn
         string caption;
         string type;    //float, slider
 
-        float initial;
-        float step;
+        double initial;
+        double step;
 
 
         //optional parameters
 
         //when slider is used
-        float min;
-        float max;
+        double min;
+        double max;
+
+        public ParameterDef() { }
+
+        public ParameterDef(String name, String caption, String type, double initial,
+            double step, double min, double max){
+            this.name = name;
+            this.caption = caption;
+            this.type = type;
+            this.initial = initial;
+            this.step = step;
+            this.min = min;
+            this.max = max;
+        }
 
 
         public string getParameterString() {
@@ -36,15 +49,18 @@ namespace InvAddIn
             completeString += "name: '" + name + "', ";
             completeString += "caption: '" + caption + "', ";
             completeString += "type: '" + type + "', ";
-            completeString += "initial: " + initial + ", ";
-            completeString += "step: " + step + ", ";
-
-            if(type == "slider") {
-                completeString += "max: " + max + ", ";
-                completeString += "min: " + min + ", ";
-
+            completeString += "initial: '" + initial + "', ";
+            
+            if(type == "float")
+            {
+                completeString += "step: " + step;
             }
 
+            if(type == "slider") {
+                completeString += "step: " + step + ", ";     
+                completeString += "max: " + max + ", ";
+                completeString += "min: " + min;               
+            }
             completeString += " }";
 
             return completeString;
