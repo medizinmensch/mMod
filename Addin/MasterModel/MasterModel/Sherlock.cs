@@ -40,9 +40,9 @@ namespace InvAddIn
             MessageBox.Show(message2);
             //End Test
         }
-        public void ShowShakespeare()
+        public void ShowShakespeare(string pathypath)
         {
-           //Shakespeare Shakey = new Shakespeare(partypart);   
+           Shakespeare Shakey = new Shakespeare(partypart, pathypath);   
         }
     }
 }

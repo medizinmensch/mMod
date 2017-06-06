@@ -118,6 +118,12 @@
     <Compile Include="StandardAddInServer.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="WhatWhereWhy.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WhatWhereWhy.Designer.cs">
+      <DependentUpon>WhatWhereWhy.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="MasterModel.X.manifest" />
@@ -132,6 +138,9 @@
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WhatWhereWhy.resx">
+      <DependentUpon>WhatWhereWhy.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

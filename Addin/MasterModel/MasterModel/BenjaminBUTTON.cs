@@ -32,7 +32,10 @@ namespace InvAddIn
                 HeySherlock = (PartDocument) Button.InventorApplication.ActiveDocument;
                 Sherlock sher = new Sherlock();
                 sher.Investigate(HeySherlock);
-                sher.ShowShakespeare();
+                WhatWhereWhy www =new WhatWhereWhy();
+                www.Show();
+                sher.ShowShakespeare(www.Path);
+
             }
             catch (Exception e)
             {

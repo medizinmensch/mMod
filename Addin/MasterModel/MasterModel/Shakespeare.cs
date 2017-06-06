@@ -25,9 +25,9 @@ namespace InvAddIn
         //    return 0;
         //}
 
-        public Shakespeare(MasterM MM)
+        public Shakespeare(MasterM MM, string path)
         {
-
+            jscadPath = path;
             sketchyList = MM.SketchyList;
             outputFile = new StreamWriter(jscadPath, true);
 
