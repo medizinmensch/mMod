@@ -39,6 +39,10 @@ namespace InvAddIn
             var message2 = string.Join(",", partypart.param.ToString());
             MessageBox.Show(message2);
             //End Test
+            //Test
+            var message3 = string.Join(",", partypart.param.ToString());
+            MessageBox.Show(message2);
+            //End Test
         }
         public void ShowShakespeare(string pathypath)
         {
