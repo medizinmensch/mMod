@@ -97,7 +97,7 @@ namespace MasterModel
                     "MasterModel", "MasterModel:StandardAddInServer:BenjaminBUTTON", CommandTypesEnum.kShapeEditCmdType,
                     addInCLSIDString, "Create a Master Model File",
                     "keep the model simple", createMasterMIcon, createMasterMICON, ButtonDisplayEnum.kDisplayTextInLearningMode);
-                ButtON.HeySherlock = (PartDocument) m_inventorApplication.ActiveDocument;
+                //ButtON.HeySherlock = (PartDocument) m_inventorApplication.ActiveDocument;
                 //create the command category
                 CommandCategory MasterMCmdCategory = m_inventorApplication.CommandManager.CommandCategories.Add("Master Model", "MasterModel:StandardAddInServer:BenjaminBUTTON", addInCLSIDString);
 
@@ -124,7 +124,7 @@ namespace MasterModel
 
                         //Get the 2d sketch environment base object
                         Inventor.Environment partSketchEnvironment;
-                        partSketchEnvironment = userInterfaceManager.Environments["PMxPartSketchEnvironment"];
+                        partSketchEnvironment = userInterfaceManager.Environments["PMxPartSkEnvironment"];
 
                         //make this command bar accessible in the panel menu for the 2d sketch environment.
                         partSketchEnvironment.PanelBar.CommandBarList.Add(MasterCommander);

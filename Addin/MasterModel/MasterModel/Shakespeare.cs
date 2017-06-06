@@ -204,6 +204,9 @@ namespace InvAddIn
         public string writeFullParameterFunction() {
             outputFile.WriteLine("function getParameterDefinitions() {");
             outputFile.WriteLine("return [");
+            //Fehlermeldung
+            List<Parameter> parameterList = new List<Parameter>();
+            //Fehlermeldung ende
 
             foreach (var parameter in parameterList) {
                 outputFile.WriteLine(parameter.getParameterString() + ",");
@@ -211,6 +214,10 @@ namespace InvAddIn
 
             outputFile.WriteLine("];");
             outputFile.WriteLine("}");
+
+            //Fehlermeldung 
+            return " ";
+            //Fehlermeldung ende
 
         }
 

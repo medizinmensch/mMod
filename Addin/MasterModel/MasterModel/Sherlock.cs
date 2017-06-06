@@ -25,7 +25,7 @@ namespace InvAddIn
         }
         public void ShowShakespeare()
         {
-           Shakespeare Shakey = new Shakespeare(partypart);   
+           //Shakespeare Shakey = new Shakespeare(partypart);   
         }
     }
 }

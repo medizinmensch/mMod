@@ -29,6 +29,7 @@ namespace InvAddIn
         {
             try
             {
+                HeySherlock = (PartDocument) Button.InventorApplication.ActiveDocument;
                 Sherlock sher = new Sherlock();
                 sher.Investigate(HeySherlock);
                 sher.ShowShakespeare();
