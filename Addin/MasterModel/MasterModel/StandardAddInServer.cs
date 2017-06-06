@@ -94,10 +94,10 @@ namespace MasterModel
 
                 //create buttons
                 ButtON = new BenjaminBUTTON(
-                    "Create a Master Model", "MasterModel:StandardAddInServer:BenjaminBUTTON", CommandTypesEnum.kShapeEditCmdType,
+                    "MasterModel", "MasterModel:StandardAddInServer:BenjaminBUTTON", CommandTypesEnum.kShapeEditCmdType,
                     addInCLSIDString, "Create a Master Model File",
                     "keep the model simple", createMasterMIcon, createMasterMICON, ButtonDisplayEnum.kDisplayTextInLearningMode);
-                ButtON.HeySherlock = m_inventorApplication.ActiveDocument;
+                ButtON.HeySherlock = (PartDocument) m_inventorApplication.ActiveDocument;
                 //create the command category
                 CommandCategory MasterMCmdCategory = m_inventorApplication.CommandManager.CommandCategories.Add("Master Model", "MasterModel:StandardAddInServer:BenjaminBUTTON", addInCLSIDString);
 
@@ -254,7 +254,7 @@ namespace MasterModel
                 for (int environmentCt = 1; environmentCt <= environments.Count; environmentCt++)
                 {
                     environment = (Inventor.Environment)environments[environmentCt];
-                    if (environment.InternalName == "PMxPartSketchEnvironment")
+                    if (environment.InternalName == "PMxPartEnvironment")
                     {
                         //make this command bar accessible in the panel menu for the 2d sketch environment.
                         environment.PanelBar.CommandBarList.Add(m_inventorApplication.UserInterfaceManager.CommandBars["MasterModel:StandardAddInServer:BenjaminBUTTONToolbar"]);

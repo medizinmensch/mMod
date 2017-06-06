@@ -10,9 +10,9 @@ namespace InvAddIn
 {
     public class Sherlock
     {
-        public Document suspect;
+        //public PartDocument suspect;
         MasterM partypart = new MasterM();
-        public void Investigate()
+        public void Investigate(PartDocument suspect)
         {
             //sketches
             foreach (Sketch sketchy in suspect.ComponentDefinition.Sketches)
