@@ -14,9 +14,11 @@ namespace InvAddIn
     public partial class WhatWhereWhy : Form
     {
         public string Path;
-        public WhatWhereWhy()
+        private Sherlock sherly;
+        public WhatWhereWhy(Sherlock Lock)
         {
             InitializeComponent();
+            sherly = Lock;
         }
 
         private void SaveMe_Click(object sender, EventArgs e)
@@ -35,6 +37,7 @@ namespace InvAddIn
                 SFD.CheckPathExists = true;
                 Path = SFD.FileName;
             }
+            sherly.ShowShakespeare(Path);
         }
     }
 }

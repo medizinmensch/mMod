@@ -40,7 +40,7 @@ namespace InvAddIn
             foreach (Sketch sketch in sketchyList)
             {
                 List<SketchEntity> sketchParts = MM.SketchyParts(sketch);
-                foreach (SketchEntity part in sketchyList)
+                foreach (SketchEntity part in sketchParts)
                 {
                     String var = "";
                     if (part is SketchCircle)
