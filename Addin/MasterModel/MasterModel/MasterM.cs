@@ -20,5 +20,14 @@ namespace InvAddIn
             }
             return SketchyP;
         }
+        /*public List<SketchEntitiesEnumerator> BigSketchyParts(Sketch sketchy)
+        {
+            List<SketchEntitiesEnumerator> SketchyP = new List<SketchEntitiesEnumerator>();
+            foreach (SketchEntitiesEnumerator Part in sketchy.SketchEntities)
+            {
+                SketchyP.Add(Part);
+            }
+            return SketchyP;
+        }*/
     }
 }

@@ -31,9 +31,9 @@ namespace InvAddIn
         //    return 0;
         //}
 
-        public Shakespeare(MasterM MM)
+        public Shakespeare(MasterM MM, string path)
         {
-
+            jscadPath = path;
             sketchyList = MM.SketchyList;
            
             int i = 1;
@@ -41,7 +41,7 @@ namespace InvAddIn
             foreach (Sketch sketch in sketchyList)
             {
                 List<SketchEntity> sketchParts = MM.SketchyParts(sketch);
-                foreach (SketchEntity part in sketchyList)
+                foreach (SketchEntity part in sketchParts)
                 {
                     String var = "";
                     if (part is SketchCircle)
@@ -277,10 +277,10 @@ namespace InvAddIn
             }
             //remove the last comma
             outputParamDef.Remove(outputParamDef.Length - 1, 1);
-
             outputParamDef += "];";
             outputParamDef += "}\n";
-            
+           
+
         }
 
     }

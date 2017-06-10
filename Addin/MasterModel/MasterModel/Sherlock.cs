@@ -10,22 +10,43 @@ namespace InvAddIn
 {
     public class Sherlock
     {
-        PartDocument suspect;
+        //public PartDocument suspect;
         MasterM partypart = new MasterM();
-        public void Investigate()
+        public void Investigate(PartDocument suspect)
         {
+            List<string> test = new List<string>();
             //sketches
             foreach (Sketch sketchy in suspect.ComponentDefinition.Sketches)
             {
                 partypart.SketchyList.Add(sketchy);
-                MessageBox.Show(sketchy.AttributeSets.ToString());
+                //Test
+                test.Add("    "+sketchy.Name+": ");
+                foreach (Inventor.SketchEntity Ente in sketchy.SketchEntities)
+                {
+                    test.Add( Ente.Type.ToString());
+
+                }
+                //End Test
             }
+            //Test
+            var message = string.Join(",", test);
+            MessageBox.Show(message);
+            //End Test
+
             //Parameter
             partypart.param = suspect.ComponentDefinition.Parameters;
+            //Test
+            var message2 = string.Join(",", partypart.param.ToString());
+            MessageBox.Show(message2);
+            //End Test
+            //Test
+            var message3 = string.Join(",", partypart.param.ToString());
+            MessageBox.Show(message2);
+            //End Test
         }
-        public void ShowShakespeare()
+        public void ShowShakespeare(string pathypath)
         {
-           Shakespeare Shakey = new Shakespeare(partypart);   
+           Shakespeare Shakey = new Shakespeare(partypart, pathypath);   
         }
     }
 }

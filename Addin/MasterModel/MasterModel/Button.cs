@@ -51,19 +51,19 @@ namespace InvAddIn
 
             #region "Methods"
 
-            public Button(string displayName, string internalName, CommandTypesEnum commandType, string clientId, string description, string tooltip, Icon standardIcon, Icon largeIcon, ButtonDisplayEnum buttonDisplayType)
+            public Button(string displayName, string internalName, CommandTypesEnum commandType, string clientId, string description, string tooltip, stdole.IPictureDisp standardIcon, stdole.IPictureDisp largeIcon, ButtonDisplayEnum buttonDisplayType)
             {
                 try
                 {
-                    //get IPictureDisp for icons
+                    /*get IPictureDisp for icons
                     stdole.IPictureDisp standardIconIPictureDisp;
                     standardIconIPictureDisp = (stdole.IPictureDisp)Support.IconToIPicture(standardIcon);
 
                     stdole.IPictureDisp largeIconIPictureDisp;
-                    largeIconIPictureDisp = (stdole.IPictureDisp)Support.IconToIPicture(largeIcon);
+                    largeIconIPictureDisp = (stdole.IPictureDisp)Support.IconToIPicture(largeIcon);*/
 
                     //create button definition
-                    m_buttonDefinition = m_inventorApplication.CommandManager.ControlDefinitions.AddButtonDefinition(displayName, internalName, commandType, clientId, description, tooltip, standardIconIPictureDisp, largeIconIPictureDisp, buttonDisplayType);
+                    m_buttonDefinition = m_inventorApplication.CommandManager.ControlDefinitions.AddButtonDefinition(displayName, internalName, commandType, clientId, description, tooltip, standardIcon, largeIcon, buttonDisplayType);
 
                     //enable the button
                     m_buttonDefinition.Enabled = true;
