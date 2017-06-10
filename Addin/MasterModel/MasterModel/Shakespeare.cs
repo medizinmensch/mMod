@@ -15,9 +15,15 @@ namespace InvAddIn
 
         private List<String> varList = new List<string>();
 
+        private List<ParameterDef> parameterList = new List<ParameterDef>();
+
         private static String jscadPath = "C:\\Users\\Davin\\test.jscad";
 
         StreamWriter outputFile;
+
+        private String outputMainFunction = "";
+
+        private String outputParamDef = "";
 
         //static int Main(string[] args)
         //{
@@ -29,14 +35,9 @@ namespace InvAddIn
         {
             jscadPath = path;
             sketchyList = MM.SketchyList;
-            outputFile = new StreamWriter(jscadPath, true);
-
-            using (outputFile)
-            {
-                outputFile.WriteLine("function main(){");     
-            }
-
+           
             int i = 1;
+            List<SketchLine> rectangleLines = new List<SketchLine>();
             foreach (Sketch sketch in sketchyList)
             {
                 List<SketchEntity> sketchParts = MM.SketchyParts(sketch);
@@ -62,12 +63,33 @@ namespace InvAddIn
                         exportEllipticalArc((SketchEllipticalArc)part, "ellipseArc" + i);
                         var = "ellipseArc";
                     }
+                    // Angenommen: Rectangle besteht aus 4 SketchLine
+                    else if (part is SketchLine)
+                    {
+                        rectangleLines.Add((SketchLine)part);
+                        if(rectangleLines.Count == 4)
+                        {
+                            exportRectangle(rectangleLines.ToArray(), "rectangle" + i);
+                            var = "ellipseArc";
+                        }else
+                        {
+                            continue;
+                        }                                           
+                    }
                     varList.Add(var + i);
                     i++;
                 }
             }
-            using (outputFile)
+
+            writeFullParameterFunction();
+
+            using (outputFile = new StreamWriter(jscadPath, true))
             {
+                outputFile.WriteLine(outputParamDef);
+
+                outputFile.WriteLine("function main(params){");
+                outputFile.WriteLine(outputMainFunction);
+
                 outputFile.WriteLine("return [ ");
                 double len = varList.Count();
                 int count = 0;
@@ -92,16 +114,36 @@ namespace InvAddIn
         public void exportCircle(SketchCircle circle, String varname)
         {
             double radius = circle.Radius;
-            using (StreamWriter outputFile = new StreamWriter(jscadPath, true))
-            {
-                outputFile.WriteLine("var " + varname + "= circle({r: " + convertCommaToDot(radius) + "})); ");
-            }
+            String name = varname + "Radius";
+            ParameterDef param = new ParameterDef(name, "radius of circle", "float",
+               radius, 0.1, radius - 10 < 0 ? 0 : radius - 10, radius+10);
+            parameterList.Add(param);
+            outputMainFunction += "var " + varname + "= circle({r: params." + name + "}); \n";       
         }
 
         // Rectangle
         public void exportRectangle(SketchLine[] lines, String varname)
-        {
-            
+        {          
+            double side1 = lines[0].Length;
+            double side2 = lines[1].Length;
+
+            if(side1 == side2)
+            {
+                side2 = lines[3].Length;
+            }
+
+            String name1 = varname + "Side1";
+            String name2 = varname + "Side2";
+            ParameterDef param1 = new ParameterDef(name1, "Width of retangle", "float",
+               side1, 0.1, side1 - 10 < 0 ? 0 : side1 - 10, side1 + 10);
+            ParameterDef param2 = new ParameterDef(name2, "Length of retangle", "float",
+               side2, 0.1, side2 - 10 < 0 ? 0 : side2 - 10, side2 + 10);
+
+            parameterList.Add(param1);
+            parameterList.Add(param2);
+
+            outputMainFunction += "var " + varname + "= CSG.cube({radius: [params." + name1 +
+                ", params." + name2 + ", 0]}); \n";
         }
 
         // Arc
@@ -111,16 +153,25 @@ namespace InvAddIn
             double centerY = arc.CenterSketchPoint.Geometry.Y;
 
             double radius = arc.Radius;
-        
-            using (StreamWriter outputFile = new StreamWriter(jscadPath, true))
-            {
-                outputFile.WriteLine("var " + varname + "= CSG.Path2D.arc({");
-                outputFile.WriteLine("center: [" + convertCommaToDot(centerX) + "," + convertCommaToDot(centerY) + ",0],");
-                outputFile.WriteLine("radius: " + convertCommaToDot(radius) + ",");
-                outputFile.WriteLine("startangle: 0,");
-                outputFile.WriteLine("endangle: 180");
-                outputFile.WriteLine("}).close().innerToCAG();");
-            }
+
+            String nameCenterX = varname + "CenterX";
+            String nameCenterY = varname + "CenterY";
+            String nameRadius = varname + "Radius";
+
+            ParameterDef param1 = new ParameterDef(nameCenterX, "Arc Center X", "float",
+               centerX, 0.1, centerX - 10 < 0 ? 0 : centerX - 10, centerX + 10);
+            ParameterDef param2 = new ParameterDef(nameCenterY, "Arc Center Y", "float",
+               centerY, 0.1, centerY - 10 < 0 ? 0 : centerY - 10, centerY + 10);
+            ParameterDef param3 = new ParameterDef(nameRadius, "Arc Radius", "float",
+               radius, 0.1, radius - 10 < 0 ? 0 : radius - 10, radius + 10);
+
+            parameterList.Add(param1);
+            parameterList.Add(param2);
+            parameterList.Add(param3);
+
+            outputMainFunction += "var " + varname + "= CSG.Path2D.arc({center: [params." + nameCenterX +
+                ", params." + nameCenterY + ",0], radius: params." + nameRadius +
+               ", startangle: 0,  endangle: 180}).close().innerToCAG();\n";
         }
 
         // Ellipsefull
@@ -129,12 +180,19 @@ namespace InvAddIn
             double majorradius = ellipsefull.MajorRadius;
             double minorradius = ellipsefull.MinorRadius;
 
-            using (StreamWriter outputFile = new StreamWriter(jscadPath, true))
-            {
-                outputFile.WriteLine(("var " + varname + "= scale([" + convertCommaToDot(majorradius) + ","));
-                outputFile.WriteLine(convertCommaToDot(minorradius) + "],");
-                outputFile.WriteLine("circle(" + convertCommaToDot(minorradius) + "));");
-            }
+            String nameMajor = varname + "Majorradius";
+            String nameMinor = varname + "Minorradius";
+
+            ParameterDef param1 = new ParameterDef(nameMajor, "Ellipse major radius", "float",
+               majorradius, 0.1, majorradius - 10 < 0 ? 0 : majorradius - 10, majorradius + 10);
+            ParameterDef param2 = new ParameterDef(nameMinor, "Ellipse minor radius", "float",
+               minorradius, 0.1, minorradius - 10 < 0 ? 0 : minorradius - 10, minorradius + 10);
+
+            parameterList.Add(param1);
+            parameterList.Add(param2);
+
+            outputMainFunction += "var " + varname + "= scale([params." + nameMajor + ", params." +
+                nameMinor + "],circle(params." + nameMinor + "));\n";
         }
 
         // SPLines
@@ -170,15 +228,24 @@ namespace InvAddIn
 
             double radius = (majorradius / 2) / Math.Cos(sweepAngle);
 
-            using (StreamWriter outputFile = new StreamWriter(jscadPath, true))
-            {
-                outputFile.WriteLine("var " + varname + "= CSG.Path2D.arc({");
-                outputFile.WriteLine("center: [0,0,0],");
-                outputFile.WriteLine("radius: " + convertCommaToDot(radius) + ",");
-                outputFile.WriteLine("startangle: " + convertCommaToDot(startAngle) + ",");
-                outputFile.WriteLine("endangle: " + convertCommaToDot(sweepAngle));
-                outputFile.WriteLine("}).close().innerToCAG();");
-            }
+            String nameRadius = varname + "Radius";
+            String nameStartAngle = varname + "StartAngle";
+            String nameSweepAngle = varname + "SweepAngle";
+
+            ParameterDef param1 = new ParameterDef(nameRadius, "Ellipse arc radius", "float",
+               radius, 0.1, radius - 10 < 0 ? 0 : radius - 10, radius + 10);
+            ParameterDef param2 = new ParameterDef(nameStartAngle, "Ellipse arc start angle", "float",
+               startAngle, 0.1, startAngle - 10 < 0 ? 0 : startAngle - 10, startAngle + 10);
+            ParameterDef param3 = new ParameterDef(nameSweepAngle, "Ellipse arc sweep angle", "float",
+               sweepAngle, 0.1, sweepAngle - 10 < 0 ? 0 : sweepAngle - 10, sweepAngle + 10);
+
+            parameterList.Add(param1);
+            parameterList.Add(param2);
+            parameterList.Add(param3);
+
+            outputMainFunction += "var " + varname + "= CSG.Path2D.arc({center: [0,0,0]," +
+                "radius: params." + nameRadius + ", startangle: params." +
+                nameStartAngle + ", endangle: params." + nameSweepAngle + "}).close().innerToCAG();\n";
         }
 
         // ConvertCommaToDot
@@ -201,23 +268,18 @@ namespace InvAddIn
         }
 
         //oskar edit:
-        public string writeFullParameterFunction() {
-            outputFile.WriteLine("function getParameterDefinitions() {");
-            outputFile.WriteLine("return [");
-            //Fehlermeldung
-            List<Parameter> parameterList = new List<Parameter>();
-            //Fehlermeldung ende
+        public void writeFullParameterFunction() {
+            outputParamDef += "function getParameterDefinitions() {\n";
+            outputParamDef += "return [\n";
 
-            foreach (var parameter in parameterList) {
-                outputFile.WriteLine(parameter.getParameterString() + ",");
+            foreach (ParameterDef parameter in parameterList) {
+                outputParamDef += parameter.getParameterString() + ",";
             }
-
-            outputFile.WriteLine("];");
-            outputFile.WriteLine("}");
-
-            //Fehlermeldung 
-            return " ";
-            //Fehlermeldung ende
+            //remove the last comma
+            outputParamDef.Remove(outputParamDef.Length - 1, 1);
+            outputParamDef += "];";
+            outputParamDef += "}\n";
+           
 
         }
 
