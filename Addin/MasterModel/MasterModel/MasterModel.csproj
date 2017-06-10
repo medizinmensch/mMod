@@ -105,6 +105,7 @@
     <Compile Include="BenjaminBUTTON.cs" />
     <Compile Include="Button.cs" />
     <Compile Include="MasterM.cs" />
+    <Compile Include="Parameter.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
