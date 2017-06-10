@@ -114,11 +114,25 @@ namespace InvAddIn
         public void exportCircle(SketchCircle circle, String varname)
         {
             double radius = circle.Radius;
+            double x = circle.CenterSketchPoint.Geometry.X;
+            double y = circle.CenterSketchPoint.Geometry.Y;
+
             String name = varname + "Radius";
+            String xName = varname + "CenterX";
+            String yName = varname + "CenterY";
+
             ParameterDef param = new ParameterDef(name, "radius of circle", "float",
                radius, 0.1, radius - 10 < 0 ? 0 : radius - 10, radius+10);
+            ParameterDef paramX = new ParameterDef(xName, "center X of circle", "float",
+               x, 0.1, x - 10 < 0 ? 0 : x - 10, x + 10);
+            ParameterDef paramY = new ParameterDef(yName, "center Y of circle", "float",
+               y, 0.1, y - 10 < 0 ? 0 : y - 10, y + 10);
+
             parameterList.Add(param);
-            outputMainFunction += "var " + varname + "= circle({r: params." + name + "}); \n";       
+            parameterList.Add(paramX);
+            parameterList.Add(paramY);
+            
+            outputMainFunction += "var " + varname + "= CAG.circle({center: [params." + xName + ", params." + yName + "], radius: params." + name + "}); \n";       
         }
 
         // Rectangle
@@ -206,7 +220,7 @@ namespace InvAddIn
 
             using(StreamWriter outputFile = new StreamWriter(jscadPath, true))
             {
-                
+                // la la la
 
             }
         }
