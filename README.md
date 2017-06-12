@@ -37,6 +37,8 @@ The directory explained as follows:
 
 ```
 |-- AddIn                       # Inventor Addin files go here
+|   |-- InventorBeispiele	# exampleFiles
+|   |-- MasterModel		# VS Project File
 |-- Web-App                     # source file for project
 |   |-- dist                    # deploy files   
 |   |-- scr                     # source file for project
