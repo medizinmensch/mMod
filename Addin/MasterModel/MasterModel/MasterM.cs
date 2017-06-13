@@ -55,6 +55,11 @@ namespace InvAddIn
         }
 
 
+        /// <summary>
+        /// Gives you all the Entitys of one Sketch
+        /// </summary>
+        /// <param name="sketchy">The Sketch you want the Entitys from</param>
+        /// <returns>List of Entitys (Containing stuff like Arcs, )</returns>
         public static List<SketchEntity> GetSketchParts(Sketch sketchy)
         {
             List<SketchEntity> sketchParts = new List<SketchEntity>();
