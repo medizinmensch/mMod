@@ -11,8 +11,6 @@ namespace InvAddIn
 {
     internal class BenjaminBUTTON : Button
     {
-        private PartDocument HeySherlock;
-        private Sherlock sher = new Sherlock();
         #region "Methods"
 
         public BenjaminBUTTON(string displayName, string internalName, CommandTypesEnum commandType, string clientId, string description, string tooltip, stdole.IPictureDisp standardIcon, stdole.IPictureDisp largeIcon, ButtonDisplayEnum buttonDisplayType)
@@ -30,10 +28,12 @@ namespace InvAddIn
         {
             try
             {
-                HeySherlock = (PartDocument) Button.InventorApplication.ActiveDocument;
-                sher.Investigate(HeySherlock);
-                WhatWhereWhy www = new WhatWhereWhy(sher);
-                www.Show();
+                PartDocument wholeDocument = (PartDocument) Button.InventorApplication.ActiveDocument;
+                Sherlock sherlockReader = new Sherlock();
+                sherlockReader.Investigate(wholeDocument);
+
+                WhatWhereWhy WindowDialoge = new WhatWhereWhy(sherlockReader);
+                WindowDialoge.Show();
 
             }
             catch (Exception e)
