@@ -161,8 +161,6 @@ namespace MasterModel
                         MasterMoRiPaCtrl = partSketchMasterRibbonPanelCtrls.AddButton(ButtON.ButtonDefinition, false, true, "", false);
                     }
                 }
-
-                MessageBox.Show("MASTER MODEL check");
             }
             catch (Exception e)
             {

@@ -12,41 +12,61 @@ namespace InvAddIn
     {
         //public PartDocument suspect;
         MasterM partypart = new MasterM();
-        public void Investigate(PartDocument suspect)
+        PartDocument Suspect { get; set; }
+
+        public Sherlock(PartDocument suspect)
         {
-            List<string> test = new List<string>();
+            Suspect = suspect;
+            Investigate();
+        }
+        public void Investigate()
+        {
             //sketches
-            foreach (Sketch sketchy in suspect.ComponentDefinition.Sketches)
+            foreach (Sketch sketchy in Suspect.ComponentDefinition.Sketches)
             {
                 partypart.SketchyList.Add(sketchy);
-                //Test
-                test.Add("    "+sketchy.Name+": ");
+            }
+            //Parameter
+            partypart.param = Suspect.ComponentDefinition.Parameters;
+
+            ShowTestDialoges();
+
+        }
+
+        public void ShowTestDialoges()
+        {
+            List<string> entetyNames = new List<string>();
+            foreach (var sketchy in partypart.SketchyList)
+            {
+                entetyNames.Add(sketchy.Name + ":\n");
                 foreach (Inventor.SketchEntity Ente in sketchy.SketchEntities)
                 {
-                    test.Add( Ente.Type.ToString());
-
+                    entetyNames.Add(Ente.Type.ToString() + ", ");
                 }
-                //End Test
+                entetyNames.Add("\n");
             }
-            //Test
-            var message = string.Join(",", test);
-            MessageBox.Show(message);
-            //End Test
+            MessageBox.Show(string.Join("", entetyNames));
 
-            //Parameter
-            partypart.param = suspect.ComponentDefinition.Parameters;
-            //Test
-            var message2 = string.Join(",", partypart.param.ToString());
-            MessageBox.Show(message2);
-            //End Test
-            //Test
-            var message3 = string.Join(",", partypart.param.ToString());
-            MessageBox.Show(message2);
-            //End Test
+            //List<string> parameterList = new List<string>();
+            //for (int i = 0; i < partypart.param.Count-1; i++)
+            //{
+            //    string p1 = "Test";//partypart.param[i].Name;
+            //    string p2 = partypart.param[i].Expression;
+            //    parameterList.Add(p1 + " - " + p2 + "\n");
+            //}
+            //MessageBox.Show("ALLE PARAMETER: \n" + string.Join(",", parameterList));
+
+            //List<string> userParameterList = new List<string>();
+            //for (int i = 0; i < partypart.param.UserParameters.Count; i++)
+            //{
+            //    userParameterList.Add(partypart.param.UserParameters[i] + " - " + partypart.param.UserParameters[i].Expression + "\n");
+            //}
+            //MessageBox.Show("ALLE PARAMETER: \n" + string.Join(",", userParameterList));
+
         }
         public void ShowShakespeare(string pathypath)
         {
-           Shakespeare Shakey = new Shakespeare(partypart, pathypath);   
+            Shakespeare Shakey = new Shakespeare(partypart, pathypath);
         }
     }
 }

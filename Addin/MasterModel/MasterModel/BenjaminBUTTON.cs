@@ -29,8 +29,7 @@ namespace InvAddIn
             try
             {
                 PartDocument wholeDocument = (PartDocument) Button.InventorApplication.ActiveDocument;
-                Sherlock sherlockReader = new Sherlock();
-                sherlockReader.Investigate(wholeDocument);
+                Sherlock sherlockReader = new Sherlock(wholeDocument);
 
                 WhatWhereWhy WindowDialoge = new WhatWhereWhy(sherlockReader);
                 WindowDialoge.Show();
