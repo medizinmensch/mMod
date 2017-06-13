@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using Inventor;
 using System.Windows.Forms;
 using System.Diagnostics;
+using System.Globalization;
+
 
 namespace InvAddIn
 {
@@ -47,13 +49,16 @@ namespace InvAddIn
 
             List<string> parameterList = new List<string>();
             Parameters documentParameters = Partypart.InventorDocument.ComponentDefinition.Parameters;
+            parameterList.Add("Name / Value / Comment");
             for (int i = 1; i < Partypart.InventorDocument.ComponentDefinition.Parameters.Count; i++)
             {
                 try
                 {
                     string p1 = documentParameters[i].Name;
-                    string p2 = documentParameters[i].Expression;
-                    parameterList.Add(p1 + " - " + p2 + "\n");
+                    string p2 = documentParameters[i]._Value.ToString(CultureInfo.InvariantCulture);
+                    string p3 = documentParameters[i].Comment;
+                    Parameter test = documentParameters[i];
+                    parameterList.Add(p1 + " - " + p2 + " - " + p3 + "\n");
                 }
                 catch (Exception e)
                 {
