@@ -104,7 +104,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="AxHostConverter.cs" />
-    <Compile Include="BenjaminBUTTON.cs" />
+    <Compile Include="BenjaminButton.cs" />
     <Compile Include="Button.cs" />
     <Compile Include="MasterM.cs" />
     <Compile Include="Parameter.cs" />

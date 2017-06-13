@@ -13,53 +13,52 @@ namespace InvAddIn
         //https://en.wikibooks.org/wiki/OpenJSCAD_Quick_Reference#Parameter_Types
 
         //essential parameters
-        string name;
-        string caption;
-        string type;    //float, slider
+        public string Name { get; set; }
+        public string Caption { get; set; }
+        public string ParapeterType { get; set; }
 
-        double initial;
-        double step;
-
+        public double Initial { get; set; }
+        public double Step { get; set; }
 
         //optional parameters
 
         //when slider is used
-        double min;
-        double max;
+        public double Min { get; set; }
+        public double Max { get; set; }
 
         public ParameterDef() { }
 
-        public ParameterDef(String name, String caption, String type, double initial,
+        public ParameterDef(String name, String caption, String parapeterType, double initial,
             double step, double min, double max){
-            this.name = name;
-            this.caption = caption;
-            this.type = type;
-            this.initial = initial;
-            this.step = step;
-            this.min = min;
-            this.max = max;
+            this.Name = name;
+            this.Caption = caption;
+            this.ParapeterType = parapeterType;
+            this.Initial = initial;
+            this.Step = step;
+            this.Min = min;
+            this.Max = max;
         }
 
 
-        public string getParameterString() {
+        public string GetParameterString() {
 
             string completeString = "";
 
             completeString += "{ ";
-            completeString += "name: '" + name + "', ";
-            completeString += "caption: '" + caption + "', ";
-            completeString += "type: '" + type + "', ";
-            completeString += "initial: '" + initial + "', ";
+            completeString += "name: '" + Name + "', ";
+            completeString += "caption: '" + Caption + "', ";
+            completeString += "ParapeterType: '" + ParapeterType + "', ";
+            completeString += "initial: '" + Initial + "', ";
             
-            if(type == "float")
+            if(ParapeterType == "float")
             {
-                completeString += "step: " + step;
+                completeString += "step: " + Step;
             }
 
-            if(type == "slider") {
-                completeString += "step: " + step + ", ";     
-                completeString += "max: " + max + ", ";
-                completeString += "min: " + min;               
+            if(ParapeterType == "slider") {
+                completeString += "step: " + Step + ", ";     
+                completeString += "max: " + Max + ", ";
+                completeString += "min: " + Min;               
             }
             completeString += " }";
 
