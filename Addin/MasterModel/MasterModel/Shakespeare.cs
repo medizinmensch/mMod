@@ -40,7 +40,7 @@ namespace InvAddIn
             List<SketchLine> rectangleLines = new List<SketchLine>();
             foreach (Sketch sketch in sketchyList)
             {
-                List<SketchEntity> sketchParts = MM.SketchyParts(sketch);
+                List<SketchEntity> sketchParts = MasterM.GetSketchParts(sketch);
                 foreach (SketchEntity part in sketchParts)
                 {
                     String var = "";
@@ -287,7 +287,7 @@ namespace InvAddIn
             outputParamDef += "return [\n";
 
             foreach (ParameterDef parameter in parameterList) {
-                outputParamDef += parameter.getParameterString() + ",";
+                outputParamDef += parameter.GetParameterString() + ",";
             }
             //remove the last comma
             outputParamDef.Remove(outputParamDef.Length - 1, 1);
