@@ -15,7 +15,7 @@ namespace InvAddIn
         //essential parameters
         public string Name { get; set; }
         public string Caption { get; set; }
-        public string ParapeterType { get; set; }
+        public string ParameterType { get; set; }
 
         public double Initial { get; set; }
         public double Step { get; set; }
@@ -28,11 +28,11 @@ namespace InvAddIn
 
         public ParameterDef() { }
 
-        public ParameterDef(String name, String caption, String parapeterType, double initial,
+        public ParameterDef(String name, String caption, String parameterType, double initial,
             double step, double min, double max){
             this.Name = name;
             this.Caption = caption;
-            this.ParapeterType = parapeterType;
+            this.ParameterType = parameterType;
             this.Initial = initial;
             this.Step = step;
             this.Min = min;
@@ -42,20 +42,20 @@ namespace InvAddIn
 
         public string GetParameterString() {
 
-            string completeString = "";
+            string completeString = "\t\t";
 
             completeString += "{ ";
             completeString += "name: '" + Name + "', ";
             completeString += "caption: '" + Caption + "', ";
-            completeString += "ParapeterType: '" + ParapeterType + "', ";
+            completeString += "type: '" + ParameterType + "', ";
             completeString += "initial: '" + Initial + "', ";
             
-            if(ParapeterType == "float")
+            if(ParameterType == "float")
             {
                 completeString += "step: " + Step;
             }
 
-            if(ParapeterType == "slider") {
+            if(ParameterType == "slider") {
                 completeString += "step: " + Step + ", ";     
                 completeString += "max: " + Max + ", ";
                 completeString += "min: " + Min;               
