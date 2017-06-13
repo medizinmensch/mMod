@@ -16,8 +16,8 @@ namespace InvAddIn
         private List<ParameterDef> parameterList = new List<ParameterDef>();
         private List<String> listOfCodeLines = new List<string>();
 
-        private string desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-        private string jscadPath = desktopPath + "\\JavaScriptExampleFile.js";
+        private static string desktopPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.Desktop);
+        private static string jscadPath = desktopPath + "\\JavaScriptExampleFile.js";
 
         /* save directly into Web-App jscad_scripts folder
         string mModDirectory = System.IO.Path.GetFullPath(@"..\..\..\..\..\..\")
@@ -38,7 +38,7 @@ namespace InvAddIn
 
             interpreteSketches();
             writeFullParameterFunction();
-            writeIntoJSFile;     
+            writeIntoJSFile();     
         }
 
         public void interpreteSketches() 
@@ -48,7 +48,7 @@ namespace InvAddIn
             foreach (Sketch sketch in sketchyList)
             {
 				
-            	List<SketchEntity> sketchParts = MM.SketchyParts(sketch);
+            	List<SketchEntity> sketchParts = MasterM.GetSketchParts(sketch);
                 foreach (SketchEntity part in sketchParts)
                 {
                 	String sketchType = "";
@@ -108,7 +108,7 @@ namespace InvAddIn
             listOfCodeLines.Add("return [");
 
             foreach (ParameterDef parameter in parameterList) {
-                listOfCodeLines.Add(parameter.getParameterString() + ",");
+                listOfCodeLines.Add(parameter.GetParameterString() + ",");
             }
 
             //remove the last comma of last element of list

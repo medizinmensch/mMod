@@ -13,31 +13,33 @@ namespace InvAddIn
 {
     public partial class WhatWhereWhy : Form
     {
-        public string Path;
-        private Sherlock sherly;
-        public WhatWhereWhy(Sherlock Lock)
+        private readonly Sherlock SherlockReader;
+        public WhatWhereWhy(Sherlock sherlockReader)
         {
             InitializeComponent();
-            sherly = Lock;
+            SherlockReader = sherlockReader;
         }
 
         private void SaveMe_Click(object sender, EventArgs e)
         {
             // Displays a SaveFileDialog so the user can save the File
             // assigned to Button SaveMe.
-            SaveFileDialog SFD = new SaveFileDialog();
-            SFD.Filter = "OpenJSCAD|*.jscad|txt file |*.txt";
-            SFD.Title = "Save as MasterModel";
-            SFD.ShowDialog();
+            SaveFileDialog saveFileDialog = new SaveFileDialog()
+            {
+                Filter = "OpenJSCAD|*.jscad|txt file |*.txt",
+                Title = "Save as MasterModel"
+            };
+
+            saveFileDialog.ShowDialog();
 
             // If the file name is not an empty string open it for saving.
-            if (SFD.FileName != "")
+            if (saveFileDialog.FileName != "")
             {
-                SFD.CheckFileExists = true;
-                SFD.CheckPathExists = true;
-                Path = SFD.FileName;
+                saveFileDialog.CheckFileExists = true;
+                saveFileDialog.CheckPathExists = true;
+                SherlockReader.ShowShakespeare(saveFileDialog.FileName);
             }
-            sherly.ShowShakespeare(Path);
+
         }
     }
 }

@@ -5,48 +5,72 @@ using System.Text;
 using System.Threading.Tasks;
 using Inventor;
 using System.Windows.Forms;
+using System.Diagnostics;
+using System.Globalization;
+
 
 namespace InvAddIn
 {
     public class Sherlock
     {
         //public PartDocument suspect;
-        MasterM partypart = new MasterM();
-        public void Investigate(PartDocument suspect)
+        private readonly MasterM Partypart;
+
+        /// <summary>
+        /// Sherlock lets you Read all relevant Information for the jsCad processing from a PartDocument Inventor File
+        /// </summary>
+        /// <param name="suspect">your PartDocument you want to get information about</param>
+        public Sherlock(PartDocument suspect)
         {
-            List<string> test = new List<string>();
-            //sketches
-            foreach (Sketch sketchy in suspect.ComponentDefinition.Sketches)
+            Partypart = new MasterM(suspect);
+
+#if DEBUG
+            ShowTestDialoges(); 
+#endif
+        }
+
+        /// <summary>
+        /// This is for Testing / Debuging purpose only
+        /// </summary>
+        private void ShowTestDialoges()
+        {
+            List<string> entetyNames = new List<string>();
+            foreach (var sketchy in Partypart.SketchyList)
             {
-                partypart.SketchyList.Add(sketchy);
-                //Test
-                test.Add("    "+sketchy.Name+": ");
-                foreach (Inventor.SketchEntity Ente in sketchy.SketchEntities)
+                entetyNames.Add(sketchy.Name + ":\n");
+                foreach (Inventor.SketchEntity ente in sketchy.SketchEntities)
                 {
-                    test.Add( Ente.Type.ToString());
-
+                    entetyNames.Add(ente.Type.ToString() + ", ");
                 }
-                //End Test
+                entetyNames.Add("\n");
             }
-            //Test
-            var message = string.Join(",", test);
-            MessageBox.Show(message);
-            //End Test
+            Debug.WriteLine(string.Join("", entetyNames));
+            MessageBox.Show(string.Join("", entetyNames));
 
-            //Parameter
-            partypart.param = suspect.ComponentDefinition.Parameters;
-            //Test
-            var message2 = string.Join(",", partypart.param.ToString());
-            MessageBox.Show(message2);
-            //End Test
-            //Test
-            var message3 = string.Join(",", partypart.param.ToString());
-            MessageBox.Show(message2);
-            //End Test
+            List<string> parameterList = new List<string>();
+            Parameters documentParameters = Partypart.InventorDocument.ComponentDefinition.Parameters;
+            parameterList.Add("Name / Value / Comment");
+            for (int i = 1; i < Partypart.InventorDocument.ComponentDefinition.Parameters.Count; i++)
+            {
+                try
+                {
+                    string p1 = documentParameters[i].Name;
+                    string p2 = documentParameters[i]._Value.ToString(CultureInfo.InvariantCulture);
+                    string p3 = documentParameters[i].Comment;
+                    Parameter test = documentParameters[i];
+                    parameterList.Add(p1 + " - " + p2 + " - " + p3 + "\n");
+                }
+                catch (Exception e)
+                {
+                    MessageBox.Show(e.ToString());
+                }
+            }
+            MessageBox.Show("ALLE PARAMETER: \n" + string.Join(",", parameterList));
+
         }
         public void ShowShakespeare(string pathypath)
         {
-           Shakespeare Shakey = new Shakespeare(partypart, pathypath);   
+            Shakespeare shakey = new Shakespeare(Partypart, pathypath);
         }
     }
 }
