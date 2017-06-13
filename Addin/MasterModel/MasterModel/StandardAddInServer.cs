@@ -34,7 +34,7 @@ namespace MasterModel
         private Inventor.ApplicationEvents m_appEvents;
 
         //buttons
-        private BenjaminBUTTON ButtON;
+        private BenjaminButton ButtON;
 
         //user interface event
         private UserInterfaceEvents m_userInterfaceEvents;
@@ -93,7 +93,7 @@ namespace MasterModel
                 addInCLSIDString = "{" + addInCLSID.Value + "}";
 
                 //create buttons
-                ButtON = new BenjaminBUTTON(
+                ButtON = new BenjaminButton(
                     "MasterModel", "MasterModel:StandardAddInServer:BenjaminBUTTON", CommandTypesEnum.kShapeEditCmdType,
                     addInCLSIDString, "Create a Master Model File",
                     "keep the model simple", createMasterMIcon, createMasterMICON, ButtonDisplayEnum.kDisplayTextInLearningMode);

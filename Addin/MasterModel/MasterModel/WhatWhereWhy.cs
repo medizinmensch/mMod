@@ -13,11 +13,11 @@ namespace InvAddIn
 {
     public partial class WhatWhereWhy : Form
     {
-        Sherlock _sherlockReader;
+        private readonly Sherlock SherlockReader;
         public WhatWhereWhy(Sherlock sherlockReader)
         {
             InitializeComponent();
-            _sherlockReader = sherlockReader;
+            SherlockReader = sherlockReader;
         }
 
         private void SaveMe_Click(object sender, EventArgs e)
@@ -37,7 +37,7 @@ namespace InvAddIn
             {
                 saveFileDialog.CheckFileExists = true;
                 saveFileDialog.CheckPathExists = true;
-                _sherlockReader.ShowShakespeare(saveFileDialog.FileName);
+                SherlockReader.ShowShakespeare(saveFileDialog.FileName);
             }
 
         }

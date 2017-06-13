@@ -9,30 +9,30 @@ using System.Drawing;
 
 namespace InvAddIn
 {
-    internal class BenjaminBUTTON : Button
+    internal class BenjaminButton : Button
     {
         #region "Methods"
 
-        public BenjaminBUTTON(string displayName, string internalName, CommandTypesEnum commandType, string clientId, string description, string tooltip, stdole.IPictureDisp standardIcon, stdole.IPictureDisp largeIcon, ButtonDisplayEnum buttonDisplayType)
+        public BenjaminButton(string displayName, string internalName, CommandTypesEnum commandType, string clientId, string description, string tooltip, stdole.IPictureDisp standardIcon, stdole.IPictureDisp largeIcon, ButtonDisplayEnum buttonDisplayType)
 			: base(displayName, internalName, commandType, clientId, description, tooltip, standardIcon, largeIcon, buttonDisplayType)
 		{
 
         }
-        public BenjaminBUTTON(string displayName, string internalName, CommandTypesEnum commandType, string clientId, string description, string tooltip, ButtonDisplayEnum buttonDisplayType)
+        public BenjaminButton(string displayName, string internalName, CommandTypesEnum commandType, string clientId, string description, string tooltip, ButtonDisplayEnum buttonDisplayType)
 			: base(displayName, internalName, commandType, clientId, description, tooltip, buttonDisplayType)
 		{
 
         }
 
-        override protected void ButtonDefinition_OnExecute(NameValueMap context)
+        protected override void ButtonDefinition_OnExecute(NameValueMap context)
         {
             try
             {
                 PartDocument wholeDocument = (PartDocument) Button.InventorApplication.ActiveDocument;
                 Sherlock sherlockReader = new Sherlock(wholeDocument);
 
-                WhatWhereWhy WindowDialoge = new WhatWhereWhy(sherlockReader);
-                WindowDialoge.Show();
+                WhatWhereWhy windowDialoge = new WhatWhereWhy(sherlockReader);
+                windowDialoge.Show();
 
             }
             catch (Exception e)
