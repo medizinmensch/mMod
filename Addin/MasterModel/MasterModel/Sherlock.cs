@@ -12,28 +12,24 @@ namespace InvAddIn
     public class Sherlock
     {
         //public PartDocument suspect;
-        private readonly MasterM Partypart = new MasterM();
-        private PartDocument Suspect { get; set; }
+        private readonly MasterM Partypart;
 
+        /// <summary>
+        /// Sherlock lets you Read all relevant Information for the jsCad processing from a PartDocument Inventor File
+        /// </summary>
+        /// <param name="suspect">your PartDocument you want to get information about</param>
         public Sherlock(PartDocument suspect)
         {
-            Suspect = suspect;
-            Investigate();
-        }
-        private void Investigate()
-        {
-            //sketches
-            foreach (Sketch sketchy in Suspect.ComponentDefinition.Sketches)
-            {
-                Partypart.SketchyList.Add(sketchy);
-            }
-            //Parameter
-            Partypart.param = Suspect.ComponentDefinition.Parameters;
+            Partypart = new MasterM(suspect);
 
-            ShowTestDialoges();
-
+#if DEBUG
+            ShowTestDialoges(); 
+#endif
         }
 
+        /// <summary>
+        /// This is for Testing / Debuging purpose only
+        /// </summary>
         private void ShowTestDialoges()
         {
             List<string> entetyNames = new List<string>();
@@ -50,12 +46,13 @@ namespace InvAddIn
             MessageBox.Show(string.Join("", entetyNames));
 
             List<string> parameterList = new List<string>();
-            for (int i = 0; i < Partypart.param.Count - 1; i++)
+            Parameters documentParameters = Partypart.InventorDocument.ComponentDefinition.Parameters;
+            for (int i = 1; i < Partypart.InventorDocument.ComponentDefinition.Parameters.Count; i++)
             {
                 try
                 {
-                    string p1 = Partypart.param[i].Name;
-                    string p2 = Partypart.param[i].Expression;
+                    string p1 = documentParameters[i].Name;
+                    string p2 = documentParameters[i].Expression;
                     parameterList.Add(p1 + " - " + p2 + "\n");
                 }
                 catch (Exception e)

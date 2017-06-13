@@ -9,25 +9,60 @@ namespace InvAddIn
 {
     public class MasterM
     {
-        public List<Sketch> SketchyList = new List<Sketch>();
-        public Parameters param;
-        public List<SketchEntity> SketchyParts(Sketch sketchy)
+        public PartDocument InventorDocument { get; set; }
+        public List<Sketch> SketchyList
         {
-            List<SketchEntity> SketchyP = new List<SketchEntity>();
-            foreach (SketchEntity Part in sketchy.SketchEntities)
+            get
             {
-                SketchyP.Add(Part);
+                List<Sketch> tmp = new List<Sketch>();
+                foreach (Sketch sketchy in InventorDocument.ComponentDefinition.Sketches)
+                {
+                    tmp.Add(sketchy);
+                }
+                return tmp;
+
             }
-            return SketchyP;
         }
-        /*public List<SketchEntitiesEnumerator> BigSketchyParts(Sketch sketchy)
+
+        public MasterM(PartDocument inventorDocument)
         {
-            List<SketchEntitiesEnumerator> SketchyP = new List<SketchEntitiesEnumerator>();
-            foreach (SketchEntitiesEnumerator Part in sketchy.SketchEntities)
-            {
-                SketchyP.Add(Part);
+            InventorDocument = inventorDocument;
+        }
+
+        public List<ParameterDef> GetCustomParameters
+        {
+            get
+            {   
+                List<ParameterDef> toReturn = new List<ParameterDef>();
+                Parameters inventorParameters = InventorDocument.ComponentDefinition.Parameters;
+                for (int i = 1; i < inventorParameters.Count; i++)
+                {
+                    if (inventorParameters[i].ParameterType == ParameterTypeEnum.kUserParameter)
+                    {
+                        ParameterDef tmpParam =
+                            new ParameterDef
+                            {
+                                Name = inventorParameters[i].Name,
+                                Initial = inventorParameters[i]._Value,
+                                Caption = inventorParameters[i].Comment
+                            };
+
+                        toReturn.Add(tmpParam);
+                    }
+                }
+                return toReturn;
             }
-            return SketchyP;
-        }*/
+        }
+
+
+        public static List<SketchEntity> GetSketchParts(Sketch sketchy)
+        {
+            List<SketchEntity> sketchParts = new List<SketchEntity>();
+            foreach (SketchEntity part in sketchy.SketchEntities)
+            {
+                sketchParts.Add(part);
+            }
+            return sketchParts;
+        }
     }
 }
