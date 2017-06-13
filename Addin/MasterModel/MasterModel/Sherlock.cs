@@ -67,13 +67,6 @@ namespace InvAddIn
             }
             MessageBox.Show("ALLE PARAMETER: \n" + string.Join(",", parameterList));
 
-            //List<string> userParameterList = new List<string>();
-            //for (int i = 0; i < partypart.param.UserParameters.Count; i++)
-            //{
-            //    userParameterList.Add(partypart.param.UserParameters[i] + " - " + partypart.param.UserParameters[i].Expression + "\n");
-            //}
-            //MessageBox.Show("ALLE PARAMETER: \n" + string.Join(",", userParameterList));
-
         }
         public void ShowShakespeare(string pathypath)
         {
