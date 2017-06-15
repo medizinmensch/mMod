@@ -9,24 +9,37 @@ using System.IO;
 
 namespace InvAddIn
 {
-    //TODO:
     /*
-        - export interprete methods, can parameter be added outside of class when public?
+        http://help.autodesk.com/view/INVNTOR/2018/ENU/?guid=GUID-311EC780-354E-4A58-9639-3E186755A498
+        https://en.wikibooks.org/wiki/OpenJSCAD_User_Guide
+
+        /TODO:
+        - export interprete methods, can parameter be added outside of class when public?   check
         - seperate between 2d and 3d entities. need two list for entities?
-        - use polygon for sketchPoints, write sketchPoint case
-    
+        - use polygon for SketchLine, write SketchLine case
+
+        hints, questions:
+        - do we need SketchPoint? at this time they get ignored and it works
+        - try out: in one sketch draw two different polylines and check sketch entities (sketchpoint as separation between?)
+            profile has information which entities belong to each other in one sketch
     
      */
     public class Shakespeare
     {
+        //main lists
         private List<String> listOfEntityNames = new List<string>();
         private List<String> listOfCodeLines = new List<string>();
-        private List<Sketch> listOfSketches;
-        private List<SketchLine> rectangleLines = new List<SketchLine>();
         public static List<Parameter> ListOfParameter = new List<Parameter>();
+        private List<Sketch> listOfSketches;
+
+        //temporary lists
+        private List<SketchLine> rectangleLines = new List<SketchLine>();
+        private List<SketchLine> listOfSketchLines = new List<SketchLine>();
+
+
 
         private int numberOfSketches;
-        private bool sketchPoints = false;
+        private bool needToInterpreteSketchLine = false;
 
         private static string desktopPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.Desktop);
         private static string jscadPath = desktopPath + "\\example.js";
@@ -61,7 +74,33 @@ namespace InvAddIn
         {
             listOfCodeLines.Add("function main(params) {");
 
-            //create 2D Primitives
+            //interprete sketches
+            interpreteSketches();
+
+
+            //union all sketches
+            listOfCodeLines.Add("");
+            listOfCodeLines.Add(UnionSketches());
+            //put it into one var?
+
+            //extrude sketches (need height here)
+            listOfCodeLines.Add(ExtrudeSketches("sketches", 10));
+
+            //interprete 3d entities
+
+            //union 3d entities (also with extruded sketches)
+
+
+            //return var
+            listOfCodeLines.Add("");
+            listOfCodeLines.Add("\t" + "return sketches;");
+            listOfCodeLines.Add("}");
+            listOfCodeLines.Add("");
+
+        } //end of method GenerateMainFunction
+
+        public void interpreteSketches() 
+        {
             foreach (Sketch sketch in listOfSketches)
             {
                 List<SketchEntity> sketchEntities = MasterM.GetSketchParts(sketch);
@@ -72,61 +111,35 @@ namespace InvAddIn
 
             }
 
-
-            //union all 2D Primitives
-            listOfCodeLines.Add("");
-            listOfCodeLines.Add(UnionSketches());
-            //put it into one var?
-
-            //extrude 2D Primitive
-            listOfCodeLines.Add(ExtrudeSketches("sketches", 10));
-
-            //union 3D Primitives
-
-
-            //return var
-            listOfCodeLines.Add("");
-            listOfCodeLines.Add("\t" + "return sketches;");
-            listOfCodeLines.Add("}");
-            listOfCodeLines.Add("");
-
-
-
-            /*
-            double len = listOfEntityNames.Count();
-            int count = 0;
-            foreach (String name in listOfEntityNames)
-            {
-                if (count == len - 1)
-                {
-                    listOfCodeLines.Add("\t" + name);
-                }
-                else
-                {
-                    listOfCodeLines.Add("\t" + name + ",");
-                }
-
-                count++;
-            }
-
-            listOfCodeLines.Add("\t" + "]; ");
-            listOfCodeLines.Add("}");
-            listOfCodeLines.Add("");
-            listOfCodeLines.Add("");
-            */
-        } //end of method GenerateMainFunction
+        }
 
         public void InterpreteSketchEntity(SketchEntity sketchEntity)
         {
+            //does this work? 
+            if (sketchEntity != SketchLine && needToInterpreteSketchLine) 
+            {
+                listOfCodeLines.Add(Exporter.ExportPolygon(listOfSketchLines, "Polygon" + numberOfSketches));
+                needToInterpreteSketchLine = false;
+                listOfSketchLines.Clear();
+            }
+
+
             String entityType = "";
             if (sketchEntity is SketchPoint)
             {
                 //sketchPoints are just optional?
                 //skip it
-                //sketchPoints = true;
                 return;
             }
-            if (sketchEntity is SketchCircle)
+            else if (sketchEntity is SketchLine)
+            {
+                //get multiple sketchLine's, put them in list, when next element is different interprete all sketchlines
+                needToInterpreteSketchLine = true;
+                listOfSketchLines.Add((SketchLine) sketchEntity);
+                return;
+
+            }
+            else if (sketchEntity is SketchCircle)
             {
                 entityType = "circle";
                 listOfCodeLines.Add(Exporter.ExportCircle((SketchCircle) sketchEntity, entityType + numberOfSketches));
@@ -246,7 +259,7 @@ namespace InvAddIn
             unionLine += ");";
 
             return unionLine;
-        }
+        } //end of method UnionSketches
 
 
         public string ExtrudeSketches(string varName, int height) 
@@ -254,6 +267,6 @@ namespace InvAddIn
             string extrusion = "\t" + varName + " = " + varName + ".extrude({ offset: [0,0," + height + "] });";
             return extrusion;
 
-        }
+        } //end of method ExtrudeSketches
     } //end of class Shakespeare
 } //end of namespace InvAddIn

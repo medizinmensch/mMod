@@ -39,7 +39,7 @@ namespace InvAddIn
 
             return ("\t" + javaScriptVariable);
         }
-
+        
         // Rectangle (todo)
         public static string exportRectangle(SketchLine[] lines, String entityName)
         {
@@ -134,8 +134,94 @@ namespace InvAddIn
         //polygon (todo)
 	    public static string ExportPolygon(List<SketchLine> listOfSketchLines, String entityName)
 	    {
-	        return "blabla";
+            /*
+            - create array of x and y coordinates?
+            - check if endpoint of last line is same then startpoint of next line
+            - 
+            
+            */
+
+            int length = listOfSketchLines.count();
+            double tempX = 0;
+            double tempY = 0;
+
+            double[] xCoordinates = new double[length];
+            double[] yCoordinates = new double[length];
+
+            int counter = 0;
+            bool notFirst = false;
+
+            foreach (var sketchLine in listOfSketchLines)
+            {
+                //pseudocode:
+
+                //first time will be executed no matter what goes on
+                if (notFirst == false)
+                {
+                    xCoordinates[counter] = sketchLine.Geometry.StartPoint.X;
+                    yCoordinates[counter] = sketchLine.Geometry.StartPoint.Y;
+
+                    tempX = sketchLine.Geometry.EndPoint.X;
+                    tempY = sketchLine.Geometry.EndPoint.Y;
+                    notFirst = true;
+                }
+
+                //all other times, compare endpoints of last SketchLine with startpoint of new SketchLine
+                if (notFirst && tempX == sketchLine.Geometry.StartPoint.X && tempY == sketchLine.Geometry.StartPoint.Y) 
+                {
+                    xCoordinates[counter] = sketchLine.Geometry.StartPoint.X;
+                    yCoordinates[counter] = sketchLine.Geometry.StartPoint.Y;
+
+                    tempX = sketchLine.Geometry.EndPoint.X;
+                    tempY = sketchLine.Geometry.EndPoint.Y;
+                    
+                }
+                else
+                {
+                    //error, destroy universe
+                    //throw error message
+                }
+                counter++;
+            }
+
+
+            string javaScriptVariable = "var " + entityName + " = CAG.fromPoints ( [";
+
+            //insert points: CAG.fromPoints([ [0,0],[5,0],[3,5],[0,5] ]);
+            for (int i = 0; i < xCoordinates.length; i++)
+            {
+                if (i == xCoordinates.length-1)
+                {
+                    javaScriptVariable += "[" + SubstituteCommaWithDot(xCoordinates[i]) + "," + SubstituteCommaWithDot(yCoordinates[i]) + "] ";
+                }
+                else
+                {
+                    javaScriptVariable += "[" + SubstituteCommaWithDot(xCoordinates[i]) + "," + SubstituteCommaWithDot(yCoordinates[i]) + "], ";
+                }
+            }
+            javaScriptVariable += "] );";
+
+            return ("\t" + javaScriptVariable);
 	    }
+
+        public string SubstituteCommaWithDot(double value)
+        {
+            string valueString = value.ToString();
+            string variable = "";
+
+            foreach (var character in valueString)
+            {
+                if (character == ',')
+                {
+                    variable += '.';
+                }
+                else
+                {
+                    variable += character;
+                }
+            }
+            return variable;
+        }
     }
 }
 
