@@ -8,7 +8,7 @@ using System.IO;
 
 namespace InvAddIn
 {
-    public class ParameterDef
+    public class Parameter
     {
         //https://en.wikibooks.org/wiki/OpenJSCAD_Quick_Reference#Parameter_Types
 
@@ -26,10 +26,20 @@ namespace InvAddIn
         public double Min { get; set; }
         public double Max { get; set; }
 
-        public ParameterDef() { }
+        //constructor for float
+        public Parameter(String name, String caption, String parameterType, double initial, double step)          
+        {
+            this.Name = name;
+            this.Caption = caption;
+            this.ParameterType = parameterType;
+            this.Initial = initial;
+            this.Step = step;
+        }
 
-        public ParameterDef(String name, String caption, String parameterType, double initial,
-            double step, double min, double max){
+        //constructor for slider
+        public Parameter(String name, String caption, String parameterType, double initial,
+            double step, double min, double max)          
+        {
             this.Name = name;
             this.Caption = caption;
             this.ParameterType = parameterType;

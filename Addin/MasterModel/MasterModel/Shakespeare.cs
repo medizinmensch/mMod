@@ -10,15 +10,24 @@ using System.IO;
 
 namespace InvAddIn
 {
+    //TODO:
+    /*
+        - export interprete methods, can parameter be added outside of class when public?
+        - seperate between 2d and 3d entities. need two list for entities?
+        - use polygon for sketchPoints, write sketchPoint case
+    
+    
+     */
     public class Shakespeare
     {
         private List<String> listOfEntityNames = new List<string>();
         private List<String> listOfCodeLines = new List<string>();
         private List<Sketch> listOfSketches;
         private List<SketchLine> rectangleLines = new List<SketchLine>();
-        public List<Parameter> parameterList = new List<Parameter>();
+        public List<Parameter> listOfParameter = new List<Parameter>();
 
         private int numberOfSketches;
+        private bool sketchPoints = false;
 
         private static string desktopPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.Desktop);
         private static string jscadPath = desktopPath + "\\example.js";
@@ -56,6 +65,7 @@ namespace InvAddIn
                 {
                     InterpreteSketchEntity(sketchEntity);
                 }
+
             }
 
 
@@ -136,6 +146,7 @@ namespace InvAddIn
             else if (sketchEntity is SketchPoint)
             {
                 //do code
+                sketchPoints = true;
             }
 
             listOfEntityNames.Add(entityType + numberOfSketches);
@@ -145,7 +156,10 @@ namespace InvAddIn
 
         public void GenerateParameterFunction()
         {
-            listOfCodeLines.Add("function getParameter parameter in parameterList)
+            listOfCodeLines.Add("function getParameterDefinitions() {");
+            listOfCodeLines.Add("\treturn [");
+
+            foreach (Parameter parameter in listOfParameter)
             {
                 listOfCodeLines.Add(parameter.GetParameterString() + ",");
             }
@@ -215,9 +229,9 @@ namespace InvAddIn
             Parameter param2 = new Parameter(xCoordinate, "X-Coordinate of " + entityName, "float", x, 0.1);
             Parameter param3 = new Parameter(yCoordinate, "Y-Coordinate of " + entityName, "float", y, 0.1);
             
-			parameterList.Add(param1);
-			parameterList.Add(param2);
-			parameterList.Add(param3);
+			listOfParameter.Add(param1);
+			listOfParameter.Add(param2);
+			listOfParameter.Add(param3);
 			
             string javaScriptVariable = "var " + entityName + " = CAG.circle ( " + 
                                         "{ center: [ params." + xCoordinate + ", params." + yCoordinate + "], " + 
