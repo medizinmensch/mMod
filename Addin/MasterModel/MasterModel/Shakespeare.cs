@@ -1,8 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Threading;
 using Inventor;
 using System.IO;
@@ -24,7 +23,7 @@ namespace InvAddIn
         private List<String> listOfCodeLines = new List<string>();
         private List<Sketch> listOfSketches;
         private List<SketchLine> rectangleLines = new List<SketchLine>();
-        public List<Parameter> listOfParameter = new List<Parameter>();
+        public static List<Parameter> ListOfParameter = new List<Parameter>();
 
         private int numberOfSketches;
         private bool sketchPoints = false;
@@ -32,8 +31,8 @@ namespace InvAddIn
         private static string desktopPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.Desktop);
         private static string jscadPath = desktopPath + "\\example.js";
 
-        //setting culture invariant so it prints 0.001 instead of german style: 0,001
-        CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
+
+        
 
         
 
@@ -43,6 +42,11 @@ namespace InvAddIn
         {
             //for testing purposes use desktop path, we can also use path chosen by user or path that directly saves the js-file into the web-app folder
             //jscadPath = savePathChosenByUser;
+
+            //clear everything at start
+            ListOfParameter.Clear();
+            listOfEntityNames.Clear();
+            listOfCodeLines.Clear();
 
             listOfSketches = masterModel.SketchyList;
             numberOfSketches = 1;
@@ -71,17 +75,20 @@ namespace InvAddIn
 
             //union all 2D Primitives
             listOfCodeLines.Add("");
-            listOfCodeLines.Add(union2DPrimitives());
+            listOfCodeLines.Add(UnionSketches());
             //put it into one var?
 
             //extrude 2D Primitive
-            extrude2DPrimitive("2DPrimitive", 10);
+            listOfCodeLines.Add(ExtrudeSketches("sketches", 10));
+
             //union 3D Primitives
 
 
             //return var
             listOfCodeLines.Add("");
-            listOfCodeLines.Add("\t" + "return 2DPrimitive;");
+            listOfCodeLines.Add("\t" + "return sketches;");
+            listOfCodeLines.Add("}");
+            listOfCodeLines.Add("");
 
 
 
@@ -112,25 +119,32 @@ namespace InvAddIn
         public void InterpreteSketchEntity(SketchEntity sketchEntity)
         {
             String entityType = "";
+            if (sketchEntity is SketchPoint)
+            {
+                //sketchPoints are just optional?
+                //skip it
+                //sketchPoints = true;
+                return;
+            }
             if (sketchEntity is SketchCircle)
             {
                 entityType = "circle";
-                listOfCodeLines.Add(exportCircle((SketchCircle) sketchEntity, entityType + numberOfSketches));
+                listOfCodeLines.Add(Exporter.ExportCircle((SketchCircle) sketchEntity, entityType + numberOfSketches));
             }
             else if (sketchEntity is SketchArc)
             {
                 entityType = "arc";
-                listOfCodeLines.Add(exportArc((SketchArc)sketchEntity, entityType + numberOfSketches));
+                listOfCodeLines.Add(Exporter.exportArc((SketchArc)sketchEntity, entityType + numberOfSketches));
             }
             else if (sketchEntity is SketchEllipse)
             {
                 entityType = "ellipse";
-                listOfCodeLines.Add(exportEllipseFull((SketchEllipse)sketchEntity, entityType + numberOfSketches));
+                listOfCodeLines.Add(Exporter.exportEllipseFull((SketchEllipse)sketchEntity, entityType + numberOfSketches));
             }
             else if (sketchEntity is SketchEllipticalArc)
             {
                 entityType = "ellipseArc";
-                listOfCodeLines.Add(exportEllipticalArc((SketchEllipticalArc)sketchEntity, entityType + numberOfSketches));
+                listOfCodeLines.Add(Exporter.exportEllipticalArc((SketchEllipticalArc)sketchEntity, entityType + numberOfSketches));
 
             }
             else if (sketchEntity is SketchLine)
@@ -140,13 +154,8 @@ namespace InvAddIn
                 if (rectangleLines.Count == 4)
                 {
                     entityType = "ellipseArc";
-                    listOfCodeLines.Add(exportRectangle(rectangleLines.ToArray(), entityType + numberOfSketches));
+                    listOfCodeLines.Add(Exporter.exportRectangle(rectangleLines.ToArray(), entityType + numberOfSketches));
                 }
-            }
-            else if (sketchEntity is SketchPoint)
-            {
-                //do code
-                sketchPoints = true;
             }
 
             listOfEntityNames.Add(entityType + numberOfSketches);
@@ -159,7 +168,7 @@ namespace InvAddIn
             listOfCodeLines.Add("function getParameterDefinitions() {");
             listOfCodeLines.Add("\treturn [");
 
-            foreach (Parameter parameter in listOfParameter)
+            foreach (Parameter parameter in ListOfParameter)
             {
                 listOfCodeLines.Add(parameter.GetParameterString() + ",");
             }
@@ -179,6 +188,10 @@ namespace InvAddIn
 
             using (StreamWriter outputFile = new StreamWriter(jscadPath, true))
             {
+                //setting culture invariant so it prints 0.001 instead of german style: 0,001
+                //System.Threading.Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
+                Thread.CurrentThread.CurrentCulture = new CultureInfo("de-DE");
+
                 foreach (var codeLine in listOfCodeLines)
                 {
                     outputFile.WriteLine(codeLine);
@@ -213,127 +226,22 @@ namespace InvAddIn
         	*/
         } //end of method WriteIntoJSFile
 
-        // Circle
-        public string exportCircle(SketchCircle circle, String entityName)
+
+
+        public string UnionSketches()
         {
-            double radius = circle.Radius;
-            double x = circle.CenterSketchPoint.Geometry.X;
-            double y = circle.CenterSketchPoint.Geometry.Y;
-
-            String varName = entityName + "_Radius";
-            String xCoordinate = entityName + "_CenterX";
-            String yCoordinate = entityName + "_CenterY";
-
-            //create parameter
-            Parameter param1 = new Parameter(varName, "radius of " + entityName, "float", radius, 0.1);
-            Parameter param2 = new Parameter(xCoordinate, "X-Coordinate of " + entityName, "float", x, 0.1);
-            Parameter param3 = new Parameter(yCoordinate, "Y-Coordinate of " + entityName, "float", y, 0.1);
-            
-			listOfParameter.Add(param1);
-			listOfParameter.Add(param2);
-			listOfParameter.Add(param3);
-			
-            string javaScriptVariable = "var " + entityName + " = CAG.circle ( " + 
-                                        "{ center: [ params." + xCoordinate + ", params." + yCoordinate + "], " + 
-                                        "radius: params." + varName + " " + 
-                                        "} );"
-
-            return ("\t" + javaScriptVariable);
-        }
-
-        // Rectangle
-        public string exportRectangle(SketchLine[] lines, String entityName)
-        {
-            double side1 = lines[0].Length;
-            double side2 = lines[1].Length;
-
-            if (side1 == side2)
-            {
-                side2 = lines[3].Length;
-            }
-
-            String name1 = entityName + "= CSG.cube({radius: [params." + name1 +
-                ", params." + name2 + ", 0]});");
-        }
-
-        // Arc
-        public string exportArc(SketchArc arc, String entityName)
-        {
-            double centerX = arc.CenterSketchPoint.Geometry.X;
-            double centerY = arc.CenterSketchPoint.Geometry.Y;
-
-            double radius = arc.Radius;
-
-            String nameCenterX = entityName + "= CSG.Path2D.arc({center: [params." + nameCenterX +
-                    ", params." + nameCenterY + ",0], radius: params." + nameRadius +
-                    ", startangle: 0,  endangle: 180}).close().innerToCAG();");
-        }
-
-        // Ellipsefull
-        public string exportEllipseFull(SketchEllipse ellipsefull, String entityName)
-        {
-            double majorradius = ellipsefull.MajorRadius;
-            double minorradius = ellipsefull.MinorRadius;
-
-            String nameMajor = entityName + "= scale([params." + nameMajor + ", params." +
-                        nameMinor + "],circle(params." + nameMinor + "));");
-        }
-
-        // SPLines
-        public string exportSpline(SketchSpline spline)
-        {
-            double startX = spline.StartSketchPoint.Geometry.X;
-            double startY = spline.StartSketchPoint.Geometry.Y;
-
-            double endX = spline.EndSketchPoint.Geometry.X;
-            double endY = spline.EndSketchPoint.Geometry.Y;
-
-            return "blabla";
-        }
-
-        // EllipticalArc
-        public string exportEllipticalArc(SketchEllipticalArc ellipticalarc, String entityName)
-        {
-            double centerX = ellipticalarc.CenterSketchPoint.Geometry.X;
-            double centerY = ellipticalarc.CenterSketchPoint.Geometry.Y;
-
-            double startAngle = ellipticalarc.StartAngle * (180 / Math.PI);
-            double sweepAngle = ellipticalarc.SweepAngle * (180 / Math.PI);
-
-            double startX = ellipticalarc.StartSketchPoint.Geometry.X;
-            double startY = ellipticalarc.StartSketchPoint.Geometry.Y;
-
-            double majorradius = ellipticalarc.MajorRadius;
-            double minorradius = ellipticalarc.MinorRadius;
-
-            double radius = (majorradius / 2) / Math.Cos(sweepAngle);
-
-            String nameRadius = entityName + "= CSG.Path2D.arc({center: [0,0,0]," +
-                    "radius: params." + nameRadius + ", startangle: params." +
-                    nameStartAngle + ", endangle: params." + nameSweepAngle + "}).close().innerToCAG();");
-        }
-
-        // Circle - Probe
-        public string exportCircle()
-        {
-            double radius = 3.5;
-            return "blabla";
-            /*
-			using (StreamWriter outputFile = new StreamWriter(jscadPath, true))
-			{
-				outputFile.WriteLine("function main(){");
-				outputFile.WriteLine("return ");
-				outputFile.WriteLine("circle({r: " + radius.ToString().Replace(",", ".") + "});");
-			}
-			*/
-        }
-
-        public string union2DPrimitives() 
-        {
-            string unionLine = "var 2DPrimitive = union( ";
+            var lastEntity = listOfEntityNames.Last();
+            string unionLine = "\t" + "var sketches = union(";
             foreach (var entityName in listOfEntityNames) 
             {
-                unionLine += entityName + ", ";
+                if (entityName == lastEntity)
+                {
+                    unionLine += entityName;
+                }
+                else
+                {
+                    unionLine += entityName + ", ";
+                }
             }
             unionLine += ");";
 
@@ -341,9 +249,9 @@ namespace InvAddIn
         }
 
 
-        public string extrude2DPrimitive(string varName, int height) 
+        public string ExtrudeSketches(string varName, int height) 
         {
-            string extrusion = varName " = " + varName + ".extrude({ offset: [0,0," + height + "] })";
+            string extrusion = "\t" + varName + " = " + varName + ".extrude({ offset: [0,0," + height + "] });";
             return extrusion;
 
         }

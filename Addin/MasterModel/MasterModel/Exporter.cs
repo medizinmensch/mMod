@@ -1,5 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Threading;
 using Inventor;
+using System.IO;
 
 
 namespace InvAddIn
@@ -7,145 +12,116 @@ namespace InvAddIn
 	public static class Exporter
 	{
 
-		// Circle
-		public static string exportCircle(SketchCircle circle, String varname)
-		{
-			double radius = circle.Radius;
-			double x = circle.CenterSketchPoint.Geometry.X;
-			double y = circle.CenterSketchPoint.Geometry.Y;
-			
-			return ("var " + varname + "= CAG.circle({center: [params." + varname + "CenterX, params." + varname + "CenterY], radius: params." + varname + "Radius });");       
-		}
+        // Circle (finished)
+        public static string ExportCircle(SketchCircle circle, String entityName)
+        {
+            double radius = circle.Radius;
+            double x = circle.CenterSketchPoint.Geometry.X;
+            double y = circle.CenterSketchPoint.Geometry.Y;
 
-		// Rectangle
-		public static string exportRectangle(SketchLine[] lines, String varname)
-		{          
-			double side1 = lines[0].Length;
-			double side2 = lines[1].Length;
+            String varName = entityName + "_Radius";
+            String xCoordinate = entityName + "_CenterX";
+            String yCoordinate = entityName + "_CenterY";
 
-			if(side1 == side2)
-			{
-				side2 = lines[3].Length;
-			}
+            //create parameter
+            Parameter param1 = new Parameter(varName, "radius of " + entityName, "float", radius, 0.1);
+            Parameter param2 = new Parameter(xCoordinate, "X-Coordinate of " + entityName, "float", x, 0.1);
+            Parameter param3 = new Parameter(yCoordinate, "Y-Coordinate of " + entityName, "float", y, 0.1);
 
-			String name1 = varname + "Side1";
-			String name2 = varname + "Side2";
-			ParameterDef param1 = new ParameterDef(name1, "Width of retangle", "float",
-				side1, 0.1, side1 - 10 < 0 ? 0 : side1 - 10, side1 + 10);
-			ParameterDef param2 = new ParameterDef(name2, "Length of retangle", "float",
-				side2, 0.1, side2 - 10 < 0 ? 0 : side2 - 10, side2 + 10);
-			/*
-			parameterList.Add(param1);
-			parameterList.Add(param2);
-			*/
-			return("var " + varname + "= CSG.cube({radius: [params." + name1 +
-				", params." + name2 + ", 0]});");
-		}
+            Shakespeare.ListOfParameter.Add(param1);
+            Shakespeare.ListOfParameter.Add(param2);
+            Shakespeare.ListOfParameter.Add(param3);
 
-		// Arc
-		public static string exportArc(SketchArc arc, String varname)
-		{
-			double centerX = arc.CenterSketchPoint.Geometry.X;
-			double centerY = arc.CenterSketchPoint.Geometry.Y;
+            string javaScriptVariable = "var " + entityName + " = CAG.circle ( " +
+                                        "{ center: [ params." + xCoordinate + ", params." + yCoordinate + "], " +
+                                        "radius: params." + varName + " " +
+                                        "} );";
 
-			double radius = arc.Radius;
+            return ("\t" + javaScriptVariable);
+        }
 
-			String nameCenterX = varname + "CenterX";
-			String nameCenterY = varname + "CenterY";
-			String nameRadius = varname + "Radius";
+        // Rectangle (todo)
+        public static string exportRectangle(SketchLine[] lines, String entityName)
+        {
+            double side1 = lines[0].Length;
+            double side2 = lines[1].Length;
 
-			ParameterDef param1 = new ParameterDef(nameCenterX, "Arc Center X", "float",
-				centerX, 0.1, centerX - 10 < 0 ? 0 : centerX - 10, centerX + 10);
-			ParameterDef param2 = new ParameterDef(nameCenterY, "Arc Center Y", "float",
-				centerY, 0.1, centerY - 10 < 0 ? 0 : centerY - 10, centerY + 10);
-			ParameterDef param3 = new ParameterDef(nameRadius, "Arc Radius", "float",
-				radius, 0.1, radius - 10 < 0 ? 0 : radius - 10, radius + 10);
-			/*
-			parameterList.Add(param1);
-			parameterList.Add(param2);
-			parameterList.Add(param3);
-			*/
-			return ("var " + varname + "= CSG.Path2D.arc({center: [params." + nameCenterX +
-					", params." + nameCenterY + ",0], radius: params." + nameRadius +
-					", startangle: 0,  endangle: 180}).close().innerToCAG();");
-		}
+            if (side1 == side2)
+            {
+                side2 = lines[3].Length;
+            }
 
-		// Ellipsefull
-		public static string exportEllipseFull(SketchEllipse ellipsefull, String varname)
-		{        
-			double majorradius = ellipsefull.MajorRadius;
-			double minorradius = ellipsefull.MinorRadius;
+            String creationString = entityName + "= CSG.cube({radius: [params." + side1 +
+                ", params." + side2 + ", 0]});";
+            return creationString;
+        }
 
-			String nameMajor = varname + "Majorradius";
-			String nameMinor = varname + "Minorradius";
+        // Arc (todo)
+        public static string exportArc(SketchArc arc, String entityName)
+        {
+            double centerX = arc.CenterSketchPoint.Geometry.X;
+            double centerY = arc.CenterSketchPoint.Geometry.Y;
 
-			ParameterDef param1 = new ParameterDef(nameMajor, "Ellipse major radius", "float",
-				majorradius, 0.1, majorradius - 10 < 0 ? 0 : majorradius - 10, majorradius + 10);
-			ParameterDef param2 = new ParameterDef(nameMinor, "Ellipse minor radius", "float",
-				minorradius, 0.1, minorradius - 10 < 0 ? 0 : minorradius - 10, minorradius + 10);
-			/*
-			parameterList.Add(param1);
-			parameterList.Add(param2);
-			*/
-			return ("var " + varname + "= scale([params." + nameMajor + ", params." +
-						nameMinor + "],circle(params." + nameMinor + "));");
-		}
+            double radius = arc.Radius;
 
-		// SPLines
-		public static string exportSpline(SketchSpline spline)
-		{
-			double startX = spline.StartSketchPoint.Geometry.X;
-			double startY = spline.StartSketchPoint.Geometry.Y;
+            String creationString = entityName + "= CSG.Path2D.arc({center: [params." + centerX +
+                    ", params." + centerY + ",0], radius: params." + radius +
+                    ", startangle: 0,  endangle: 180}).close().innerToCAG();";
+            return creationString;
+        }
 
-			double endX = spline.EndSketchPoint.Geometry.X;
-			double endY = spline.EndSketchPoint.Geometry.Y;
+        // Ellipsefull(todo)
+        public static string exportEllipseFull(SketchEllipse ellipsefull, String entityName)
+        {
+            double majorradius = ellipsefull.MajorRadius;
+            double minorradius = ellipsefull.MinorRadius;
 
-			return "blabla";
-		}
+            String creationString = entityName + "= scale([params." + majorradius + ", params." +
+                        minorradius + "],circle(params." + minorradius + "));";
+            return creationString;
+        }
 
-		// EllipticalArc
-		public static string exportEllipticalArc(SketchEllipticalArc ellipticalarc, String varname)
-		{
-			double centerX = ellipticalarc.CenterSketchPoint.Geometry.X;
-			double centerY = ellipticalarc.CenterSketchPoint.Geometry.Y;
+        // SPLines(todo)
+        public static string exportSpline(SketchSpline spline)
+        {
+            double startX = spline.StartSketchPoint.Geometry.X;
+            double startY = spline.StartSketchPoint.Geometry.Y;
 
-			double startAngle = ellipticalarc.StartAngle * (180 / Math.PI);
-			double sweepAngle = ellipticalarc.SweepAngle * (180 / Math.PI);
+            double endX = spline.EndSketchPoint.Geometry.X;
+            double endY = spline.EndSketchPoint.Geometry.Y;
 
-			double startX = ellipticalarc.StartSketchPoint.Geometry.X;
-			double startY = ellipticalarc.StartSketchPoint.Geometry.Y;
+            return "blabla";
+        }
 
-			double majorradius = ellipticalarc.MajorRadius;
-			double minorradius = ellipticalarc.MinorRadius;
+        // EllipticalArc(todo)
+        public static string exportEllipticalArc(SketchEllipticalArc ellipticalarc, String entityName)
+        {
+            double centerX = ellipticalarc.CenterSketchPoint.Geometry.X;
+            double centerY = ellipticalarc.CenterSketchPoint.Geometry.Y;
 
-			double radius = (majorradius / 2) / Math.Cos(sweepAngle);
+            double startAngle = ellipticalarc.StartAngle * (180 / Math.PI);
+            double sweepAngle = ellipticalarc.SweepAngle * (180 / Math.PI);
 
-			String nameRadius = varname + "Radius";
-			String nameStartAngle = varname + "StartAngle";
-			String nameSweepAngle = varname + "SweepAngle";
+            double startX = ellipticalarc.StartSketchPoint.Geometry.X;
+            double startY = ellipticalarc.StartSketchPoint.Geometry.Y;
 
-			ParameterDef param1 = new ParameterDef(nameRadius, "Ellipse arc radius", "float",
-				radius, 0.1, radius - 10 < 0 ? 0 : radius - 10, radius + 10);
-			ParameterDef param2 = new ParameterDef(nameStartAngle, "Ellipse arc start angle", "float",
-				startAngle, 0.1, startAngle - 10 < 0 ? 0 : startAngle - 10, startAngle + 10);
-			ParameterDef param3 = new ParameterDef(nameSweepAngle, "Ellipse arc sweep angle", "float",
-				sweepAngle, 0.1, sweepAngle - 10 < 0 ? 0 : sweepAngle - 10, sweepAngle + 10);
-			/*
-			parameterList.Add(param1);
-			parameterList.Add(param2);
-			parameterList.Add(param3);
-			*/
-			return ("var " + varname + "= CSG.Path2D.arc({center: [0,0,0]," +
-					"radius: params." + nameRadius + ", startangle: params." +
-					nameStartAngle + ", endangle: params." + nameSweepAngle + "}).close().innerToCAG();");
-		}
+            double majorradius = ellipticalarc.MajorRadius;
+            double minorradius = ellipticalarc.MinorRadius;
 
-		// Circle - Probe
-		public static string exportCircle()
-		{
-			double radius = 3.5;
-			return "blabla";
-			/*
+            double radius = (majorradius / 2) / Math.Cos(sweepAngle);
+
+            String creationString = entityName + "= CSG.Path2D.arc({center: [0,0,0]," +
+                    "radius: params." + radius + ", startangle: params." +
+                    startAngle + ", endangle: params." + sweepAngle + "}).close().innerToCAG();";
+            return creationString;
+        }
+
+        // Circle - Probe (needed?)
+        public static string ExportCircle()
+        {
+            double radius = 3.5;
+            return "blabla";
+            /*
 			using (StreamWriter outputFile = new StreamWriter(jscadPath, true))
 			{
 				outputFile.WriteLine("function main(){");
@@ -153,7 +129,13 @@ namespace InvAddIn
 				outputFile.WriteLine("circle({r: " + radius.ToString().Replace(",", ".") + "});");
 			}
 			*/
-		}
-	}
+        }
+
+        //polygon (todo)
+	    public static string ExportPolygon(List<SketchLine> listOfSketchLines, String entityName)
+	    {
+	        return "blabla";
+	    }
+    }
 }
 

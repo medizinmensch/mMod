@@ -29,18 +29,18 @@ namespace InvAddIn
             InventorDocument = inventorDocument;
         }
 
-        public List<ParameterDef> GetCustomParameters
+        public List<Parameter> GetCustomParameters
         {
             get
             {   
-                List<ParameterDef> toReturn = new List<ParameterDef>();
+                List<Parameter> toReturn = new List<Parameter>();
                 Parameters inventorParameters = InventorDocument.ComponentDefinition.Parameters;
                 for (int i = 1; i < inventorParameters.Count; i++)
                 {
                     if (inventorParameters[i].ParameterType == ParameterTypeEnum.kUserParameter)
                     {
-                        ParameterDef tmpParam =
-                            new ParameterDef
+                        Parameter tmpParam =
+                            new Parameter
                             {
                                 Name = inventorParameters[i].Name,
                                 Initial = inventorParameters[i]._Value,

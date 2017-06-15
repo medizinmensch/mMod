@@ -35,6 +35,8 @@ namespace InvAddIn
             this.Initial = initial;
             this.Step = step;
         }
+        
+        public Parameter() { }
 
         //constructor for slider
         public Parameter(String name, String caption, String parameterType, double initial,
@@ -58,22 +60,41 @@ namespace InvAddIn
             completeString += "name: '" + Name + "', ";
             completeString += "caption: '" + Caption + "', ";
             completeString += "type: '" + ParameterType + "', ";
-            completeString += "initial: '" + Initial + "', ";
+            completeString += "initial: '" + SubstituteCommaWithDot(Initial) + "', ";
             
             if(ParameterType == "float")
             {
-                completeString += "step: " + Step;
+                completeString += "step: " + SubstituteCommaWithDot(Step);
             }
 
             if(ParameterType == "slider") {
-                completeString += "step: " + Step + ", ";     
-                completeString += "max: " + Max + ", ";
-                completeString += "min: " + Min;               
+                completeString += "step: " + SubstituteCommaWithDot(Step) + ", ";     
+                completeString += "max: " + SubstituteCommaWithDot(Max) + ", ";
+                completeString += "min: " + SubstituteCommaWithDot(Min);               
             }
             completeString += " }";
 
             return completeString;
 
+        }
+
+        public string SubstituteCommaWithDot(double value)
+        {
+            string valueString = value.ToString();
+            string variable = "";
+
+            foreach (var character in valueString)
+            {
+                if (character == ',')
+                {
+                    variable += '.';
+                }
+                else
+                {
+                    variable += character;
+                }
+            }
+            return variable;
         }
     }
 
