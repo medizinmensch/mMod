@@ -57,7 +57,7 @@ namespace InvAddIn
                     string p1 = documentParameters[i].Name;
                     string p2 = documentParameters[i]._Value.ToString(CultureInfo.InvariantCulture);
                     string p3 = documentParameters[i].Comment;
-                    Parameter test = documentParameters[i];
+                    Inventor.Parameter test = documentParameters[i];
                     parameterList.Add(p1 + " - " + p2 + " - " + p3 + "\n");
                 }
                 catch (Exception e)

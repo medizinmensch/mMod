@@ -8,14 +8,14 @@ using System.IO;
 
 namespace InvAddIn
 {
-    public class ParameterDef
+    public class Parameter
     {
         //https://en.wikibooks.org/wiki/OpenJSCAD_Quick_Reference#Parameter_Types
 
         //essential parameters
         public string Name { get; set; }
         public string Caption { get; set; }
-        public string ParapeterType { get; set; }
+        public string ParameterType { get; set; }
 
         public double Initial { get; set; }
         public double Step { get; set; }
@@ -26,13 +26,25 @@ namespace InvAddIn
         public double Min { get; set; }
         public double Max { get; set; }
 
-        public ParameterDef() { }
-
-        public ParameterDef(String name, String caption, String parapeterType, double initial,
-            double step, double min, double max){
+        //constructor for float
+        public Parameter(String name, String caption, String parameterType, double initial, double step)          
+        {
             this.Name = name;
             this.Caption = caption;
-            this.ParapeterType = parapeterType;
+            this.ParameterType = parameterType;
+            this.Initial = initial;
+            this.Step = step;
+        }
+        
+        public Parameter() { }
+
+        //constructor for slider
+        public Parameter(String name, String caption, String parameterType, double initial,
+            double step, double min, double max)          
+        {
+            this.Name = name;
+            this.Caption = caption;
+            this.ParameterType = parameterType;
             this.Initial = initial;
             this.Step = step;
             this.Min = min;
@@ -42,28 +54,47 @@ namespace InvAddIn
 
         public string GetParameterString() {
 
-            string completeString = "";
+            string completeString = "\t\t";
 
             completeString += "{ ";
             completeString += "name: '" + Name + "', ";
             completeString += "caption: '" + Caption + "', ";
-            completeString += "ParapeterType: '" + ParapeterType + "', ";
-            completeString += "initial: '" + Initial + "', ";
+            completeString += "type: '" + ParameterType + "', ";
+            completeString += "initial: '" + SubstituteCommaWithDot(Initial) + "', ";
             
-            if(ParapeterType == "float")
+            if(ParameterType == "float")
             {
-                completeString += "step: " + Step;
+                completeString += "step: " + SubstituteCommaWithDot(Step);
             }
 
-            if(ParapeterType == "slider") {
-                completeString += "step: " + Step + ", ";     
-                completeString += "max: " + Max + ", ";
-                completeString += "min: " + Min;               
+            if(ParameterType == "slider") {
+                completeString += "step: " + SubstituteCommaWithDot(Step) + ", ";     
+                completeString += "max: " + SubstituteCommaWithDot(Max) + ", ";
+                completeString += "min: " + SubstituteCommaWithDot(Min);               
             }
             completeString += " }";
 
             return completeString;
 
+        }
+
+        public string SubstituteCommaWithDot(double value)
+        {
+            string valueString = value.ToString();
+            string variable = "";
+
+            foreach (var character in valueString)
+            {
+                if (character == ',')
+                {
+                    variable += '.';
+                }
+                else
+                {
+                    variable += character;
+                }
+            }
+            return variable;
         }
     }
 
