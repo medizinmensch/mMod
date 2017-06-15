@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using Inventor;
 
 namespace InvAddIn
 {
     public class MasterM
     {
-        public PartDocument InventorDocument { get; set; }
+        public PartDocument InventorDocument { get;}
         public List<Sketch> SketchyList
         {
             get
@@ -51,6 +52,26 @@ namespace InvAddIn
                     }
                 }
                 return toReturn;
+            }
+        }
+
+        public void Get3DModelInformation()
+        {
+            PartComponentDefinition partComponentDefinition = InventorDocument.ComponentDefinition;
+            foreach (PlanarSketch planarSketch in partComponentDefinition.Sketches)
+            {
+                foreach (Profile planarSketchProfile in planarSketch.Profiles)
+                {
+                    string a = "planarSketchProfile.Application: " + planarSketchProfile.Application + "\n";
+                    string b = "planarSketchProfile.AttributeSets: " + planarSketchProfile.AttributeSets + "\n";
+                    string c = "planarSketchProfile.Count: " + planarSketchProfile.Count + "\n";
+                    string d = "planarSketchProfile.Parent: " + planarSketchProfile.Parent + "\n";
+                    string e = "planarSketchProfile.RegionProperties: " + planarSketchProfile.RegionProperties + "\n";
+                    string f = "planarSketchProfile.Type: " + planarSketchProfile.Type + "\n";
+                    string g = "planarSketchProfile.Wires: " + planarSketchProfile.Wires+ "\n";
+
+                    MessageBox.Show(a + b + c + d + e + f + g);
+                }
             }
         }
 
