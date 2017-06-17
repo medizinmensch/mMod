@@ -9,27 +9,39 @@ using System.IO;
 
 namespace InvAddIn
 {
-    //TODO:
     /*
-        - export interprete methods, can parameter be added outside of class when public?
+        http://help.autodesk.com/view/INVNTOR/2018/ENU/?guid=GUID-311EC780-354E-4A58-9639-3E186755A498
+        https://en.wikibooks.org/wiki/OpenJSCAD_User_Guide
+
+        /TODO:
+        - export interprete methods, can parameter be added outside of class when public?   check
         - seperate between 2d and 3d entities. need two list for entities?
-        - use polygon for sketchPoints, write sketchPoint case
-    
+        - use polygon for SketchLine, write SketchLine case
+
+        hints, questions:
+        - do we need SketchPoint? at this time they get ignored and it works
+        - try out: in one sketch draw two different polylines and check sketch entities (sketchpoint as separation between?)
+            profile has information which entities belong to each other in one sketch
     
      */
     public class Shakespeare
     {
-        private List<String> listOfEntityNames = new List<string>();
+        //main lists
+        public static List<String> listOfEntityNames = new List<string>();
         private List<String> listOfCodeLines = new List<string>();
-        private List<Sketch> listOfSketches;
-        private List<SketchLine> rectangleLines = new List<SketchLine>();
         public static List<Parameter> ListOfParameter = new List<Parameter>();
+        private List<Sketch> listOfSketches;
 
-        private int numberOfSketches;
-        private bool sketchPoints = false;
+        //temporary lists
+        private List<SketchLine> listOfSketchLines = new List<SketchLine>();
+
+
+
+        public static int numberOfSketches;
+        private bool needToInterpreteSketchLine = false;
 
         private static string desktopPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.Desktop);
-        private static string jscadPath = desktopPath + "\\example.js";
+        private static string jscadPath = desktopPath + "\\example.jscad";
 
 
         
@@ -61,27 +73,21 @@ namespace InvAddIn
         {
             listOfCodeLines.Add("function main(params) {");
 
-            //create 2D Primitives
-            foreach (Sketch sketch in listOfSketches)
-            {
-                List<SketchEntity> sketchEntities = MasterM.GetSketchParts(sketch);
-                foreach (SketchEntity sketchEntity in sketchEntities)
-                {
-                    InterpreteSketchEntity(sketchEntity);
-                }
-
-            }
+            //interprete sketches
+            InterpreteSketches();
 
 
-            //union all 2D Primitives
+            //union all sketches
             listOfCodeLines.Add("");
             listOfCodeLines.Add(UnionSketches());
             //put it into one var?
 
-            //extrude 2D Primitive
+            //extrude sketches (need height here)
             listOfCodeLines.Add(ExtrudeSketches("sketches", 10));
 
-            //union 3D Primitives
+            //interprete 3d entities
+
+            //union 3d entities (also with extruded sketches)
 
 
             //return var
@@ -90,43 +96,49 @@ namespace InvAddIn
             listOfCodeLines.Add("}");
             listOfCodeLines.Add("");
 
+        } //end of method GenerateMainFunction
 
-
-            /*
-            double len = listOfEntityNames.Count();
-            int count = 0;
-            foreach (String name in listOfEntityNames)
+        public void InterpreteSketches() 
+        {
+            foreach (Sketch sketch in listOfSketches)
             {
-                if (count == len - 1)
+                List<SketchEntity> sketchEntities = MasterM.GetSketchParts(sketch);
+                foreach (SketchEntity sketchEntity in sketchEntities)
                 {
-                    listOfCodeLines.Add("\t" + name);
-                }
-                else
-                {
-                    listOfCodeLines.Add("\t" + name + ",");
+                    InterpreteSketchEntity(sketchEntity);
                 }
 
-                count++;
+                //interprete sketchLine list of one sketch
+                if (needToInterpreteSketchLine)
+                {
+                    listOfCodeLines.Add(Exporter.ExportPolygon(listOfSketchLines, numberOfSketches));
+                    needToInterpreteSketchLine = false;
+                    listOfSketchLines.Clear();
+                }
+
             }
 
-            listOfCodeLines.Add("\t" + "]; ");
-            listOfCodeLines.Add("}");
-            listOfCodeLines.Add("");
-            listOfCodeLines.Add("");
-            */
-        } //end of method GenerateMainFunction
+        }
 
         public void InterpreteSketchEntity(SketchEntity sketchEntity)
         {
+
             String entityType = "";
             if (sketchEntity is SketchPoint)
             {
                 //sketchPoints are just optional?
                 //skip it
-                //sketchPoints = true;
                 return;
             }
-            if (sketchEntity is SketchCircle)
+            else if (sketchEntity is SketchLine)
+            {
+                //get multiple sketchLine's, put them in list, when next element is different interprete all sketchlines
+                needToInterpreteSketchLine = true;
+                listOfSketchLines.Add((SketchLine) sketchEntity);
+                return;
+
+            }
+            else if (sketchEntity is SketchCircle)
             {
                 entityType = "circle";
                 listOfCodeLines.Add(Exporter.ExportCircle((SketchCircle) sketchEntity, entityType + numberOfSketches));
@@ -147,17 +159,6 @@ namespace InvAddIn
                 listOfCodeLines.Add(Exporter.exportEllipticalArc((SketchEllipticalArc)sketchEntity, entityType + numberOfSketches));
 
             }
-            else if (sketchEntity is SketchLine)
-            {
-                // Angenommen: Rectangle besteht aus 4 SketchLine
-                rectangleLines.Add((SketchLine)sketchEntity);
-                if (rectangleLines.Count == 4)
-                {
-                    entityType = "ellipseArc";
-                    listOfCodeLines.Add(Exporter.exportRectangle(rectangleLines.ToArray(), entityType + numberOfSketches));
-                }
-            }
-
             listOfEntityNames.Add(entityType + numberOfSketches);
             numberOfSketches++;
 
@@ -230,6 +231,11 @@ namespace InvAddIn
 
         public string UnionSketches()
         {
+            if (listOfEntityNames.Count <= 1)
+            {
+                return "";
+            }
+
             var lastEntity = listOfEntityNames.Last();
             string unionLine = "\t" + "var sketches = union(";
             foreach (var entityName in listOfEntityNames) 
@@ -246,7 +252,7 @@ namespace InvAddIn
             unionLine += ");";
 
             return unionLine;
-        }
+        } //end of method UnionSketches
 
 
         public string ExtrudeSketches(string varName, int height) 
@@ -254,6 +260,6 @@ namespace InvAddIn
             string extrusion = "\t" + varName + " = " + varName + ".extrude({ offset: [0,0," + height + "] });";
             return extrusion;
 
-        }
+        } //end of method ExtrudeSketches
     } //end of class Shakespeare
 } //end of namespace InvAddIn
