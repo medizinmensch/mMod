@@ -51,9 +51,21 @@ namespace InvAddIn
                 side2 = lines[3].Length;
             }
 
-            String creationString = entityName + "= CSG.cube({radius: [params." + side1 +
+            String length = entityName + "_Length";
+            String width = entityName + "_Width";
+
+            Parameter param1 = new Parameter(length, "Width of " + entityName, "float",
+               side1, 1);
+            Parameter param2 = new Parameter(width, "Length of " + entityName, "float",
+               side2, 1);
+
+            Shakespeare.ListOfParameter.Add(param1);
+            Shakespeare.ListOfParameter.Add(param2);
+
+            string javaScriptVariable = "var " + entityName + "= CSG.cube({radius: [params." + side1 +
                 ", params." + side2 + ", 0]});";
-            return creationString;
+
+            return ("\t" + javaScriptVariable);
         }
 
         // Arc (todo)
