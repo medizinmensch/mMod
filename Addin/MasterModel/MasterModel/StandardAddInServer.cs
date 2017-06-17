@@ -40,7 +40,7 @@ namespace MasterModel
         private UserInterfaceEvents m_userInterfaceEvents;
 
         // ribbon panel
-        RibbonPanel partSketchMasterRibbonPanel;
+        RibbonPanel partToolMasterRibbonPanel;
 
         //event handler delegates
         //to make changes in comandbar or enviroment ui
@@ -121,13 +121,13 @@ namespace MasterModel
 
                         //add buttons to toolbar
                         MasterCommander.Controls.AddButton(ButtON.ButtonDefinition, 0);
-
+                        
                         //Get the 2d sketch environment base object
-                        Inventor.Environment partSketchEnvironment;
-                        partSketchEnvironment = userInterfaceManager.Environments["PMxPartSkEnvironment"];
+                        Inventor.Environment partToolEnvironment;
+                        partToolEnvironment = userInterfaceManager.Environments["PMxPartSkEnvironment"];
 
-                        //make this command bar accessible in the panel menu for the 2d sketch environment.
-                        partSketchEnvironment.PanelBar.CommandBarList.Add(MasterCommander);
+                        //make this command bar accessible in the panel menu for the Tool environment.
+                        partToolEnvironment.PanelBar.CommandBarList.Add(MasterCommander);
                     }
                     //create the UI for ribbon interface
                     else
@@ -139,26 +139,27 @@ namespace MasterModel
                         Inventor.Ribbon partRibbon;
                         partRibbon = ribbons["Part"];
 
-                        //get the tabls associated with part ribbon
+                        //get the tabs associated with part ribbon
                         RibbonTabs ribbonTabs;
                         ribbonTabs = partRibbon.RibbonTabs;
 
-                        RibbonTab partSketchRibbonTab;
-                        partSketchRibbonTab = ribbonTabs["id_TabSketch"];
+                        //get the Tool tab
+                        RibbonTab partToolRibbonTab;
+                        partToolRibbonTab = ribbonTabs["id_TabTools"];
 
                         //create a new panel with the tab
                         RibbonPanels ribbonPanels;
-                        ribbonPanels = partSketchRibbonTab.RibbonPanels;
+                        ribbonPanels = partToolRibbonTab.RibbonPanels;
 
-                        partSketchMasterRibbonPanel = ribbonPanels.Add("Master Model", "MasterModel:StandardAddInServer:BenjaminBUTTONRibbonPanel", "{DB59D9A7-EE4C-434A-BB5A-F93E8866E872}", "", false);
+                        partToolMasterRibbonPanel = ribbonPanels.Add("Master Model", "MasterModel:StandardAddInServer:BenjaminBUTTONRibbonPanel", "{DB59D9A7-EE4C-434A-BB5A-F93E8866E872}", "", false);
 
                         //add controls to the MasterModel panel
-                        CommandControls partSketchMasterRibbonPanelCtrls;
-                        partSketchMasterRibbonPanelCtrls = partSketchMasterRibbonPanel.CommandControls;
+                        CommandControls partToolMasterRibbonPanelCtrls;
+                        partToolMasterRibbonPanelCtrls = partToolMasterRibbonPanel.CommandControls;
 
                         //add the buttons to the ribbon panel
                         CommandControl MasterMoRiPaCtrl;
-                        MasterMoRiPaCtrl = partSketchMasterRibbonPanelCtrls.AddButton(ButtON.ButtonDefinition, false, true, "", false);
+                        MasterMoRiPaCtrl = partToolMasterRibbonPanelCtrls.AddButton(ButtON.ButtonDefinition, false, true, "", false);
                     }
                 }
             }
@@ -293,12 +294,12 @@ namespace MasterModel
                 RibbonPanels ribbonPanels;
                 ribbonPanels = partSketchRibbonTab.RibbonPanels;
 
-                partSketchMasterRibbonPanel = ribbonPanels.Add("MasterModel", "MasterModel:StandardAddInServer:BenjaminBUTTONRibbonPanel",
+                partToolMasterRibbonPanel = ribbonPanels.Add("MasterModel", "MasterModel:StandardAddInServer:BenjaminBUTTONRibbonPanel",
                                                              "{DB59D9A7-EE4C-434A-BB5A-F93E8866E872}", "", false);
 
                 //add controls to the MasterModel panel
                 CommandControls partSketchMasterMoRiPaCtrl;
-                partSketchMasterMoRiPaCtrl = partSketchMasterRibbonPanel.CommandControls;
+                partSketchMasterMoRiPaCtrl = partToolMasterRibbonPanel.CommandControls;
 
                 //add the buttons to the ribbon panel
                 CommandControl MasterCommander;
