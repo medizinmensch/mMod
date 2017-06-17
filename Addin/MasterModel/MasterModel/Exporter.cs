@@ -39,36 +39,8 @@ namespace InvAddIn
 
             return ("\t" + javaScriptVariable);
         }
-        
-        // Rectangle (todo)
-        public static string exportRectangle(SketchLine[] lines, String entityName)
-        {
-            double side1 = lines[0].Length;
-            double side2 = lines[1].Length;
 
-            if (side1 == side2)
-            {
-                side2 = lines[3].Length;
-            }
-
-            String length = entityName + "_Length";
-            String width = entityName + "_Width";
-
-            Parameter param1 = new Parameter(length, "Width of " + entityName, "float",
-               side1, 1);
-            Parameter param2 = new Parameter(width, "Length of " + entityName, "float",
-               side2, 1);
-
-            Shakespeare.ListOfParameter.Add(param1);
-            Shakespeare.ListOfParameter.Add(param2);
-
-            string javaScriptVariable = "var " + entityName + "= CSG.cube({radius: [params." + side1 +
-                ", params." + side2 + ", 0]});";
-
-            return ("\t" + javaScriptVariable);
-        }
-
-        // Arc (todo)
+        // Arc (finished)
         public static string exportArc(SketchArc arc, String entityName)
         {
             double centerX = arc.CenterSketchPoint.Geometry.X;
@@ -76,33 +48,72 @@ namespace InvAddIn
 
             double radius = arc.Radius;
 
-            String creationString = entityName + "= CSG.Path2D.arc({center: [params." + centerX +
-                    ", params." + centerY + ",0], radius: params." + radius +
-                    ", startangle: 0,  endangle: 180}).close().innerToCAG();";
-            return creationString;
+            double startAngle = arc.StartAngle * (180 / Math.PI);
+            double sweepAngle = arc.SweepAngle * (180 / Math.PI);
+
+            String nameCenterX = entityName + "_CenterX";
+            String nameCenterY = entityName + "_CenterY";
+            String nameRadius = entityName + "_Radius";
+            String nameStartAngle = entityName + "_StartAngle";
+            String nameSweepAngle = entityName + "_SweepAngle";
+
+            Parameter param1 = new Parameter(nameCenterX, "Center X of " + entityName, "float",
+               centerX, 0.1);
+            Parameter param2 = new Parameter(nameCenterY, "Center Y of " + entityName, "float",
+               centerY, 0.1);
+            Parameter param3 = new Parameter(nameRadius, "Radius of " + entityName, "float",
+               radius, 0.1);
+            Parameter param4 = new Parameter(nameStartAngle, "Start angle of " + entityName, "float",
+               startAngle, 1, 0, 180);
+            Parameter param5 = new Parameter(nameSweepAngle, "Sweep angle of " + entityName, "float",
+               sweepAngle, 1, 0, 180);
+
+            Shakespeare.ListOfParameter.Add(param1);
+            Shakespeare.ListOfParameter.Add(param2);
+            Shakespeare.ListOfParameter.Add(param3);
+            Shakespeare.ListOfParameter.Add(param4);
+            Shakespeare.ListOfParameter.Add(param5);
+
+            string javaScriptVariable = "var " + entityName + "= CSG.Path2D.arc({center: [params." + nameCenterX +
+                    ", params." + nameCenterY + ",0], radius: params." + nameRadius +
+                    ", startangle: params." + nameStartAngle + ",  endangle: params." + nameSweepAngle + "}).close().innerToCAG();";
+
+            return ("\t" + javaScriptVariable);
         }
 
-        // Ellipsefull(todo)
+        // Ellipsefull (finished)
         public static string exportEllipseFull(SketchEllipse ellipsefull, String entityName)
         {
             double majorradius = ellipsefull.MajorRadius;
             double minorradius = ellipsefull.MinorRadius;
 
-            String creationString = entityName + "= scale([params." + majorradius + ", params." +
-                        minorradius + "],circle(params." + minorradius + "));";
-            return creationString;
-        }
+            double centerX = ellipsefull.CenterSketchPoint.Geometry.X;
+            double centerY = ellipsefull.CenterSketchPoint.Geometry.Y;
 
-        // SPLines(todo)
-        public static string exportSpline(SketchSpline spline)
-        {
-            double startX = spline.StartSketchPoint.Geometry.X;
-            double startY = spline.StartSketchPoint.Geometry.Y;
+            String nameMajor = entityName + "_MajorRadius";
+            String nameMinor = entityName + "_MinorRadius";
+            String nameCenterX = entityName + "_CenterX";
+            String nameCenterY = entityName + "_CenterY";
 
-            double endX = spline.EndSketchPoint.Geometry.X;
-            double endY = spline.EndSketchPoint.Geometry.Y;
+            Parameter param1 = new Parameter(nameMajor, "Major radius of " + entityName, "float",
+               majorradius, 0.1);
+            Parameter param2 = new Parameter(nameMinor, "Minor radius of " + entityName, "float",
+               minorradius, 0.1);
+            Parameter param3 = new Parameter(nameCenterX, "Center X of " + entityName, "float",
+               centerX, 0.1);
+            Parameter param4 = new Parameter(nameCenterY, "Center Y of " + entityName, "float",
+               centerY, 0.1);
 
-            return "blabla";
+            Shakespeare.ListOfParameter.Add(param1);
+            Shakespeare.ListOfParameter.Add(param2);
+            Shakespeare.ListOfParameter.Add(param3);
+            Shakespeare.ListOfParameter.Add(param4);
+
+            string javaScriptVariable = "var " + entityName + " = scale([params." + nameMajor + ", params." +
+                nameMinor + "], CAG.circle ({ center: [ params." + nameCenterX + ", params." + nameCenterY +
+                "], " + "radius: params." + nameMinor + "} )  );";
+             
+            return ("\t" + javaScriptVariable);
         }
 
         // EllipticalArc(todo)
@@ -114,33 +125,53 @@ namespace InvAddIn
             double startAngle = ellipticalarc.StartAngle * (180 / Math.PI);
             double sweepAngle = ellipticalarc.SweepAngle * (180 / Math.PI);
 
-            double startX = ellipticalarc.StartSketchPoint.Geometry.X;
-            double startY = ellipticalarc.StartSketchPoint.Geometry.Y;
-
             double majorradius = ellipticalarc.MajorRadius;
             double minorradius = ellipticalarc.MinorRadius;
 
             double radius = (majorradius / 2) / Math.Cos(sweepAngle);
 
-            String creationString = entityName + "= CSG.Path2D.arc({center: [0,0,0]," +
-                    "radius: params." + radius + ", startangle: params." +
-                    startAngle + ", endangle: params." + sweepAngle + "}).close().innerToCAG();";
-            return creationString;
-        }
+            String nameRadius = entityName + "_Radius";
+            String nameStartAngle = entityName + "_StartAngle";
+            String nameSweepAngle = entityName + "_SweepAngle";
+            String nameCenterX = entityName + "_CenterX";
+            String nameCenterY = entityName + "_CenterY";
 
-        // Circle - Probe (needed?)
-        public static string ExportCircle()
-        {
-            double radius = 3.5;
-            return "blabla";
-            /*
-			using (StreamWriter outputFile = new StreamWriter(jscadPath, true))
-			{
-				outputFile.WriteLine("function main(){");
-				outputFile.WriteLine("return ");
-				outputFile.WriteLine("circle({r: " + radius.ToString().Replace(",", ".") + "});");
-			}
-			*/
+            Parameter param1 = new Parameter(nameRadius, "Radius of " + entityName, "float",
+               radius, 0.1);
+            Parameter param2 = new Parameter(nameStartAngle, "Start angle of " + entityName, "float",
+               startAngle, 0.1);
+            Parameter param3 = new Parameter(nameSweepAngle, "Sweep angle of " + entityName, "float",
+               sweepAngle, 0.1);
+            Parameter param4 = new Parameter(nameCenterX, "Center X of " + entityName, "float",
+               centerX, 0.1);
+            Parameter param5 = new Parameter(nameCenterY, "Center Y of " + entityName, "float",
+               centerY, 0.1);
+
+            Shakespeare.ListOfParameter.Add(param1);
+            Shakespeare.ListOfParameter.Add(param2);
+            Shakespeare.ListOfParameter.Add(param3);
+            Shakespeare.ListOfParameter.Add(param4);
+            Shakespeare.ListOfParameter.Add(param5);
+
+            // das hier funktioniert nicht in jscad :/
+            // https://joostn.github.io/OpenJsCad/
+                  //var ellipsearc = CSG.Path2D.arc({
+                  //    center: [0, 0, 0], 
+                  // xradius: 5, 
+                  // yradius: 20, 
+                  // xaxisrotation: 100,
+                  // clockwise: true,
+                  //    large: false,
+                  //    resolution: 48,
+                  //    startangle: 0,  
+                  // endangle: 60
+                  //}).close().innerToCAG();
+
+            string javaScriptVariable = "var " + entityName + "= CSG.Path2D.arc({center: [0,0,0]," +
+                "radius: params." + nameRadius + ", startangle: params." +
+                nameStartAngle + ", endangle: params." + nameSweepAngle + "}).close().innerToCAG();";
+
+            return ("\t" + javaScriptVariable);
         }
 
         //polygon (todo)
@@ -153,7 +184,7 @@ namespace InvAddIn
             
             */
 
-            int length = listOfSketchLines.count();
+            int length = listOfSketchLines.Count();
             double tempX = 0;
             double tempY = 0;
 
@@ -200,9 +231,9 @@ namespace InvAddIn
             string javaScriptVariable = "var " + entityName + " = CAG.fromPoints ( [";
 
             //insert points: CAG.fromPoints([ [0,0],[5,0],[3,5],[0,5] ]);
-            for (int i = 0; i < xCoordinates.length; i++)
+            for (int i = 0; i < xCoordinates.Length; i++)
             {
-                if (i == xCoordinates.length-1)
+                if (i == xCoordinates.Length - 1)
                 {
                     javaScriptVariable += "[" + SubstituteCommaWithDot(xCoordinates[i]) + "," + SubstituteCommaWithDot(yCoordinates[i]) + "] ";
                 }
@@ -216,7 +247,7 @@ namespace InvAddIn
             return ("\t" + javaScriptVariable);
 	    }
 
-        public string SubstituteCommaWithDot(double value)
+        public static string SubstituteCommaWithDot(double value)
         {
             string valueString = value.ToString();
             string variable = "";

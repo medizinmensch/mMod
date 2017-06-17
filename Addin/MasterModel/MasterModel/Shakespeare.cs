@@ -42,7 +42,7 @@ namespace InvAddIn
         private bool needToInterpreteSketchLine = false;
 
         private static string desktopPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.Desktop);
-        private static string jscadPath = desktopPath + "\\example.js";
+        private static string jscadPath = desktopPath + "\\example.jscad";
 
 
         
@@ -115,17 +115,17 @@ namespace InvAddIn
 
         public void InterpreteSketchEntity(SketchEntity sketchEntity)
         {
+            String entityType = "";
+
             //does this work? 
-            if (sketchEntity != SketchLine && needToInterpreteSketchLine) 
+            if (!(sketchEntity is SketchLine) && needToInterpreteSketchLine) 
             {
-                listOfCodeLines.Add(Exporter.ExportPolygon(listOfSketchLines, "Polygon" + numberOfSketches));
+                entityType = "polygon";
+                listOfCodeLines.Add(Exporter.ExportPolygon(listOfSketchLines, entityType + numberOfSketches));
                 needToInterpreteSketchLine = false;
                 listOfSketchLines.Clear();
             }
-
-
-            String entityType = "";
-            if (sketchEntity is SketchPoint)
+            else if (sketchEntity is SketchPoint)
             {
                 //sketchPoints are just optional?
                 //skip it
@@ -159,16 +159,6 @@ namespace InvAddIn
                 entityType = "ellipseArc";
                 listOfCodeLines.Add(Exporter.exportEllipticalArc((SketchEllipticalArc)sketchEntity, entityType + numberOfSketches));
 
-            }
-            else if (sketchEntity is SketchLine)
-            {
-                // Angenommen: Rectangle besteht aus 4 SketchLine
-                rectangleLines.Add((SketchLine)sketchEntity);
-                if (rectangleLines.Count == 4)
-                {
-                    entityType = "ellipseArc";
-                    listOfCodeLines.Add(Exporter.exportRectangle(rectangleLines.ToArray(), entityType + numberOfSketches));
-                }
             }
 
             listOfEntityNames.Add(entityType + numberOfSketches);
