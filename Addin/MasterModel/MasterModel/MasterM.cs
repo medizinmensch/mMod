@@ -25,6 +25,8 @@ namespace InvAddIn
             }
         }
 
+        public List<string> NotImplementedTypes { get; } = new List<string>();
+
         public MasterM(PartDocument inventorDocument)
         {
             InventorDocument = inventorDocument;
@@ -55,24 +57,87 @@ namespace InvAddIn
             }
         }
 
-        public void Get3DModelInformation()
+
+        public List<ExtrudeFeature> GetExtrudeFeatures()
         {
             PartComponentDefinition partComponentDefinition = InventorDocument.ComponentDefinition;
-            foreach (PlanarSketch planarSketch in partComponentDefinition.Sketches)
-            {
-                foreach (Profile planarSketchProfile in planarSketch.Profiles)
-                {
-                    string a = "planarSketchProfile.Application: " + planarSketchProfile.Application + "\n";
-                    string b = "planarSketchProfile.AttributeSets: " + planarSketchProfile.AttributeSets + "\n";
-                    string c = "planarSketchProfile.Count: " + planarSketchProfile.Count + "\n";
-                    string d = "planarSketchProfile.Parent: " + planarSketchProfile.Parent + "\n";
-                    string e = "planarSketchProfile.RegionProperties: " + planarSketchProfile.RegionProperties + "\n";
-                    string f = "planarSketchProfile.Type: " + planarSketchProfile.Type + "\n";
-                    string g = "planarSketchProfile.Wires: " + planarSketchProfile.Wires+ "\n";
 
-                    MessageBox.Show(a + b + c + d + e + f + g);
+            //foreach (PartFeature partFeature in partComponentDefinition.Features)
+            //{
+            //    foreach (Inventor.Parameter partFeatureParameter in partFeature.Parameters)
+            //    {
+            //        MessageBox.Show(string.Join(", ", partFeature.Name, partFeature.ExtendedName,partFeatureParameter.Value, partFeatureParameter.Name, partFeatureParameter.ParameterType,partFeatureParameter.Expression));
+            //    }
+            //}
+
+            //partComponentDefinition.Features.ExtrudeFeatures.AddByToExtent(
+            //    partComponentDefinition.Sketches[1].Profiles[1], "30 In", PartFeatureOperationEnum.kJoinOperation);
+
+            partComponentDefinition.Features.ExtrudeFeatures.AddByDistanceExtent(
+                partComponentDefinition.Sketches[1].Profiles[1], "20 mm",
+                PartFeatureExtentDirectionEnum.kNegativeExtentDirection, PartFeatureOperationEnum.kNewBodyOperation);
+
+            List<ExtrudeFeature> toReturn = new List<ExtrudeFeature>();
+            
+            foreach (ExtrudeFeature extrudeFeature in partComponentDefinition.Features.ExtrudeFeatures)
+            {
+                toReturn.Add(extrudeFeature);
+                List<string> msg = new List<string>();
+                msg.Add(extrudeFeature.ExtendedName); //z.B. "Neuer Volumenkörper x 17mm"
+                msg.Add(extrudeFeature.Name); //z.B. "Extrusion1"
+                msg.Add(extrudeFeature.Profile.Type.ToString()); //enthält das Profil (Profil.Parent sollte die Skizze enthalten)
+                msg.Add(extrudeFeature.ExtentType.ToString()); // enthält die möglichen ExtentType typen. Z.B. kDistanceExtend, kThroughAllExtent, kFromToExtent, kToNextExtent. Wir gehen mal von kDistanceExtend aus - das ist das normale mit "17 mm" oder so.
+                msg.Add(extrudeFeature.Operation.ToString()); // z.B. kNewBodyOperation, kIntersectOperation, kCutOperation, kJoinOperation
+                msg.Add(extrudeFeature.Definition.IsTwoDirectional.ToString()); // bei der angabe 
+
+                foreach (Inventor.Parameter parameter in extrudeFeature.Parameters)
+                {
+                    msg.Add(parameter._Value.ToString());
                 }
+                //msg.Add(extrudeFeature.Definition.Extent.Distance.);
+
+                if (extrudeFeature.Definition.IsTwoDirectional)
+                {
+                    NotImplementedTypes.Add("extrudeFeature " + extrudeFeature.ExtendedName + ": IsTwoDirectional");
+                }
+                if (extrudeFeature.Profile.Count>1)
+                {
+                    NotImplementedTypes.Add("extrudeFeature " + extrudeFeature.ExtendedName + ": Only 1 Profile per Sketch");
+                }
+                if (extrudeFeature.Operation != PartFeatureOperationEnum.kNewBodyOperation)
+                {
+                    NotImplementedTypes.Add("extrudeFeature " + extrudeFeature.ExtendedName + ": only kNewBodyOperation allowed");
+                }
+                if (extrudeFeature.ExtentType != PartFeatureExtentEnum.kDistanceExtent)
+                {
+                    NotImplementedTypes.Add("extrudeFeature " + extrudeFeature.ExtendedName + ": only kDistanceExtent allowed");
+                }
+
+                MessageBox.Show(string.Join("\n", msg));
+
             }
+
+            return toReturn;
+
+
+            //foreach (PlanarSketch planarSketch in partComponentDefinition.Sketches)
+            //{
+            //    foreach (Profile planarSketchProfile in planarSketch.Profiles)
+            //    {
+            //        string b = "planarSketchProfile.AttributeSets.Type: " + planarSketchProfile.AttributeSets.Type + "\n";
+            //        string c = "planarSketchProfile.Count: " + planarSketchProfile.Count + "\n";
+            //        string d = "planarSketchProfile.Parent: " + planarSketchProfile.Parent.Type + "\n";
+            //        string e = "planarSketchProfile.RegionProperties: " + planarSketchProfile.RegionProperties.Type+ "\n";
+            //        string f = "planarSketchProfile.Type: " + planarSketchProfile.Type + "\n";
+            //        string g = "planarSketchProfile.Wires: " + planarSketchProfile.Wires.Type + "\n";
+
+            //        foreach (AttributeSet attributeSet in planarSketchProfile.AttributeSets)
+            //        {
+            //            attributeSet.
+            //        }
+            //        MessageBox.Show(b + c + d + e + f + g);
+            //    }
+            //}
         }
 
 

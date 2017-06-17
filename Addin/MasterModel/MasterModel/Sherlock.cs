@@ -26,7 +26,7 @@ namespace InvAddIn
 
 #if DEBUG
             ShowTestDialoges();
-            Partypart.Get3DModelInformation();
+            Partypart.GetExtrudeFeatures();
 #endif
         }
 
