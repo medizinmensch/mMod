@@ -144,7 +144,7 @@ namespace MasterModel
                         ribbonTabs = partRibbon.RibbonTabs;
 
                         RibbonTab partSketchRibbonTab;
-                        partSketchRibbonTab = ribbonTabs["id_TabSketch"];
+                        partSketchRibbonTab = ribbonTabs["id_TabTools"];
 
                         //create a new panel with the tab
                         RibbonPanels ribbonPanels;
