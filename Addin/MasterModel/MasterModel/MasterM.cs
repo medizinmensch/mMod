@@ -10,7 +10,7 @@ namespace InvAddIn
 {
     public class MasterM
     {
-        public PartDocument InventorDocument { get;}
+        public PartDocument InventorDocument { get; }
         public List<Sketch> SketchyList
         {
             get
@@ -35,7 +35,7 @@ namespace InvAddIn
         public List<Parameter> GetCustomParameters
         {
             get
-            {   
+            {
                 List<Parameter> toReturn = new List<Parameter>();
                 Parameters inventorParameters = InventorDocument.ComponentDefinition.Parameters;
                 for (int i = 1; i < inventorParameters.Count; i++)
@@ -58,27 +58,16 @@ namespace InvAddIn
         }
 
 
+        /// <summary>
+        /// Everything you need to know about Extrusions
+        /// </summary>
+        /// <returns>List of "ExtrudeFeature"s</returns>
         public List<ExtrudeFeature> GetExtrudeFeatures()
         {
             PartComponentDefinition partComponentDefinition = InventorDocument.ComponentDefinition;
 
-            //foreach (PartFeature partFeature in partComponentDefinition.Features)
-            //{
-            //    foreach (Inventor.Parameter partFeatureParameter in partFeature.Parameters)
-            //    {
-            //        MessageBox.Show(string.Join(", ", partFeature.Name, partFeature.ExtendedName,partFeatureParameter.Value, partFeatureParameter.Name, partFeatureParameter.ParameterType,partFeatureParameter.Expression));
-            //    }
-            //}
-
-            //partComponentDefinition.Features.ExtrudeFeatures.AddByToExtent(
-            //    partComponentDefinition.Sketches[1].Profiles[1], "30 In", PartFeatureOperationEnum.kJoinOperation);
-
-            partComponentDefinition.Features.ExtrudeFeatures.AddByDistanceExtent(
-                partComponentDefinition.Sketches[1].Profiles[1], "20 mm",
-                PartFeatureExtentDirectionEnum.kNegativeExtentDirection, PartFeatureOperationEnum.kNewBodyOperation);
-
             List<ExtrudeFeature> toReturn = new List<ExtrudeFeature>();
-            
+
             foreach (ExtrudeFeature extrudeFeature in partComponentDefinition.Features.ExtrudeFeatures)
             {
                 toReturn.Add(extrudeFeature);
@@ -88,29 +77,29 @@ namespace InvAddIn
                 msg.Add(extrudeFeature.Profile.Type.ToString()); //enthält das Profil (Profil.Parent sollte die Skizze enthalten)
                 msg.Add(extrudeFeature.ExtentType.ToString()); // enthält die möglichen ExtentType typen. Z.B. kDistanceExtend, kThroughAllExtent, kFromToExtent, kToNextExtent. Wir gehen mal von kDistanceExtend aus - das ist das normale mit "17 mm" oder so.
                 msg.Add(extrudeFeature.Operation.ToString()); // z.B. kNewBodyOperation, kIntersectOperation, kCutOperation, kJoinOperation
-                msg.Add(extrudeFeature.Definition.IsTwoDirectional.ToString()); // bei der angabe 
+                msg.Add(extrudeFeature.Definition.IsTwoDirectional.ToString()); // bei der angabe kannste abbrechen da die Extrusion in beide richtungen geht. Es sind generell auch asyncrone Bidirektionale Extrude operationen möglich, ich weiß allerdings noch nicht inwiefern uns dieses eNum uns darüber informationen gibt
 
                 foreach (Inventor.Parameter parameter in extrudeFeature.Parameters)
                 {
                     msg.Add(parameter._Value.ToString());
                 }
-                //msg.Add(extrudeFeature.Definition.Extent.Distance.);
+                //msg.Add(extrudeFeature.Definition.Extent.);
 
                 if (extrudeFeature.Definition.IsTwoDirectional)
                 {
-                    NotImplementedTypes.Add("extrudeFeature " + extrudeFeature.ExtendedName + ": IsTwoDirectional");
+                    NotImplementedTypes.Add("extrudeFeature " + extrudeFeature.Name + ": IsTwoDirectional");
                 }
-                if (extrudeFeature.Profile.Count>1)
+                if (extrudeFeature.Profile.Count > 1)
                 {
-                    NotImplementedTypes.Add("extrudeFeature " + extrudeFeature.ExtendedName + ": Only 1 Profile per Sketch");
+                    NotImplementedTypes.Add("extrudeFeature " + extrudeFeature.Name + ": Only 1 Profile per Sketch");
                 }
                 if (extrudeFeature.Operation != PartFeatureOperationEnum.kNewBodyOperation)
                 {
-                    NotImplementedTypes.Add("extrudeFeature " + extrudeFeature.ExtendedName + ": only kNewBodyOperation allowed");
+                    NotImplementedTypes.Add("extrudeFeature " + extrudeFeature.Name + ": only kNewBodyOperation allowed");
                 }
                 if (extrudeFeature.ExtentType != PartFeatureExtentEnum.kDistanceExtent)
                 {
-                    NotImplementedTypes.Add("extrudeFeature " + extrudeFeature.ExtendedName + ": only kDistanceExtent allowed");
+                    NotImplementedTypes.Add("extrudeFeature " + extrudeFeature.Name + ": only kDistanceExtent allowed");
                 }
 
                 MessageBox.Show(string.Join("\n", msg));
@@ -118,7 +107,6 @@ namespace InvAddIn
             }
 
             return toReturn;
-
 
             //foreach (PlanarSketch planarSketch in partComponentDefinition.Sketches)
             //{
@@ -138,6 +126,22 @@ namespace InvAddIn
             //        MessageBox.Show(b + c + d + e + f + g);
             //    }
             //}
+
+            //partComponentDefinition.Features.ExtrudeFeatures.AddByDistanceExtent(
+            //    partComponentDefinition.Sketches[1].Profiles[1], "20 mm",
+            //    PartFeatureExtentDirectionEnum.kNegativeExtentDirection, PartFeatureOperationEnum.kNewBodyOperation);
+
+
+            //foreach (PartFeature partFeature in partComponentDefinition.Features)
+            //{
+            //    foreach (Inventor.Parameter partFeatureParameter in partFeature.Parameters)
+            //    {
+            //        MessageBox.Show(string.Join(", ", partFeature.Name, partFeature.ExtendedName,partFeatureParameter.Value, partFeatureParameter.Name, partFeatureParameter.ParameterType,partFeatureParameter.Expression));
+            //    }
+            //}
+
+            //partComponentDefinition.Features.ExtrudeFeatures.AddByToExtent(
+            //    partComponentDefinition.Sketches[1].Profiles[1], "30 In", PartFeatureOperationEnum.kJoinOperation);
         }
 
 
