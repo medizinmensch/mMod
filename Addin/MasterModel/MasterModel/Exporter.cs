@@ -15,9 +15,9 @@ namespace InvAddIn
         // Circle (finished)
         public static string ExportCircle(SketchCircle circle, String entityName)
         {
-            double radius = circle.Radius;
-            double x = circle.CenterSketchPoint.Geometry.X;
-            double y = circle.CenterSketchPoint.Geometry.Y;
+            double radius = Math.Round(circle.Radius, 4);
+            double x = Math.Round(circle.CenterSketchPoint.Geometry.X, 4);
+            double y = Math.Round(circle.CenterSketchPoint.Geometry.Y, 4);
 
             String varName = entityName + "_Radius";
             String xCoordinate = entityName + "_CenterX";
@@ -175,7 +175,7 @@ namespace InvAddIn
         }
 
         //polygon (todo)
-	    public static string ExportPolygon(List<SketchLine> listOfSketchLines, String entityName)
+	    public static string ExportPolygon(List<SketchLine> listOfSketchLines, int numberOfSketches)
 	    {
             /*
             - create array of x and y coordinates?
@@ -184,56 +184,83 @@ namespace InvAddIn
             
             */
 
-            int length = listOfSketchLines.Count();
+	        int numberOfSketchesInExporter = numberOfSketches;
+	        string javaScriptVariable = "";
             double tempX = 0;
             double tempY = 0;
 
-            double[] xCoordinates = new double[length];
-            double[] yCoordinates = new double[length];
+            List<double> xCoordinates = new List<double>();
+            List<double> yCoordinates = new List<double>();
 
             int counter = 0;
-            bool notFirst = false;
+            bool first = true;
 
             foreach (var sketchLine in listOfSketchLines)
             {
-                //pseudocode:
-
-                //first time will be executed no matter what goes on
-                if (notFirst == false)
+                //first time will be executed, without comparing start and endpoint
+                if (first)
                 {
-                    xCoordinates[counter] = sketchLine.Geometry.StartPoint.X;
-                    yCoordinates[counter] = sketchLine.Geometry.StartPoint.Y;
+                    xCoordinates.Add(Math.Round(sketchLine.Geometry.StartPoint.X, 4));
+                    yCoordinates.Add(Math.Round(sketchLine.Geometry.StartPoint.Y, 4));
 
-                    tempX = sketchLine.Geometry.EndPoint.X;
-                    tempY = sketchLine.Geometry.EndPoint.Y;
-                    notFirst = true;
+                    tempX = Math.Round(sketchLine.Geometry.EndPoint.X, 4);
+                    tempY = Math.Round(sketchLine.Geometry.EndPoint.Y, 4);
+                    first = false;
                 }
-
-                //all other times, compare endpoints of last SketchLine with startpoint of new SketchLine
-                if (notFirst && tempX == sketchLine.Geometry.StartPoint.X && tempY == sketchLine.Geometry.StartPoint.Y) 
+                //compare endpoints of last SketchLine with startpoint of new SketchLine
+                else if (tempX == Math.Round(sketchLine.Geometry.StartPoint.X, 4) && tempY == Math.Round(sketchLine.Geometry.StartPoint.Y, 4)) 
                 {
-                    xCoordinates[counter] = sketchLine.Geometry.StartPoint.X;
-                    yCoordinates[counter] = sketchLine.Geometry.StartPoint.Y;
+                    xCoordinates.Add(Math.Round(sketchLine.Geometry.StartPoint.X, 4));
+                    yCoordinates.Add(Math.Round(sketchLine.Geometry.StartPoint.Y, 4));
 
-                    tempX = sketchLine.Geometry.EndPoint.X;
-                    tempY = sketchLine.Geometry.EndPoint.Y;
-                    
+                    tempX = Math.Round(sketchLine.Geometry.EndPoint.X, 4);
+                    tempY = Math.Round(sketchLine.Geometry.EndPoint.Y, 4);
+                    first = false;
+
                 }
                 else
                 {
-                    //error, destroy universe
-                    //throw error message
+                    //next line does not belong to "old system", create new polygon
+                    javaScriptVariable += CreatePolygonVariable(numberOfSketchesInExporter, xCoordinates, yCoordinates);
+                    javaScriptVariable += "\n\t";
+                    numberOfSketchesInExporter++;
+                    xCoordinates.Clear();
+                    yCoordinates.Clear();
+                    first = true;
+
+                    //add point of new polygon to lists
+                    xCoordinates.Add(Math.Round(sketchLine.Geometry.StartPoint.X, 4));
+                    yCoordinates.Add(Math.Round(sketchLine.Geometry.StartPoint.Y, 4));
+
+                    tempX = Math.Round(sketchLine.Geometry.EndPoint.X, 4);
+                    tempY = Math.Round(sketchLine.Geometry.EndPoint.Y, 4);
+
+
+                    //reset arrays
+
                 }
+                
                 counter++;
             }
 
+	        javaScriptVariable += CreatePolygonVariable(numberOfSketchesInExporter, xCoordinates, yCoordinates);
 
-            string javaScriptVariable = "var " + entityName + " = CAG.fromPoints ( [";
+            return ("\t" + javaScriptVariable);
+	    }
+
+	    private static string CreatePolygonVariable(int numberOfSketch, List<double> xCoordinates, List<double> yCoordinates)
+	    {
+            Shakespeare.listOfEntityNames.Add("polygon" + numberOfSketch);
+            Shakespeare.numberOfSketches++;
+
+
+            string javaScriptVariable = "var polygon" + numberOfSketch + " = CAG.fromPoints ( [";
 
             //insert points: CAG.fromPoints([ [0,0],[5,0],[3,5],[0,5] ]);
-            for (int i = 0; i < xCoordinates.Length; i++)
+
+            for (int i = 0; i < xCoordinates.Count; i++)
             {
-                if (i == xCoordinates.Length - 1)
+                if (i == xCoordinates.Count - 1)
                 {
                     javaScriptVariable += "[" + SubstituteCommaWithDot(xCoordinates[i]) + "," + SubstituteCommaWithDot(yCoordinates[i]) + "] ";
                 }
@@ -244,7 +271,7 @@ namespace InvAddIn
             }
             javaScriptVariable += "] );";
 
-            return ("\t" + javaScriptVariable);
+	        return javaScriptVariable;
 	    }
 
         public static string SubstituteCommaWithDot(double value)
