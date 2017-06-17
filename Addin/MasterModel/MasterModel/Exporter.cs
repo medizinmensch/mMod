@@ -64,9 +64,9 @@ namespace InvAddIn
             Parameter param3 = new Parameter(nameRadius, "Radius of " + entityName, "float",
                radius, 0.1);
             Parameter param4 = new Parameter(nameStartAngle, "Start angle of " + entityName, "float",
-               startAngle, 1, 0, 180);
+               startAngle, 1);
             Parameter param5 = new Parameter(nameSweepAngle, "Sweep angle of " + entityName, "float",
-               sweepAngle, 1, 0, 180);
+               sweepAngle, 1);
 
             Shakespeare.ListOfParameter.Add(param1);
             Shakespeare.ListOfParameter.Add(param2);
