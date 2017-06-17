@@ -27,18 +27,17 @@ namespace InvAddIn
     public class Shakespeare
     {
         //main lists
-        private List<String> listOfEntityNames = new List<string>();
+        public static List<String> listOfEntityNames = new List<string>();
         private List<String> listOfCodeLines = new List<string>();
         public static List<Parameter> ListOfParameter = new List<Parameter>();
         private List<Sketch> listOfSketches;
 
         //temporary lists
-        private List<SketchLine> rectangleLines = new List<SketchLine>();
         private List<SketchLine> listOfSketchLines = new List<SketchLine>();
 
 
 
-        private int numberOfSketches;
+        public static int numberOfSketches;
         private bool needToInterpreteSketchLine = false;
 
         private static string desktopPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.Desktop);
@@ -75,7 +74,7 @@ namespace InvAddIn
             listOfCodeLines.Add("function main(params) {");
 
             //interprete sketches
-            interpreteSketches();
+            InterpreteSketches();
 
 
             //union all sketches
@@ -99,7 +98,7 @@ namespace InvAddIn
 
         } //end of method GenerateMainFunction
 
-        public void interpreteSketches() 
+        public void InterpreteSketches() 
         {
             foreach (Sketch sketch in listOfSketches)
             {
@@ -109,20 +108,20 @@ namespace InvAddIn
                     InterpreteSketchEntity(sketchEntity);
                 }
 
+                //interprete sketchLine list of one sketch
+                if (needToInterpreteSketchLine)
+                {
+                    listOfCodeLines.Add(Exporter.ExportPolygon(listOfSketchLines, numberOfSketches));
+                    needToInterpreteSketchLine = false;
+                    listOfSketchLines.Clear();
+                }
+
             }
 
         }
 
         public void InterpreteSketchEntity(SketchEntity sketchEntity)
         {
-            //does this work? 
-            if (sketchEntity != SketchLine && needToInterpreteSketchLine) 
-            {
-                listOfCodeLines.Add(Exporter.ExportPolygon(listOfSketchLines, "Polygon" + numberOfSketches));
-                needToInterpreteSketchLine = false;
-                listOfSketchLines.Clear();
-            }
-
 
             String entityType = "";
             if (sketchEntity is SketchPoint)
@@ -160,6 +159,7 @@ namespace InvAddIn
                 listOfCodeLines.Add(Exporter.exportEllipticalArc((SketchEllipticalArc)sketchEntity, entityType + numberOfSketches));
 
             }
+            /*
             else if (sketchEntity is SketchLine)
             {
                 // Angenommen: Rectangle besteht aus 4 SketchLine
@@ -170,7 +170,7 @@ namespace InvAddIn
                     listOfCodeLines.Add(Exporter.exportRectangle(rectangleLines.ToArray(), entityType + numberOfSketches));
                 }
             }
-
+            */
             listOfEntityNames.Add(entityType + numberOfSketches);
             numberOfSketches++;
 
@@ -243,6 +243,11 @@ namespace InvAddIn
 
         public string UnionSketches()
         {
+            if (listOfEntityNames.Count <= 1)
+            {
+                return "";
+            }
+
             var lastEntity = listOfEntityNames.Last();
             string unionLine = "\t" + "var sketches = union(";
             foreach (var entityName in listOfEntityNames) 
