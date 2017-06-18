@@ -74,7 +74,7 @@ namespace InvAddIn
             Shakespeare.ListOfParameter.Add(param4);
             Shakespeare.ListOfParameter.Add(param5);
 
-            string javaScriptVariable = "var " + entityName + "= CSG.Path2D.arc({center: [params." + nameCenterX +
+            string javaScriptVariable = "var " + entityName + " = CSG.Path2D.arc({center: [params." + nameCenterX +
                     ", params." + nameCenterY + ",0], radius: params." + nameRadius +
                     ", startangle: params." + nameStartAngle + ",  endangle: params." + nameSweepAngle + "}).close().innerToCAG();";
 
@@ -174,15 +174,9 @@ namespace InvAddIn
             return ("\t" + javaScriptVariable);
         }
 
-        //polygon (todo)
-	    public static string ExportPolygon(List<SketchLine> listOfSketchLines, int numberOfSketches)
+        //polygon (finished)
+        public static string ExportPolygon(List<SketchLine> listOfSketchLines, int numberOfSketches)
 	    {
-            /*
-            - create array of x and y coordinates?
-            - check if endpoint of last line is same then startpoint of next line
-            - 
-            
-            */
 
 	        int numberOfSketchesInExporter = numberOfSketches;
 	        string javaScriptVariable = "";
@@ -224,6 +218,8 @@ namespace InvAddIn
                     javaScriptVariable += CreatePolygonVariable(numberOfSketchesInExporter, xCoordinates, yCoordinates);
                     javaScriptVariable += "\n\t";
                     numberOfSketchesInExporter++;
+
+                    //reset arrays
                     xCoordinates.Clear();
                     yCoordinates.Clear();
                     first = true;
@@ -236,7 +232,7 @@ namespace InvAddIn
                     tempY = Math.Round(sketchLine.Geometry.EndPoint.Y, 4);
 
 
-                    //reset arrays
+
 
                 }
                 

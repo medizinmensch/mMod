@@ -128,7 +128,7 @@
     </PreBuildEvent>
     <PostBuildEvent>call "%25VS140COMNTOOLS%25vsvars32"
 			mt.exe -manifest "$(ProjectDir)MasterModel.X.manifest" -outputresource:"$(TargetPath)";#2
-			XCopy /y "$(TargetPath)" "C:\ProgramData\Autodesk\Inventor 2017\Addins\MasterModel\"
+			XCopy /y "$(TargetPath)" "C:\ProgramData\Autodesk\Inventor 2018\Addins\MasterModel\"
 		    XCopy /y "$(ProjectDir)*.addin" "C:\ProgramData\Autodesk\Inventor 2017\Addins\MasterModel\"   
 	</PostBuildEvent>
   </PropertyGroup>
