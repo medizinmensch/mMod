@@ -102,7 +102,7 @@ namespace InvAddIn
                     NotImplementedTypes.Add("extrudeFeature " + extrudeFeature.Name + ": only kDistanceExtent allowed");
                 }
 
-                MessageBox.Show(string.Join("\n", msg));
+                //MessageBox.Show(string.Join("\n", msg));
 
             }
 
