@@ -25,8 +25,8 @@ namespace InvAddIn
             Partypart = new MasterM(suspect);
 
 #if DEBUG
-            ShowTestDialoges();
-            Partypart.GetExtrudeFeatures();
+            //ShowTestDialoges();
+            //Partypart.GetExtrudeFeatures();
 #endif
         }
 
