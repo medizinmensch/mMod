@@ -15,19 +15,19 @@ namespace InvAddIn
         //essential parameters
         public string Name { get; set; }
         public string Caption { get; set; }
-        public string ParameterType { get; set; }
+        private string ParameterType { get; set; }
 
         public double Initial { get; set; }
-        public double Step { get; set; }
+        private double Step { get; set; }
 
         //optional parameters
 
         //when slider is used
-        public double Min { get; set; }
-        public double Max { get; set; }
+        private double Min { get; set; }
+        private double Max { get; set; }
 
         //constructor for float
-        public Parameter(String name, String caption, String parameterType, double initial, double step)          
+        public Parameter(string name, string caption, string parameterType, double initial, double step)          
         {
             this.Name = name;
             this.Caption = caption;
@@ -39,7 +39,7 @@ namespace InvAddIn
         public Parameter() { }
 
         //constructor for slider
-        public Parameter(String name, String caption, String parameterType, double initial,
+        public Parameter(string name, string caption, string parameterType, double initial,
             double step, double min, double max)          
         {
             this.Name = name;
@@ -78,7 +78,7 @@ namespace InvAddIn
 
         }
 
-        public string SubstituteCommaWithDot(double value)
+        private string SubstituteCommaWithDot(double value)
         {
             string valueString = value.ToString();
             string variable = "";

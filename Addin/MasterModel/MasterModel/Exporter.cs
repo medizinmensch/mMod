@@ -13,15 +13,15 @@ namespace InvAddIn
 	{
 
         // Circle (finished)
-        public static string ExportCircle(SketchCircle circle, String entityName)
+        public static string ExportCircle(SketchCircle circle, string entityName)
         {
             double radius = Math.Round(circle.Radius, 4);
             double x = Math.Round(circle.CenterSketchPoint.Geometry.X, 4);
             double y = Math.Round(circle.CenterSketchPoint.Geometry.Y, 4);
 
-            String varName = entityName + "_Radius";
-            String xCoordinate = entityName + "_CenterX";
-            String yCoordinate = entityName + "_CenterY";
+            string varName = entityName + "_Radius";
+            string xCoordinate = entityName + "_CenterX";
+            string yCoordinate = entityName + "_CenterY";
 
             //create parameter
             Parameter param1 = new Parameter(varName, "radius of " + entityName, "float", radius, 0.1);
@@ -41,7 +41,7 @@ namespace InvAddIn
         }
 
         // Arc (finished)
-        public static string exportArc(SketchArc arc, String entityName)
+        public static string ExportArc(SketchArc arc, string entityName)
         {
             double centerX = arc.CenterSketchPoint.Geometry.X;
             double centerY = arc.CenterSketchPoint.Geometry.Y;
@@ -51,11 +51,11 @@ namespace InvAddIn
             double startAngle = arc.StartAngle * (180 / Math.PI);
             double sweepAngle = arc.SweepAngle * (180 / Math.PI);
 
-            String nameCenterX = entityName + "_CenterX";
-            String nameCenterY = entityName + "_CenterY";
-            String nameRadius = entityName + "_Radius";
-            String nameStartAngle = entityName + "_StartAngle";
-            String nameSweepAngle = entityName + "_SweepAngle";
+            string nameCenterX = entityName + "_CenterX";
+            string nameCenterY = entityName + "_CenterY";
+            string nameRadius = entityName + "_Radius";
+            string nameStartAngle = entityName + "_StartAngle";
+            string nameSweepAngle = entityName + "_SweepAngle";
 
             Parameter param1 = new Parameter(nameCenterX, "Center X of " + entityName, "float",
                centerX, 0.1);
@@ -82,7 +82,7 @@ namespace InvAddIn
         }
 
         // Ellipsefull (finished)
-        public static string exportEllipseFull(SketchEllipse ellipsefull, String entityName)
+        public static string ExportEllipseFull(SketchEllipse ellipsefull, string entityName)
         {
             double majorradius = ellipsefull.MajorRadius;
             double minorradius = ellipsefull.MinorRadius;
@@ -90,10 +90,10 @@ namespace InvAddIn
             double centerX = ellipsefull.CenterSketchPoint.Geometry.X;
             double centerY = ellipsefull.CenterSketchPoint.Geometry.Y;
 
-            String nameMajor = entityName + "_MajorRadius";
-            String nameMinor = entityName + "_MinorRadius";
-            String nameCenterX = entityName + "_CenterX";
-            String nameCenterY = entityName + "_CenterY";
+            string nameMajor = entityName + "_MajorRadius";
+            string nameMinor = entityName + "_MinorRadius";
+            string nameCenterX = entityName + "_CenterX";
+            string nameCenterY = entityName + "_CenterY";
 
             Parameter param1 = new Parameter(nameMajor, "Major radius of " + entityName, "float",
                majorradius, 0.1);
@@ -117,7 +117,7 @@ namespace InvAddIn
         }
 
         // EllipticalArc(todo)
-        public static string exportEllipticalArc(SketchEllipticalArc ellipticalarc, String entityName)
+        public static string ExportEllipticalArc(SketchEllipticalArc ellipticalarc, string entityName)
         {
             double centerX = ellipticalarc.CenterSketchPoint.Geometry.X;
             double centerY = ellipticalarc.CenterSketchPoint.Geometry.Y;
@@ -130,11 +130,11 @@ namespace InvAddIn
 
             double radius = (majorradius / 2) / Math.Cos(sweepAngle);
 
-            String nameRadius = entityName + "_Radius";
-            String nameStartAngle = entityName + "_StartAngle";
-            String nameSweepAngle = entityName + "_SweepAngle";
-            String nameCenterX = entityName + "_CenterX";
-            String nameCenterY = entityName + "_CenterY";
+            string nameRadius = entityName + "_Radius";
+            string nameStartAngle = entityName + "_StartAngle";
+            string nameSweepAngle = entityName + "_SweepAngle";
+            string nameCenterX = entityName + "_CenterX";
+            string nameCenterY = entityName + "_CenterY";
 
             Parameter param1 = new Parameter(nameRadius, "Radius of " + entityName, "float",
                radius, 0.1);
@@ -251,7 +251,7 @@ namespace InvAddIn
 	    private static string CreatePolygonVariable(int numberOfSketch, List<double> xCoordinates, List<double> yCoordinates)
 	    {
             Shakespeare.listOfEntityNames.Add("polygon" + numberOfSketch);
-            Shakespeare.numberOfSketches++;
+            Shakespeare.NumberOfSketches++;
 
 
             string javaScriptVariable = "var polygon" + numberOfSketch + " = CAG.fromPoints ( [";
@@ -274,7 +274,7 @@ namespace InvAddIn
 	        return javaScriptVariable;
 	    }
 
-        public static string SubstituteCommaWithDot(double value)
+	    private static string SubstituteCommaWithDot(double value)
         {
             string valueString = value.ToString();
             string variable = "";
