@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using Inventor;
 using System.IO;
+using File = System.IO.File;
 
 
 namespace InvAddIn
@@ -53,7 +54,7 @@ namespace InvAddIn
         public Shakespeare(MasterM masterModel, string savePathChosenByUser)
         {
             //for testing purposes use desktop path, we can also use path chosen by user or path that directly saves the js-file into the web-app folder
-            //jscadPath = savePathChosenByUser;
+            jscadPath = savePathChosenByUser;
 
             //clear everything at start
             ListOfParameter.Clear();
@@ -186,6 +187,9 @@ namespace InvAddIn
         {
             //check for existing file
             //overwrite it? give hint? create copy?
+
+            if (File.Exists(jscadPath))
+                File.Delete(jscadPath);
 
             using (StreamWriter outputFile = new StreamWriter(jscadPath, true))
             {
