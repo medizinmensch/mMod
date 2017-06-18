@@ -41,7 +41,7 @@ namespace InvAddIn
         private bool needToInterpreteSketchLine = false;
 
         private static string desktopPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.Desktop);
-        private static string jscadPath = desktopPath + "\\example.jscad";
+        private static string jscadPath = desktopPath + "\\example.js";
 
 
         
