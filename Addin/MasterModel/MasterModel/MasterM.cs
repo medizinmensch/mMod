@@ -21,7 +21,6 @@ namespace InvAddIn
                     tmp.Add(sketchy);
                 }
                 return tmp;
-
             }
         }
 
@@ -110,6 +109,7 @@ namespace InvAddIn
 
             return toReturn;
 
+            #region old
             //foreach (PlanarSketch planarSketch in partComponentDefinition.Sketches)
             //{
             //    foreach (Profile planarSketchProfile in planarSketch.Profiles)
@@ -144,6 +144,9 @@ namespace InvAddIn
 
             //partComponentDefinition.Features.ExtrudeFeatures.AddByToExtent(
             //    partComponentDefinition.Sketches[1].Profiles[1], "30 In", PartFeatureOperationEnum.kJoinOperation);
+
+            #endregion
+
         }
 
 

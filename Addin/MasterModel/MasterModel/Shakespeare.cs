@@ -28,8 +28,8 @@ namespace InvAddIn
     public class Shakespeare
     {
         //main lists
-        public static List<string> listOfEntityNames = new List<string>();
-        private List<string> listOfCodeLines = new List<string>();
+        public static List<String> listOfEntityNames = new List<string>();
+        private List<String> listOfCodeLines = new List<string>();
         public static List<Parameter> ListOfParameter = new List<Parameter>();
         private List<Sketch> listOfSketches;
 
@@ -38,8 +38,8 @@ namespace InvAddIn
 
 
 
-        public static int NumberOfSketches;
-        private bool NeedToInterpreteSketchLine = false;
+        public static int numberOfSketches;
+        private bool needToInterpreteSketchLine = false;
 
         private static string desktopPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.Desktop);
         private static string jscadPath = desktopPath + "\\example.jscad";
@@ -62,7 +62,7 @@ namespace InvAddIn
             listOfCodeLines.Clear();
 
             listOfSketches = masterModel.SketchyList;
-            NumberOfSketches = 1;
+            numberOfSketches = 1;
 
             GenerateMainFunction();
             GenerateParameterFunction();
@@ -99,7 +99,7 @@ namespace InvAddIn
 
         } //end of method GenerateMainFunction
 
-        private void InterpreteSketches() 
+        public void InterpreteSketches() 
         {
             foreach (Sketch sketch in listOfSketches)
             {
@@ -110,10 +110,10 @@ namespace InvAddIn
                 }
 
                 //interprete sketchLine list of one sketch
-                if (NeedToInterpreteSketchLine)
+                if (needToInterpreteSketchLine)
                 {
-                    listOfCodeLines.Add(Exporter.ExportPolygon(listOfSketchLines, NumberOfSketches));
-                    NeedToInterpreteSketchLine = false;
+                    listOfCodeLines.Add(Exporter.ExportPolygon(listOfSketchLines, numberOfSketches));
+                    needToInterpreteSketchLine = false;
                     listOfSketchLines.Clear();
                 }
 
@@ -121,10 +121,10 @@ namespace InvAddIn
 
         }
 
-        private void InterpreteSketchEntity(SketchEntity sketchEntity)
+        public void InterpreteSketchEntity(SketchEntity sketchEntity)
         {
 
-            string entityType = "";
+            String entityType = "";
             if (sketchEntity is SketchPoint)
             {
                 //sketchPoints are just optional?
@@ -134,7 +134,7 @@ namespace InvAddIn
             else if (sketchEntity is SketchLine)
             {
                 //get multiple sketchLine's, put them in list, when next element is different interprete all sketchlines
-                NeedToInterpreteSketchLine = true;
+                needToInterpreteSketchLine = true;
                 listOfSketchLines.Add((SketchLine) sketchEntity);
                 return;
 
@@ -142,26 +142,26 @@ namespace InvAddIn
             else if (sketchEntity is SketchCircle)
             {
                 entityType = "circle";
-                listOfCodeLines.Add(Exporter.ExportCircle((SketchCircle) sketchEntity, entityType + NumberOfSketches));
+                listOfCodeLines.Add(Exporter.ExportCircle((SketchCircle) sketchEntity, entityType + numberOfSketches));
             }
             else if (sketchEntity is SketchArc)
             {
                 entityType = "arc";
-                listOfCodeLines.Add(Exporter.ExportArc((SketchArc)sketchEntity, entityType + NumberOfSketches));
+                listOfCodeLines.Add(Exporter.ExportArc((SketchArc)sketchEntity, entityType + numberOfSketches));
             }
             else if (sketchEntity is SketchEllipse)
             {
                 entityType = "ellipse";
-                listOfCodeLines.Add(Exporter.ExportEllipseFull((SketchEllipse)sketchEntity, entityType + NumberOfSketches));
+                listOfCodeLines.Add(Exporter.ExportEllipseFull((SketchEllipse)sketchEntity, entityType + numberOfSketches));
             }
             else if (sketchEntity is SketchEllipticalArc)
             {
                 entityType = "ellipseArc";
-                listOfCodeLines.Add(Exporter.ExportEllipticalArc((SketchEllipticalArc)sketchEntity, entityType + NumberOfSketches));
+                listOfCodeLines.Add(Exporter.ExportEllipticalArc((SketchEllipticalArc)sketchEntity, entityType + numberOfSketches));
 
             }
-            listOfEntityNames.Add(entityType + NumberOfSketches);
-            NumberOfSketches++;
+            listOfEntityNames.Add(entityType + numberOfSketches);
+            numberOfSketches++;
 
         } //end of method InterpreteSketchEntity
 
@@ -231,7 +231,9 @@ namespace InvAddIn
         	*/
         } //end of method WriteIntoJSFile
 
-        private string UnionSketches()
+
+
+        public string UnionSketches()
         {
             if (listOfEntityNames.Count <= 1)
             {
@@ -256,7 +258,8 @@ namespace InvAddIn
             return unionLine;
         } //end of method UnionSketches
 
-        private string ExtrudeSketches(string varName, int height) 
+
+        public string ExtrudeSketches(string varName, int height) 
         {
             string extrusion = "\t" + varName + " = " + varName + ".extrude({ offset: [0,0," + height + "] });";
             return extrusion;
