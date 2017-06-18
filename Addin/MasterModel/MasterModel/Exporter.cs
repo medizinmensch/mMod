@@ -247,7 +247,7 @@ namespace InvAddIn
 	    private static string CreatePolygonVariable(int numberOfSketch, List<double> xCoordinates, List<double> yCoordinates)
 	    {
             Shakespeare.listOfEntityNames.Add("polygon" + numberOfSketch);
-            Shakespeare.NumberOfSketches++;
+            Shakespeare.numberOfSketches++;
 
 
             string javaScriptVariable = "var polygon" + numberOfSketch + " = CAG.fromPoints ( [";

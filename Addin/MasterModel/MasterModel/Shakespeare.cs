@@ -202,33 +202,6 @@ namespace InvAddIn
                     outputFile.WriteLine(codeLine);
                 }
             }
-
-            /*
-                    using (outputFile = new StreamWriter(jscadPath, true))
-                    {
-                        outputFile.WriteLine(outputParamDef);
-
-                        outputFile.WriteLine("function main(params){");
-                        outputFile.WriteLine(outputMainFunction);
-
-                        outputFile.WriteLine("return [ ");
-                        double len = listOfEntityNames.Count();
-                        int count = 0;
-                        foreach(String name in listOfEntityNames)
-                        {
-                            if(count == len - 1)
-                            {
-                                outputFile.WriteLine(name);
-                            }else
-                            {
-                                outputFile.WriteLine(name + ",");
-                            }
-
-                            count++;
-                        }
-                        outputFile.WriteLine("]; ");
-                    }
-        	*/
         } //end of method WriteIntoJSFile
 
 
