@@ -26,19 +26,13 @@ namespace InvAddIn
             // assigned to Button SaveMe.
             SaveFileDialog saveFileDialog = new SaveFileDialog()
             {
-                Filter = "OpenJSCAD|*.jscad|txt file |*.txt",
-                Title = "Save as MasterModel"
+                Filter = "OpenJSCAD / JavaScript|*.js",
+                Title = "Save as MasterModel",
+                CheckPathExists = true
             };
 
-            saveFileDialog.ShowDialog();
-
-            // If the file name is not an empty string open it for saving.
-            if (saveFileDialog.FileName != "")
-            {
-                saveFileDialog.CheckFileExists = true;
-                saveFileDialog.CheckPathExists = true;
-                SherlockReader.ShowShakespeare(saveFileDialog.FileName);
-            }
+            if (saveFileDialog.ShowDialog() == DialogResult.OK && !string.IsNullOrEmpty(saveFileDialog.FileName))
+                    SherlockReader.ShowShakespeare(saveFileDialog.FileName);
 
         }
     }
