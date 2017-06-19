@@ -36,8 +36,8 @@ namespace InvAddIn
         //temporary lists
         private List<SketchLine> listOfSketchLines = new List<SketchLine>();
 
-
-
+        //setting culture to invariant so it prints 0.001 instead of german style: 0,001
+        CultureInfo myCultureInfo = new CultureInfo("en-GB");
         public static int numberOfSketches;
         private bool needToInterpreteSketchLine = false;
 
@@ -193,10 +193,6 @@ namespace InvAddIn
 
             using (StreamWriter outputFile = new StreamWriter(jscadPath, true))
             {
-                //setting culture invariant so it prints 0.001 instead of german style: 0,001
-                //System.Threading.Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
-                Thread.CurrentThread.CurrentCulture = new CultureInfo("de-DE");
-
                 foreach (var codeLine in listOfCodeLines)
                 {
                     outputFile.WriteLine(codeLine);

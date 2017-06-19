@@ -12,6 +12,9 @@ namespace InvAddIn
 	public static class Exporter
 	{
 
+        //setting culture to invariant so it prints 0.001 instead of german style: 0,001
+        static CultureInfo myCultureInfo = new CultureInfo("en-GB");
+
         // Circle (finished)
         public static string ExportCircle(SketchCircle circle, string entityName)
         {
@@ -258,11 +261,11 @@ namespace InvAddIn
             {
                 if (i == xCoordinates.Count - 1)
                 {
-                    javaScriptVariable += "[" + SubstituteCommaWithDot(xCoordinates[i]) + "," + SubstituteCommaWithDot(yCoordinates[i]) + "] ";
+                    javaScriptVariable += "[" + xCoordinates[i].ToString(myCultureInfo) + "," + yCoordinates[i].ToString(myCultureInfo) + "] ";
                 }
                 else
                 {
-                    javaScriptVariable += "[" + SubstituteCommaWithDot(xCoordinates[i]) + "," + SubstituteCommaWithDot(yCoordinates[i]) + "], ";
+                    javaScriptVariable += "[" + xCoordinates[i].ToString(myCultureInfo) + "," + yCoordinates[i].ToString(myCultureInfo) + "], ";
                 }
             }
             javaScriptVariable += "] );";
@@ -270,10 +273,12 @@ namespace InvAddIn
 	        return javaScriptVariable;
 	    }
 
+        //check if .toString method with cultureInfo works. if not use this method again
 	    private static string SubstituteCommaWithDot(double value)
         {
             string valueString = value.ToString();
             string variable = "";
+            value.ToString()
 
             foreach (var character in valueString)
             {
