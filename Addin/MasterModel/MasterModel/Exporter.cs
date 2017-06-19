@@ -278,7 +278,6 @@ namespace InvAddIn
         {
             string valueString = value.ToString();
             string variable = "";
-            value.ToString()
 
             foreach (var character in valueString)
             {

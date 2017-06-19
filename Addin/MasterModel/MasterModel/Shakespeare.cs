@@ -74,7 +74,7 @@ namespace InvAddIn
             listOfSketches = masterModel.SketchyList;
             listOfExtrusions = masterModel.GetExtrudeFeatures();
             numberOfSketchEntities = 1;
-            numberOfSketches = 1;
+            numberOfSketches = 0;
 
             GenerateMainFunction();
             GenerateParameterFunction();
@@ -86,7 +86,7 @@ namespace InvAddIn
         {
             listOfCodeLines.Add("function main(params) {");
 
-            interpreteExtrusions();
+            InterpreteExtrusions();
             listOfCodeLines.Add(unionAllExtrusion(endVar));
             //return 
             listOfCodeLines.Add("");
@@ -95,25 +95,27 @@ namespace InvAddIn
 
         } //end of method GenerateMainFunction
 
-        private void interpreteExtrusions()
+        private void InterpreteExtrusions()
         {
             foreach (var extrusion in listOfExtrusions)
             {
-                listOfCodeLines.Add("//Sketch" + numberOfSketches + ": ");
+                numberOfSketches++;
+                listOfCodeLines.Add("\t" + "//Sketch" + numberOfSketches + ": ");
                 //get Sketch
                 Sketch actualSketch = extrusion.Profile.Parent;
                 InterpreteSketch(actualSketch);
 
-                listOfCodeLines.Add("");
                 listOfCodeLines.Add(UnionSketch());
                 //extrude sketch (need height here)
-                listOfCodeLines.Add(ExtrudeSketch("extrusion" + numberOfSketches, 10));
+                //extrusion.Extent.Distance.Value;                  dont work?!
+                //extrusion.Definition.Extent.Distance.Value;       dont work?!
+                double distance = getDistance(extrusion);
+                listOfCodeLines.Add(ExtrudeSketch(distance));
                 listOfCodeLines.Add("");
 
                 listOfEntityNamesOfOneSketch.Clear();
-                numberOfSketches++;
             }
-        } //end of method interpreteExtrusions
+        } //end of method InterpreteExtrusions
 
         private void InterpreteSketch(Sketch actualSketch) 
         {
@@ -121,7 +123,6 @@ namespace InvAddIn
                 foreach (SketchEntity sketchEntity in sketchEntities)
                 {
                     InterpreteSketchEntity(sketchEntity);
-                    numberOfSketchEntities++;
                 }
 
                 //interprete sketchLine list of one sketch
@@ -174,7 +175,8 @@ namespace InvAddIn
 
             }
             listOfEntityNamesOfOneSketch.Add(entityType + numberOfSketchEntities);
-            
+            numberOfSketchEntities++;
+
 
         } //end of method InterpreteSketchEntity
 
@@ -215,56 +217,108 @@ namespace InvAddIn
 
         private string UnionSketch()
         {
-            if (listOfEntityNamesOfOneSketch.Count <= 1)
-            {
-                return "";
-            }
-
+            string unionLine = "\t" + "var sketch" + numberOfSketches + " = union(";
             var lastEntity = listOfEntityNamesOfOneSketch.Last();
-            string unionLine = "\t" + "var sketch" + numberOfSketches +  " = union(";
-            foreach (var entityName in listOfEntityNamesOfOneSketch) 
-            {
-                if (entityName == lastEntity)
-                {
-                    unionLine += entityName;
-                }
-                else
-                {
-                    unionLine += entityName + ", ";
-                }
-            }
-            unionLine += ");";
 
+            if (listOfEntityNamesOfOneSketch.Count == 0)
+            {
+                unionLine = "";
+            }
+            else if (listOfEntityNamesOfOneSketch.Count == 1)
+            {
+                unionLine = "\t" + "var sketch" + numberOfSketches + " = " + lastEntity + ";";
+            }
+            else
+            {
+                foreach (var entityName in listOfEntityNamesOfOneSketch)
+                {
+                    if (entityName == lastEntity)
+                    {
+                        unionLine += entityName;
+                    }
+                    else
+                    {
+                        unionLine += entityName + ", ";
+                    }
+                }
+                unionLine += ");";    
+            }
             return unionLine;
+
         } //end of method UnionSketch
 
 
-        private string ExtrudeSketch(string varName, int height) 
+        private string ExtrudeSketch(double height) 
         {
-            string extrusionLine = "\t" + varName + " = " + varName + ".extrude({ offset: [0,0," + height + "] });";
+            string extrusionLine = "\t" + "var extrusion" + numberOfSketches + " = sketch" + numberOfSketches + ".extrude({ offset: [0,0," + height.ToString(myCultureInfo) + "] });";
             return extrusionLine;
 
         } //end of method ExtrudeSketch
 
-        private string unionAllExtrusion(string varName) 
+        private string unionAllExtrusion(string varName)
         {
-            string extrusionLine = "\t" + "var " + varName + " = union(";
-            for (int i = 0; i < numberOfSketches; i++)
+            string extrusionLine = "";
+            if (numberOfSketches == 0)
             {
-                if (i == numberOfSketches-1)
+                extrusionLine = "";
+            }
+            else if (numberOfSketches == 1)
+            {
+                extrusionLine = "\t" + "var " + varName + " = extrusion" + numberOfSketches + "";
+            }
+            else
+            {
+                extrusionLine = "\t" + "var " + varName + " = union(";
+                for (int i = 1; i <= numberOfSketches; i++)
                 {
-                    extrusionLine += "extrusion" + i;
+                    if (i == numberOfSketches)
+                    {
+                        extrusionLine += "extrusion" + i;
+                    }
+                    else
+                    {
+                        extrusionLine += "extrusion" + i + ", ";
+                    }
+
                 }
-                else
-                {
-                    extrusionLine += "extrusion" + i + ", ";
-                }
+                extrusionLine += ");";
                 
             }
-            extrusionLine += ");";
             return extrusionLine;
 
         } //end of method unionAllExtrusion
 
+        private double getDistance(ExtrudeFeature extrusion)
+        {
+            //find out direction 20993 is one, 20994 is other direction
+            //if (extrusion.Extent.Direction == 20993)
+            //cant get it...
+
+            //current method to take a parameter out of the list which fits the best...
+            List<double> listOfParameters = new List<double>();
+            foreach (Inventor.Parameter parameter in extrusion.Parameters)
+            {
+                double temp;
+                Double.TryParse(parameter.Value.ToString(), out temp);
+                listOfParameters.Add(temp);
+            }
+
+            for (int i = 0; i < listOfParameters.Count; i++)
+            {
+                if (i==0)
+                {
+                    continue;
+                }
+                else if (listOfParameters[i] == 0.0)
+                {
+                    continue;
+                }
+                else
+                {
+                    return listOfParameters[i];
+                }
+            }
+            return 10;
+        }
     } //end of class Shakespeare
 } //end of namespace InvAddIn
