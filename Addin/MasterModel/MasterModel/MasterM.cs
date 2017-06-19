@@ -74,7 +74,7 @@ namespace InvAddIn
                 {
                     extrudeFeature.ExtendedName, //z.B. "Neuer Volumenkörper x 17mm"
                     extrudeFeature.Name, //z.B. "Extrusion1"
-                    extrudeFeature.Profile.Type.ToString(),//enthält das Profil (Profil.Parent sollte die Skizze enthalten)
+                    extrudeFeature.Profile.Type.ToString(),//enthält das Profil (Profile.Parent sollte die Skizze enthalten)
                     extrudeFeature.ExtentType.ToString(),// enthält die möglichen ExtentType typen. Z.B. kDistanceExtend, kThroughAllExtent, kFromToExtent, kToNextExtent. Wir gehen mal von kDistanceExtend aus - das ist das normale mit "17 mm" oder so.
                     extrudeFeature.Operation.ToString(),// z.B. kNewBodyOperation, kIntersectOperation, kCutOperation, kJoinOperation
                     extrudeFeature.Definition.IsTwoDirectional.ToString()// bei der angabe kannste abbrechen da die Extrusion in beide richtungen geht. Es sind generell auch asyncrone Bidirektionale Extrude operationen möglich, ich weiß allerdings noch nicht inwiefern uns dieses eNum uns darüber informationen gibt
