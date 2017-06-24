@@ -12,16 +12,19 @@ namespace InvAddIn
 	public static class Exporter
 	{
 
+        //setting culture to invariant so it prints 0.001 instead of german style: 0,001
+        static CultureInfo myCultureInfo = new CultureInfo("en-GB");
+
         // Circle (finished)
-        public static string ExportCircle(SketchCircle circle, String entityName)
+        public static string ExportCircle(SketchCircle circle, string entityName)
         {
             double radius = Math.Round(circle.Radius, 4);
             double x = Math.Round(circle.CenterSketchPoint.Geometry.X, 4);
             double y = Math.Round(circle.CenterSketchPoint.Geometry.Y, 4);
 
-            String varName = entityName + "_Radius";
-            String xCoordinate = entityName + "_CenterX";
-            String yCoordinate = entityName + "_CenterY";
+            string varName = entityName + "_Radius";
+            string xCoordinate = entityName + "_CenterX";
+            string yCoordinate = entityName + "_CenterY";
 
             //create parameter
             Parameter param1 = new Parameter(varName, "radius of " + entityName, "float", radius, 0.1);
@@ -41,7 +44,7 @@ namespace InvAddIn
         }
 
         // Arc (finished)
-        public static string exportArc(SketchArc arc, String entityName)
+        public static string ExportArc(SketchArc arc, string entityName)
         {
             double centerX = arc.CenterSketchPoint.Geometry.X;
             double centerY = arc.CenterSketchPoint.Geometry.Y;
@@ -51,11 +54,11 @@ namespace InvAddIn
             double startAngle = arc.StartAngle * (180 / Math.PI);
             double sweepAngle = arc.SweepAngle * (180 / Math.PI);
 
-            String nameCenterX = entityName + "_CenterX";
-            String nameCenterY = entityName + "_CenterY";
-            String nameRadius = entityName + "_Radius";
-            String nameStartAngle = entityName + "_StartAngle";
-            String nameSweepAngle = entityName + "_SweepAngle";
+            string nameCenterX = entityName + "_CenterX";
+            string nameCenterY = entityName + "_CenterY";
+            string nameRadius = entityName + "_Radius";
+            string nameStartAngle = entityName + "_StartAngle";
+            string nameSweepAngle = entityName + "_SweepAngle";
 
             Parameter param1 = new Parameter(nameCenterX, "Center X of " + entityName, "float",
                centerX, 0.1);
@@ -74,7 +77,7 @@ namespace InvAddIn
             Shakespeare.ListOfParameter.Add(param4);
             Shakespeare.ListOfParameter.Add(param5);
 
-            string javaScriptVariable = "var " + entityName + "= CSG.Path2D.arc({center: [params." + nameCenterX +
+            string javaScriptVariable = "var " + entityName + " = CSG.Path2D.arc({center: [params." + nameCenterX +
                     ", params." + nameCenterY + ",0], radius: params." + nameRadius +
                     ", startangle: params." + nameStartAngle + ",  endangle: params." + nameSweepAngle + "}).close().innerToCAG();";
 
@@ -82,7 +85,7 @@ namespace InvAddIn
         }
 
         // Ellipsefull (finished)
-        public static string exportEllipseFull(SketchEllipse ellipsefull, String entityName)
+        public static string ExportEllipseFull(SketchEllipse ellipsefull, string entityName)
         {
             double majorradius = ellipsefull.MajorRadius;
             double minorradius = ellipsefull.MinorRadius;
@@ -90,10 +93,10 @@ namespace InvAddIn
             double centerX = ellipsefull.CenterSketchPoint.Geometry.X;
             double centerY = ellipsefull.CenterSketchPoint.Geometry.Y;
 
-            String nameMajor = entityName + "_MajorRadius";
-            String nameMinor = entityName + "_MinorRadius";
-            String nameCenterX = entityName + "_CenterX";
-            String nameCenterY = entityName + "_CenterY";
+            string nameMajor = entityName + "_MajorRadius";
+            string nameMinor = entityName + "_MinorRadius";
+            string nameCenterX = entityName + "_CenterX";
+            string nameCenterY = entityName + "_CenterY";
 
             Parameter param1 = new Parameter(nameMajor, "Major radius of " + entityName, "float",
                majorradius, 0.1);
@@ -117,7 +120,7 @@ namespace InvAddIn
         }
 
         // EllipticalArc(todo)
-        public static string exportEllipticalArc(SketchEllipticalArc ellipticalarc, String entityName)
+        public static string ExportEllipticalArc(SketchEllipticalArc ellipticalarc, string entityName)
         {
             double centerX = ellipticalarc.CenterSketchPoint.Geometry.X;
             double centerY = ellipticalarc.CenterSketchPoint.Geometry.Y;
@@ -130,11 +133,11 @@ namespace InvAddIn
 
             double radius = (majorradius / 2) / Math.Cos(sweepAngle);
 
-            String nameRadius = entityName + "_Radius";
-            String nameStartAngle = entityName + "_StartAngle";
-            String nameSweepAngle = entityName + "_SweepAngle";
-            String nameCenterX = entityName + "_CenterX";
-            String nameCenterY = entityName + "_CenterY";
+            string nameRadius = entityName + "_Radius";
+            string nameStartAngle = entityName + "_StartAngle";
+            string nameSweepAngle = entityName + "_SweepAngle";
+            string nameCenterX = entityName + "_CenterX";
+            string nameCenterY = entityName + "_CenterY";
 
             Parameter param1 = new Parameter(nameRadius, "Radius of " + entityName, "float",
                radius, 0.1);
@@ -174,15 +177,9 @@ namespace InvAddIn
             return ("\t" + javaScriptVariable);
         }
 
-        //polygon (todo)
-	    public static string ExportPolygon(List<SketchLine> listOfSketchLines, int numberOfSketches)
+        //polygon (finished)
+        public static string ExportPolygon(List<SketchLine> listOfSketchLines, int numberOfSketches)
 	    {
-            /*
-            - create array of x and y coordinates?
-            - check if endpoint of last line is same then startpoint of next line
-            - 
-            
-            */
 
 	        int numberOfSketchesInExporter = numberOfSketches;
 	        string javaScriptVariable = "";
@@ -224,6 +221,8 @@ namespace InvAddIn
                     javaScriptVariable += CreatePolygonVariable(numberOfSketchesInExporter, xCoordinates, yCoordinates);
                     javaScriptVariable += "\n\t";
                     numberOfSketchesInExporter++;
+
+                    //reset arrays
                     xCoordinates.Clear();
                     yCoordinates.Clear();
                     first = true;
@@ -236,7 +235,7 @@ namespace InvAddIn
                     tempY = Math.Round(sketchLine.Geometry.EndPoint.Y, 4);
 
 
-                    //reset arrays
+
 
                 }
                 
@@ -262,11 +261,11 @@ namespace InvAddIn
             {
                 if (i == xCoordinates.Count - 1)
                 {
-                    javaScriptVariable += "[" + SubstituteCommaWithDot(xCoordinates[i]) + "," + SubstituteCommaWithDot(yCoordinates[i]) + "] ";
+                    javaScriptVariable += "[" + xCoordinates[i].ToString(myCultureInfo) + "," + yCoordinates[i].ToString(myCultureInfo) + "] ";
                 }
                 else
                 {
-                    javaScriptVariable += "[" + SubstituteCommaWithDot(xCoordinates[i]) + "," + SubstituteCommaWithDot(yCoordinates[i]) + "], ";
+                    javaScriptVariable += "[" + xCoordinates[i].ToString(myCultureInfo) + "," + yCoordinates[i].ToString(myCultureInfo) + "], ";
                 }
             }
             javaScriptVariable += "] );";
@@ -274,10 +273,12 @@ namespace InvAddIn
 	        return javaScriptVariable;
 	    }
 
-        public static string SubstituteCommaWithDot(double value)
+        //check if .toString method with cultureInfo works. if not use this method again
+	    private static string SubstituteCommaWithDot(double value)
         {
             string valueString = value.ToString();
             string variable = "";
+            value.ToString()
 
             foreach (var character in valueString)
             {

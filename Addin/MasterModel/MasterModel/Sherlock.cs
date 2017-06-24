@@ -24,8 +24,12 @@ namespace InvAddIn
         {
             Partypart = new MasterM(suspect);
 
+            WhatWhereWhy windowDialoge = new WhatWhereWhy(this);
+            windowDialoge.Show();
+
 #if DEBUG
-            ShowTestDialoges(); 
+            //ShowTestDialoges();
+            //Partypart.GetExtrudeFeatures();
 #endif
         }
 

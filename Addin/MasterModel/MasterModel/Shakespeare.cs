@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using Inventor;
 using System.IO;
+using File = System.IO.File;
 
 
 namespace InvAddIn
@@ -35,13 +36,13 @@ namespace InvAddIn
         //temporary lists
         private List<SketchLine> listOfSketchLines = new List<SketchLine>();
 
-
-
+        //setting culture to invariant so it prints 0.001 instead of german style: 0,001
+        CultureInfo myCultureInfo = new CultureInfo("en-GB");
         public static int numberOfSketches;
         private bool needToInterpreteSketchLine = false;
 
         private static string desktopPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.Desktop);
-        private static string jscadPath = desktopPath + "\\example.jscad";
+        private static string jscadPath = desktopPath + "\\example.js";
 
 
         
@@ -53,7 +54,7 @@ namespace InvAddIn
         public Shakespeare(MasterM masterModel, string savePathChosenByUser)
         {
             //for testing purposes use desktop path, we can also use path chosen by user or path that directly saves the js-file into the web-app folder
-            //jscadPath = savePathChosenByUser;
+            jscadPath = savePathChosenByUser;
 
             //clear everything at start
             ListOfParameter.Clear();
@@ -65,7 +66,7 @@ namespace InvAddIn
 
             GenerateMainFunction();
             GenerateParameterFunction();
-            WriteIntoJSFile();
+            WriteIntoJsFile();
 
         } //end of constructor 
 
@@ -146,17 +147,17 @@ namespace InvAddIn
             else if (sketchEntity is SketchArc)
             {
                 entityType = "arc";
-                listOfCodeLines.Add(Exporter.exportArc((SketchArc)sketchEntity, entityType + numberOfSketches));
+                listOfCodeLines.Add(Exporter.ExportArc((SketchArc)sketchEntity, entityType + numberOfSketches));
             }
             else if (sketchEntity is SketchEllipse)
             {
                 entityType = "ellipse";
-                listOfCodeLines.Add(Exporter.exportEllipseFull((SketchEllipse)sketchEntity, entityType + numberOfSketches));
+                listOfCodeLines.Add(Exporter.ExportEllipseFull((SketchEllipse)sketchEntity, entityType + numberOfSketches));
             }
             else if (sketchEntity is SketchEllipticalArc)
             {
                 entityType = "ellipseArc";
-                listOfCodeLines.Add(Exporter.exportEllipticalArc((SketchEllipticalArc)sketchEntity, entityType + numberOfSketches));
+                listOfCodeLines.Add(Exporter.ExportEllipticalArc((SketchEllipticalArc)sketchEntity, entityType + numberOfSketches));
 
             }
             listOfEntityNames.Add(entityType + numberOfSketches);
@@ -164,7 +165,7 @@ namespace InvAddIn
 
         } //end of method InterpreteSketchEntity
 
-        public void GenerateParameterFunction()
+        private void GenerateParameterFunction()
         {
             listOfCodeLines.Add("function getParameterDefinitions() {");
             listOfCodeLines.Add("\treturn [");
@@ -182,49 +183,21 @@ namespace InvAddIn
 
         } //end of method GenerateParameterFunction
 
-        public void WriteIntoJSFile()
+        private void WriteIntoJsFile()
         {
             //check for existing file
             //overwrite it? give hint? create copy?
 
+            if (File.Exists(jscadPath))
+                File.Delete(jscadPath);
+
             using (StreamWriter outputFile = new StreamWriter(jscadPath, true))
             {
-                //setting culture invariant so it prints 0.001 instead of german style: 0,001
-                //System.Threading.Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
-                Thread.CurrentThread.CurrentCulture = new CultureInfo("de-DE");
-
                 foreach (var codeLine in listOfCodeLines)
                 {
                     outputFile.WriteLine(codeLine);
                 }
             }
-
-            /*
-                    using (outputFile = new StreamWriter(jscadPath, true))
-                    {
-                        outputFile.WriteLine(outputParamDef);
-
-                        outputFile.WriteLine("function main(params){");
-                        outputFile.WriteLine(outputMainFunction);
-
-                        outputFile.WriteLine("return [ ");
-                        double len = listOfEntityNames.Count();
-                        int count = 0;
-                        foreach(String name in listOfEntityNames)
-                        {
-                            if(count == len - 1)
-                            {
-                                outputFile.WriteLine(name);
-                            }else
-                            {
-                                outputFile.WriteLine(name + ",");
-                            }
-
-                            count++;
-                        }
-                        outputFile.WriteLine("]; ");
-                    }
-        	*/
         } //end of method WriteIntoJSFile
 
 
