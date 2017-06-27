@@ -164,5 +164,21 @@ namespace InvAddIn
             }
             return sketchParts;
         }
+
+        public List<EmbossFeature> GetEmbossFeatures()
+        {
+            List<EmbossFeature> bossyFeatures = new List<EmbossFeature>();
+
+            if (InventorDocument.ComponentDefinition.Features.EmbossFeatures.Count > 0)
+            {
+               foreach (EmbossFeature boss in InventorDocument.ComponentDefinition.Features.EmbossFeatures)
+                {
+                    bossyFeatures.Add(boss);
+                    //EmbossFeature.Depth returns the parameter controlling the depth
+                } 
+            }
+            return bossyFeatures;
+
+        }
     }
 }
