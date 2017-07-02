@@ -175,6 +175,7 @@ namespace InvAddIn
                 {
                     bossyFeatures.Add(boss);
                     //EmbossFeature.Depth returns the parameter controlling the depth
+                    //EmbossFeature.parent returns the (text)sketch 
                 } 
             }
             return bossyFeatures;
