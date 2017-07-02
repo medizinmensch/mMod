@@ -70,21 +70,23 @@ namespace InvAddIn
             foreach (ExtrudeFeature extrudeFeature in partComponentDefinition.Features.ExtrudeFeatures)
             {
                 toReturn.Add(extrudeFeature);
-                List<string> msg = new List<string>
-                {
-                    extrudeFeature.ExtendedName, //z.B. "Neuer Volumenkörper x 17mm"
-                    extrudeFeature.Name, //z.B. "Extrusion1"
-                    extrudeFeature.Profile.Type.ToString(),//enthält das Profil (Profil.Parent sollte die Skizze enthalten)
-                    extrudeFeature.ExtentType.ToString(),// enthält die möglichen ExtentType typen. Z.B. kDistanceExtend, kThroughAllExtent, kFromToExtent, kToNextExtent. Wir gehen mal von kDistanceExtend aus - das ist das normale mit "17 mm" oder so.
-                    extrudeFeature.Operation.ToString(),// z.B. kNewBodyOperation, kIntersectOperation, kCutOperation, kJoinOperation
-                    extrudeFeature.Definition.IsTwoDirectional.ToString()// bei der angabe kannste abbrechen da die Extrusion in beide richtungen geht. Es sind generell auch asyncrone Bidirektionale Extrude operationen möglich, ich weiß allerdings noch nicht inwiefern uns dieses eNum uns darüber informationen gibt
-                };
 
-                foreach (Inventor.Parameter parameter in extrudeFeature.Parameters)
+                
+                if (extrudeFeature.ExtentType == PartFeatureExtentEnum.kDistanceExtent) //wir können nur Distance extend benutzen!
                 {
-                    msg.Add(parameter._Value.ToString());
+                    Inventor.Parameter param = (extrudeFeature.Definition.Extent as DistanceExtent).Distance; //Value vorbereiten und unten dann abreifen
+
+                    List<string> msg = new List<string>
+                    {
+                        extrudeFeature.ExtendedName, //z.B. "Neuer Volumenkörper x 17mm"
+                        extrudeFeature.Name, //z.B. "Extrusion1"
+                        extrudeFeature.Profile.Type.ToString(),//enthält das Profil (Profil.Parent sollte die Skizze enthalten)
+                        extrudeFeature.ExtentType.ToString(),// enthält die möglichen ExtentType typen. Z.B. kDistanceExtend, kThroughAllExtent, kFromToExtent, kToNextExtent. Wir gehen mal von kDistanceExtend aus - das ist das normale mit "17 mm" oder so.
+                        extrudeFeature.Operation.ToString(),// z.B. kNewBodyOperation, kIntersectOperation, kCutOperation, kJoinOperation
+                        extrudeFeature.Definition.IsTwoDirectional.ToString(),// bei der angabe kannste abbrechen da die Extrusion in beide richtungen geht. Es sind generell auch asyncrone Bidirektionale Extrude operationen möglich, ich weiß allerdings noch nicht inwiefern uns dieses eNum uns darüber informationen gibt
+                        param._Value.ToString() // ENDLICH! die Extrusion-Distance als double Value!
+                    };
                 }
-                //msg.Add(extrudeFeature.Definition.Extent.);
 
                 if (extrudeFeature.Definition.IsTwoDirectional)
                 {
@@ -102,8 +104,6 @@ namespace InvAddIn
                 {
                     NotImplementedTypes.Add("extrudeFeature " + extrudeFeature.Name + ": only kDistanceExtent allowed");
                 }
-
-                //MessageBox.Show(string.Join("\n", msg));
 
             }
 
