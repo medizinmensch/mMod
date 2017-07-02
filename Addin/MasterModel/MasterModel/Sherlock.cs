@@ -30,6 +30,7 @@ namespace InvAddIn
 #if DEBUG
             //ShowTestDialoges();
             //Partypart.GetExtrudeFeatures();
+            //List<RevolveFeature> toReturn = Partypart.GetRevolveFeatures();
 #endif
         }
 

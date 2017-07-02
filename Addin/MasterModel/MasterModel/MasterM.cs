@@ -181,5 +181,56 @@ namespace InvAddIn
             return bossyFeatures;
 
         }
+
+        public List<RevolveFeature> GetRevolveFeatures()
+        {
+            PartComponentDefinition partComponentDefinition = InventorDocument.ComponentDefinition;
+
+            List<RevolveFeature> toReturn = new List<RevolveFeature>();
+
+            foreach (RevolveFeature revolveFeature in partComponentDefinition.Features.RevolveFeatures)
+            {
+                toReturn.Add(revolveFeature);
+
+                //MessageBox.Show(revolveFeature.Parameters[revolveFeature.Parameters.Count].Value.ToString());
+                if (revolveFeature.ExtentType == PartFeatureExtentEnum.kFullSweepExtent) //wenn volle Rotation
+                {
+
+                    List<string> msg = new List<string>
+                    {
+                        revolveFeature.ExtendedName, //z.B. "Neue Rotation 45°"
+                        revolveFeature.Name, //z.B. "Umdrehung1"
+                        revolveFeature.Profile.Type.ToString(), //enthält das Profil (Profil.Parent sollte die Skizze enthalten)
+                        revolveFeature.ExtentType.ToString(), // enthält die möglichen ExtentType typen. Z.B. kAngleExtent oder kFullSweepExtent.
+                        revolveFeature.Operation.ToString(), // z.B. kNewBodyOperation, kIntersectOperation, kCutOperation, kJoinOperation
+                        revolveFeature.AxisEntity.ToString(), // gibt die Rotationsachse zurück
+                        "360" // Der Rotationswinkel
+                    };
+                }
+                if (revolveFeature.ExtentType == PartFeatureExtentEnum.kAngleExtent) //wenn drehung mit bestimmten Winkel
+                {
+                    double Rotationswinkel = 360 / (2 * Math.PI) * double.Parse(revolveFeature.Parameters[revolveFeature.Parameters.Count].Value.ToString());
+
+                    List<string> msg = new List<string>
+                    {
+                        revolveFeature.ExtendedName, //z.B. "Neue Rotation 45°"
+                        revolveFeature.Name, //z.B. "Umdrehung1"
+                        revolveFeature.Profile.Type.ToString(), //enthält das Profil (Profil.Parent sollte die Skizze enthalten)
+                        revolveFeature.ExtentType.ToString(), // enthält die möglichen ExtentType typen. Z.B. kAngleExtent oder kFullSweepExtent.
+                        revolveFeature.Operation.ToString(), // z.B. kNewBodyOperation, kIntersectOperation, kCutOperation, kJoinOperation
+                        revolveFeature.AxisEntity.ToString(), // gibt die Rotationsachse zurück
+                        revolveFeature.Parameters[revolveFeature.Parameters.Count].Name, // Der Rotationswinkelparametername
+                        Rotationswinkel.ToString() // Der Rotationswinkelwert
+                    };
+                }
+
+                if (revolveFeature.Profile.Count > 1)
+                {
+                    NotImplementedTypes.Add("revolveFeature " + revolveFeature.Name + ": Only 1 Profile per Sketch");
+                }
+
+            }
+            return toReturn;
+        }
     }
 }
