@@ -72,6 +72,7 @@ namespace InvAddIn
             listOfCodeLines.Clear();
 
             listOfSketches = masterModel.SketchyList;
+            //get list of partFeatures
             listOfExtrusions = masterModel.GetExtrudeFeatures();
             numberOfSketchEntities = 1;
             numberOfSketches = 0;
@@ -86,7 +87,7 @@ namespace InvAddIn
         {
             listOfCodeLines.Add("function main(params) {");
 
-            InterpreteExtrusions();
+            InterpretePartFeatures();
             listOfCodeLines.Add(unionAllExtrusion(endVar));
             //return 
             listOfCodeLines.Add("");
@@ -95,27 +96,36 @@ namespace InvAddIn
 
         } //end of method GenerateMainFunction
 
-        private void InterpreteExtrusions()
+        private void InterpretePartFeatures()
         {
-            foreach (var extrusion in listOfExtrusions)
+            foreach (var partFeature in listOfExtrusions)
             {
+
+                //check if partFeature is revolveFeature or extrudeFeature
+                //interprete differently
+                //get name of partFeature and name var of js-code the same
+
                 numberOfSketches++;
                 listOfCodeLines.Add("\t" + "//Sketch" + numberOfSketches + ": ");
                 //get Sketch
-                Sketch actualSketch = extrusion.Profile.Parent;
+                Sketch actualSketch = partFeature.Profile.Parent;
                 InterpreteSketch(actualSketch);
 
                 listOfCodeLines.Add(UnionSketch());
+
+                //
+
+                //extrusion:
                 //extrude sketch (need height here)
                 //extrusion.Extent.Distance.Value;                  dont work?!
                 //extrusion.Definition.Extent.Distance.Value;       dont work?!
-                double distance = getDistance(extrusion);
+                double distance = getDistance(partFeature);
                 listOfCodeLines.Add(ExtrudeSketch(distance));
                 listOfCodeLines.Add("");
 
                 listOfEntityNamesOfOneSketch.Clear();
             }
-        } //end of method InterpreteExtrusions
+        } //end of method InterpretePartFeatures
 
         private void InterpreteSketch(Sketch actualSketch) 
         {
