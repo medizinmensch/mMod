@@ -86,6 +86,11 @@ namespace InvAddIn
                         extrudeFeature.Definition.IsTwoDirectional.ToString(),// bei der angabe kannste abbrechen da die Extrusion in beide richtungen geht. Es sind generell auch asyncrone Bidirektionale Extrude operationen möglich, ich weiß allerdings noch nicht inwiefern uns dieses eNum uns darüber informationen gibt
                         param._Value.ToString() // ENDLICH! die Extrusion-Distance als double Value!
                     };
+
+                    if (extrudeFeature.Operation == PartFeatureOperationEnum.kIntersectOperation)
+                    {
+                        //extrudeFeature.ExtentTwo.Parent.
+                    }
                 }
 
                 if (extrudeFeature.Definition.IsTwoDirectional)
@@ -231,6 +236,28 @@ namespace InvAddIn
 
             }
             return toReturn;
+        }
+
+        private static List<object> GetFeatures(PartComponentDefinition partComponentDefinition)
+        {
+            List<object> myFeatures = new List<object>();
+
+            PartFeatures partFeatures = partComponentDefinition.Features;
+            foreach (PartFeature partFeature in partFeatures)
+            {
+                if (partFeature.Type == ObjectTypeEnum.kRevolveFeaturesObject)
+                {
+                    RevolveFeature feature = partFeature as RevolveFeature;
+                    myFeatures.Add(feature);
+                }
+                else if (partFeature.Type == ObjectTypeEnum.kExtrudeFeatureObject)
+                {
+                    ExtendFeature feature = partFeature as ExtendFeature;
+                    myFeatures.Add(feature);
+                }
+            }
+
+            return myFeatures;
         }
     }
 }
