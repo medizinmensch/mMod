@@ -70,9 +70,9 @@ namespace InvAddIn
             foreach (ExtrudeFeature extrudeFeature in partComponentDefinition.Features.ExtrudeFeatures)
             {
                 toReturn.Add(extrudeFeature);
-
                 
                 if (extrudeFeature.ExtentType == PartFeatureExtentEnum.kDistanceExtent) //wir können nur Distance extend benutzen!
+
                 {
                     Inventor.Parameter param = (extrudeFeature.Definition.Extent as DistanceExtent).Distance; //Value vorbereiten und unten dann abreifen
 
