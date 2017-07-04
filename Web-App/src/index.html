@@ -38,21 +38,13 @@ History:
             <div class="dropdown">
                 <!--ein weiteres dropdown menü, dass etwas schicker aussieht und später verwendet wird.
                 zum jetztigen zeitpunkt noch nicht eingebunden-->
-                <button onclick="myFunction()" class="dropbtn">funktioniert noch nicht</button>
+                <button onclick="myFunction()" class="dropbtn">Mastermodell</button>
                 <div id="myDropdown" class="dropdown-content">
-                    <a href="#">3 Part - Axis decoupler</a>
-                    <a href="#">Bauble</a>
-                    <a href="#">Parametric Grille</a>
+                    <a id="example" href="#">Example</a>
+                    <a id="parametricAxisCoupler" href="#">Parametric Axis Coupler</a>
+                    <a id="parametricGrille" href="#">Parametric Grille</a>
+                    <a id="involuteGear" href="#">Involute Gear</a>
                 </div>
-                <form>
-                    <form action="#">
-                        <select class="dropDownTest" onchange="switchMasterModel(this)">
-                            <option value="scripts/jscad_scripts/example.js">Example</option>
-	    	    		    <option value="scripts/jscad_scripts/parametricAxisCoupler.js">3 Part - Axis decoupler</option>
-                            <option value="scripts/jscad_scripts/parametricGrille.js">Parametric Grille</option>
-                            <option value="scripts/jscad_scripts/involuteGear.js">Involute Gear</option>
-		        	    </select>
-                    </form>
             </div>
             <input type="hidden" name="hiddenInput" id="hiddenInput" value="" />
             <button class="testButton" onclick="reset()">Reset</button>
@@ -154,6 +146,22 @@ History:
             //globale variable den aktuellen pfad geben
             jscad_script = actualPath;
         }
+
+        function switchMMB(fileName) {
+            //sicherheitsabfrage einbauen
+            alert("Ihr Mastermodell wird geändert.");
+            var actualPath = "scripts/jscad_scripts/" + fileName;
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", actualPath, true);
+            xhr.onload = function () {
+                var source = this.responseText;
+                configurator.processor.setJsCad(source, actualPath);
+            };
+            xhr.send();
+            //globale variable den aktuellen pfad geben
+            jscad_script = actualPath;
+        }
+
         function reset() {
             //sicherheitsabfrage einbauen
             alert("Ihr Mastermodell wird zurückgesetzt. Bitte warten...");
@@ -167,6 +175,12 @@ History:
             };
             xhr.send();
         }
+
+        document.getElementById("example").addEventListener("click", function () { switchMMB("example.js"); }, false)
+        document.getElementById("parametricAxisCoupler").addEventListener("click", function () { switchMMB("parametricAxisCoupler.js"); }, false);
+        document.getElementById("parametricGrille").addEventListener("click", function () { switchMMB("parametricGrille.js"); }, false)
+        document.getElementById("involuteGear").addEventListener("click", function () { switchMMB("involuteGear.js"); }, false)
+        
     </script>
 </body>
 
