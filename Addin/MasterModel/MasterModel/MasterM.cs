@@ -75,6 +75,10 @@ namespace InvAddIn
                 {
                     Inventor.Parameter param = (extrudeFeature.Definition.Extent as DistanceExtent).Distance; //Value vorbereiten und unten dann abgreifen
 
+
+
+
+
                     List<string> msg = new List<string>
                     {
                         extrudeFeature.ExtendedName, //z.B. "Neuer Volumenkörper x 17mm"
@@ -91,6 +95,7 @@ namespace InvAddIn
                         //extrudeFeature.ExtentTwo.Parent.
                     }
                 }
+
 
                 if (extrudeFeature.Definition.IsTwoDirectional)
                 {
@@ -151,6 +156,32 @@ namespace InvAddIn
 
             #endregion
 
+        }
+
+        public enum ExtrudeDirection
+        {
+            Positive,
+            Negative,
+            Symetric
+        }
+
+        public static ExtrudeDirection GetDirection(ExtrudeFeature feature)
+        {
+            DistanceExtent extrDef = feature.Definition as DistanceExtent;
+            PartFeatureExtentDirectionEnum direction = extrDef.Direction;
+
+            if (direction == PartFeatureExtentDirectionEnum.kNegativeExtentDirection)
+            {
+                return ExtrudeDirection.Negative;
+            }
+            else if (direction == PartFeatureExtentDirectionEnum.kPositiveExtentDirection)
+            {
+                return ExtrudeDirection.Negative;
+            }
+            else
+            {
+                return ExtrudeDirection.Negative;
+            }
         }
 
 
