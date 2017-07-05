@@ -287,22 +287,53 @@ namespace InvAddIn
         private string ExtrudeSketch(ExtrudeFeature extrudeFeature)
         {
             StringBuilder extrusionLine = new StringBuilder();
-            //add check for direction: PartFeatureExtentDirectionEnum.kNegativeExtentDirection
-            if (extrudeFeature.ExtentType == PartFeatureExtentEnum.kDistanceExtent)
+
+            MasterM.ExtrudeDirection direction = MasterM.GetDirection(extrudeFeature);
+
+            if (direction == MasterM.ExtrudeDirection.Positive)
             {
+                if (extrudeFeature.ExtentType == PartFeatureExtentEnum.kDistanceExtent)
+                {
 
-                Inventor.Parameter param = (extrudeFeature.Definition.Extent as DistanceExtent).Distance;
+                    Inventor.Parameter param = (extrudeFeature.Definition.Extent as DistanceExtent).Distance;
 
-                double height = param._Value * factor;
-                extrusionLine.Append("\t" + "var object" + _numberOfSketches + " = sketch" + _numberOfSketches + ".extrude({ offset: [0,0," + height.ToString(myCultureInfo) + "] });");
+                    double height = param._Value * factor;
+                    extrusionLine.Append("\t" + "var object" + _numberOfSketches + " = sketch" + _numberOfSketches + ".extrude({ offset: [0,0," + height.ToString(myCultureInfo) + "] });");
 
+                }
+                else
+                {
+                    //hopefully we wont come to this point :D
+                    //extruding with 10
+                    extrusionLine.Append("\t" + "var object" + _numberOfSketches + " = sketch" + _numberOfSketches + ".extrude({ offset: [0,0,10] });");
+                }
             }
-            else
+            else if (direction == MasterM.ExtrudeDirection.Negative)
             {
-                //hopefully we wont come to this point :D
-                //extruding with 10
-                extrusionLine.Append("\t" + "var object" + _numberOfSketches + " = sketch" + _numberOfSketches + ".extrude({ offset: [0,0,10] });");
+                if (extrudeFeature.ExtentType == PartFeatureExtentEnum.kDistanceExtent)
+                {
+
+                    Inventor.Parameter param = (extrudeFeature.Definition.Extent as DistanceExtent).Distance;
+
+                    double height = param._Value * factor * -1;
+                    extrusionLine.Append("\t" + "var object" + _numberOfSketches + " = sketch" + _numberOfSketches + ".extrude({ offset: [0,0," + height.ToString(myCultureInfo) + "] });");
+
+                }
+                else
+                {
+                    //hopefully we wont come to this point :D
+                    //extruding with 10
+                    extrusionLine.Append("\t" + "var object" + _numberOfSketches + " = sketch" + _numberOfSketches + ".extrude({ offset: [0,0,10] });");
+                }
             }
+            else //if(direction == ExtrudeDirection.Symetric)
+            {
+                //translate distance/2
+                //extrude distance
+            }
+
+
+
             return extrusionLine.ToString();
         } //end of method ExtrudeSketch
 
