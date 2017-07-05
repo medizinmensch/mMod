@@ -5,29 +5,30 @@ using System.Linq;
 using System.Threading;
 using Inventor;
 using System.IO;
+using System.Text;
 
 
 namespace InvAddIn
 {
 	public static class Exporter
 	{
-
+	    private static double factor = 10;
         //setting culture to invariant so it prints 0.001 instead of german style: 0,001
         static CultureInfo myCultureInfo = new CultureInfo("en-GB");
 
         // Circle (finished)
         public static string ExportCircle(SketchCircle circle, string entityName)
         {
-            double radius = Math.Round(circle.Radius, 4);
-            double x = Math.Round(circle.CenterSketchPoint.Geometry.X, 4);
-            double y = Math.Round(circle.CenterSketchPoint.Geometry.Y, 4);
+            double radius = Math.Round(circle.Radius, 4) * factor;
+            double x = Math.Round(circle.CenterSketchPoint.Geometry.X, 4) * factor;
+            double y = Math.Round(circle.CenterSketchPoint.Geometry.Y, 4) * factor;
 
-            string varName = entityName + "_Radius";
+            string radiusString = entityName + "_Radius";
             string xCoordinate = entityName + "_CenterX";
             string yCoordinate = entityName + "_CenterY";
 
             //create parameter
-            Parameter param1 = new Parameter(varName, "radius of " + entityName, "float", radius, 0.1);
+            Parameter param1 = new Parameter(radiusString, "radius of " + entityName, "float", radius, 0.1);
             Parameter param2 = new Parameter(xCoordinate, "X-Coordinate of " + entityName, "float", x, 0.1);
             Parameter param3 = new Parameter(yCoordinate, "Y-Coordinate of " + entityName, "float", y, 0.1);
 
@@ -35,10 +36,9 @@ namespace InvAddIn
             Shakespeare.ListOfParameter.Add(param2);
             Shakespeare.ListOfParameter.Add(param3);
 
-            string javaScriptVariable = "var " + entityName + " = CAG.circle ( " +
-                                        "{ center: [ params." + xCoordinate + ", params." + yCoordinate + "], " +
-                                        "radius: params." + varName + " " +
-                                        "} );";
+            string javaScriptVariable = "var " + entityName + " = CAG.circle (" +
+                                        "{ center:[params." + xCoordinate + ", params." + yCoordinate + "], " +
+                                        "radius: params." + radiusString + "});";
 
             return ("\t" + javaScriptVariable);
         }
@@ -46,10 +46,10 @@ namespace InvAddIn
         // Arc (finished)
         public static string ExportArc(SketchArc arc, string entityName)
         {
-            double centerX = arc.CenterSketchPoint.Geometry.X;
-            double centerY = arc.CenterSketchPoint.Geometry.Y;
+            double centerX = Math.Round(arc.CenterSketchPoint.Geometry.X, 4) * factor;
+            double centerY = Math.Round(arc.CenterSketchPoint.Geometry.Y, 4) * factor;
 
-            double radius = arc.Radius;
+            double radius = Math.Round(arc.Radius, 4) * factor;
 
             double startAngle = arc.StartAngle * (180 / Math.PI);
             double sweepAngle = arc.SweepAngle * (180 / Math.PI);
@@ -87,11 +87,11 @@ namespace InvAddIn
         // Ellipsefull (finished)
         public static string ExportEllipseFull(SketchEllipse ellipsefull, string entityName)
         {
-            double majorradius = ellipsefull.MajorRadius;
-            double minorradius = ellipsefull.MinorRadius;
+            double majorradius = Math.Round(ellipsefull.MajorRadius, 4) * factor;
+            double minorradius = Math.Round(ellipsefull.MinorRadius, 4) * factor;
 
-            double centerX = ellipsefull.CenterSketchPoint.Geometry.X;
-            double centerY = ellipsefull.CenterSketchPoint.Geometry.Y;
+            double centerX = Math.Round(ellipsefull.CenterSketchPoint.Geometry.X, 4) * factor;
+            double centerY = Math.Round(ellipsefull.CenterSketchPoint.Geometry.Y, 4) * factor;
 
             string nameMajor = entityName + "_MajorRadius";
             string nameMinor = entityName + "_MinorRadius";
@@ -119,17 +119,17 @@ namespace InvAddIn
             return ("\t" + javaScriptVariable);
         }
 
-        // EllipticalArc(todo)
+        // EllipticalArc (todo)
         public static string ExportEllipticalArc(SketchEllipticalArc ellipticalarc, string entityName)
         {
-            double centerX = ellipticalarc.CenterSketchPoint.Geometry.X;
-            double centerY = ellipticalarc.CenterSketchPoint.Geometry.Y;
+            double centerX = Math.Round(ellipticalarc.CenterSketchPoint.Geometry.X, 4) * factor;
+            double centerY = Math.Round(ellipticalarc.CenterSketchPoint.Geometry.Y, 4) * factor;
 
             double startAngle = ellipticalarc.StartAngle * (180 / Math.PI);
             double sweepAngle = ellipticalarc.SweepAngle * (180 / Math.PI);
 
-            double majorradius = ellipticalarc.MajorRadius;
-            double minorradius = ellipticalarc.MinorRadius;
+            double majorradius = Math.Round(ellipticalarc.MajorRadius, 4) * factor;
+            double minorradius = Math.Round(ellipticalarc.MinorRadius, 4) * factor;
 
             double radius = (majorradius / 2) / Math.Cos(sweepAngle);
 
@@ -182,7 +182,7 @@ namespace InvAddIn
 	    {
 
 	        int numberOfSketchesInExporter = numberOfSketches;
-	        string javaScriptVariable = "";
+            StringBuilder javaScriptVariable = new StringBuilder();
             double tempX = 0;
             double tempY = 0;
 
@@ -197,8 +197,8 @@ namespace InvAddIn
                 //first time will be executed, without comparing start and endpoint
                 if (first)
                 {
-                    xCoordinates.Add(Math.Round(sketchLine.Geometry.StartPoint.X, 4));
-                    yCoordinates.Add(Math.Round(sketchLine.Geometry.StartPoint.Y, 4));
+                    xCoordinates.Add(Math.Round(sketchLine.Geometry.StartPoint.X, 4) * factor);
+                    yCoordinates.Add(Math.Round(sketchLine.Geometry.StartPoint.Y, 4) * factor);
 
                     tempX = Math.Round(sketchLine.Geometry.EndPoint.X, 4);
                     tempY = Math.Round(sketchLine.Geometry.EndPoint.Y, 4);
@@ -207,8 +207,8 @@ namespace InvAddIn
                 //compare endpoints of last SketchLine with startpoint of new SketchLine
                 else if (tempX == Math.Round(sketchLine.Geometry.StartPoint.X, 4) && tempY == Math.Round(sketchLine.Geometry.StartPoint.Y, 4)) 
                 {
-                    xCoordinates.Add(Math.Round(sketchLine.Geometry.StartPoint.X, 4));
-                    yCoordinates.Add(Math.Round(sketchLine.Geometry.StartPoint.Y, 4));
+                    xCoordinates.Add(Math.Round(sketchLine.Geometry.StartPoint.X, 4) * factor);
+                    yCoordinates.Add(Math.Round(sketchLine.Geometry.StartPoint.Y, 4) * factor);
 
                     tempX = Math.Round(sketchLine.Geometry.EndPoint.X, 4);
                     tempY = Math.Round(sketchLine.Geometry.EndPoint.Y, 4);
@@ -218,8 +218,8 @@ namespace InvAddIn
                 else
                 {
                     //next line does not belong to "old system", create new polygon
-                    javaScriptVariable += CreatePolygonVariable(numberOfSketchesInExporter, xCoordinates, yCoordinates);
-                    javaScriptVariable += "\n\t";
+                    javaScriptVariable.Append(CreatePolygonVariable(numberOfSketchesInExporter, xCoordinates, yCoordinates));
+                    javaScriptVariable.Append("\n\t");
                     numberOfSketchesInExporter++;
 
                     //reset arrays
@@ -228,8 +228,8 @@ namespace InvAddIn
                     first = true;
 
                     //add point of new polygon to lists
-                    xCoordinates.Add(Math.Round(sketchLine.Geometry.StartPoint.X, 4));
-                    yCoordinates.Add(Math.Round(sketchLine.Geometry.StartPoint.Y, 4));
+                    xCoordinates.Add(Math.Round(sketchLine.Geometry.StartPoint.X, 4) * factor);
+                    yCoordinates.Add(Math.Round(sketchLine.Geometry.StartPoint.Y, 4) * factor);
 
                     tempX = Math.Round(sketchLine.Geometry.EndPoint.X, 4);
                     tempY = Math.Round(sketchLine.Geometry.EndPoint.Y, 4);
@@ -242,18 +242,18 @@ namespace InvAddIn
                 counter++;
             }
 
-	        javaScriptVariable += CreatePolygonVariable(numberOfSketchesInExporter, xCoordinates, yCoordinates);
+	        javaScriptVariable.Append(CreatePolygonVariable(numberOfSketchesInExporter, xCoordinates, yCoordinates));
 
-            return ("\t" + javaScriptVariable);
+            return "\t" + javaScriptVariable;
 	    }
 
 	    private static string CreatePolygonVariable(int numberOfSketch, List<double> xCoordinates, List<double> yCoordinates)
 	    {
             Shakespeare.listOfEntityNamesOfOneSketch.Add("polygon" + numberOfSketch);
-            Shakespeare.numberOfSketchEntities++;
+            Shakespeare.NumberOfSketchEntities++;
 
-
-            string javaScriptVariable = "var polygon" + numberOfSketch + " = CAG.fromPoints ( [";
+	        StringBuilder javaScriptVariable = new StringBuilder();
+	        javaScriptVariable.Append("var polygon" + numberOfSketch + " = CAG.fromPoints ( [");
 
             //insert points: CAG.fromPoints([ [0,0],[5,0],[3,5],[0,5] ]);
 
@@ -261,37 +261,17 @@ namespace InvAddIn
             {
                 if (i == xCoordinates.Count - 1)
                 {
-                    javaScriptVariable += "[" + xCoordinates[i].ToString(myCultureInfo) + "," + yCoordinates[i].ToString(myCultureInfo) + "] ";
+                    javaScriptVariable.Append("[" + xCoordinates[i].ToString(myCultureInfo) + "," + yCoordinates[i].ToString(myCultureInfo) + "] ");
                 }
                 else
                 {
-                    javaScriptVariable += "[" + xCoordinates[i].ToString(myCultureInfo) + "," + yCoordinates[i].ToString(myCultureInfo) + "], ";
+                    javaScriptVariable.Append("[" + xCoordinates[i].ToString(myCultureInfo) + "," + yCoordinates[i].ToString(myCultureInfo) + "], ");
                 }
             }
-            javaScriptVariable += "] );";
+            javaScriptVariable.Append("] );");
 
-	        return javaScriptVariable;
+	        return javaScriptVariable.ToString();
 	    }
-
-        //check if .toString method with cultureInfo works. if not use this method again
-	    private static string SubstituteCommaWithDot(double value)
-        {
-            string valueString = value.ToString();
-            string variable = "";
-
-            foreach (var character in valueString)
-            {
-                if (character == ',')
-                {
-                    variable += '.';
-                }
-                else
-                {
-                    variable += character;
-                }
-            }
-            return variable;
-        }
     }
 }
 

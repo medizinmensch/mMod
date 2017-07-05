@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using Inventor;
 using System.IO;
+using System.Text;
 using File = System.IO.File;
 
 
@@ -31,14 +32,11 @@ namespace InvAddIn
     public class Shakespeare
     {
         //main lists
-        private List<String> listOfCodeLines = new List<string>();
+        private List<string> listOfCodeLines = new List<string>();
         public static List<Parameter> ListOfParameter = new List<Parameter>();
 
-            
-        
-        private List<Sketch> listOfSketches;
-        public static List<String> listOfEntityNamesOfOneSketch = new List<string>();
-        private List<ExtrudeFeature> listOfExtrusions;
+        public static List<string> listOfEntityNamesOfOneSketch = new List<string>();
+        private List<ExtrudeFeature> listOfObjects;
 
         //temporary lists
         private List<SketchLine> listOfSketchLines = new List<SketchLine>();
@@ -46,36 +44,31 @@ namespace InvAddIn
         //other variables:
         //setting culture to invariant so it prints 0.001 instead of german style: 0,001
         CultureInfo myCultureInfo = new CultureInfo("en-GB");
-        public static int numberOfSketchEntities;
-        public static int numberOfSketches;
-        private bool needToInterpreteSketchLine = false;
+        public static int NumberOfSketchEntities;
+        private static int _numberOfSketches;
+        private bool _needToInterpreteSketchLine = false;
         private string endVar = "OskarTheGreat";
+        private static double factor = 10;
 
+        //for testing purposes use desktop path, we can also use path chosen by user or path that directly saves the js-file into the web-app folder
         private static string desktopPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.Desktop);
-        private static string jscadPath = desktopPath + "\\example.js";
-
-
-        
-
-        
+        private static string _jscadPath = desktopPath + "\\example.js";
 
 
         //constructor
         public Shakespeare(MasterM masterModel, string savePathChosenByUser)
         {
-            //for testing purposes use desktop path, we can also use path chosen by user or path that directly saves the js-file into the web-app folder
-            jscadPath = savePathChosenByUser;
+            _jscadPath = savePathChosenByUser;
 
             //clear everything at start
             ListOfParameter.Clear();
             listOfEntityNamesOfOneSketch.Clear();
             listOfCodeLines.Clear();
 
-            listOfSketches = masterModel.SketchyList;
             //get list of partFeatures
-            listOfExtrusions = masterModel.GetExtrudeFeatures();
-            numberOfSketchEntities = 1;
-            numberOfSketches = 0;
+            listOfObjects = masterModel.GetExtrudeFeatures();
+            NumberOfSketchEntities = 1;
+            _numberOfSketches = 0;
 
             GenerateMainFunction();
             GenerateParameterFunction();
@@ -86,43 +79,67 @@ namespace InvAddIn
         private void GenerateMainFunction()
         {
             listOfCodeLines.Add("function main(params) {");
+            listOfCodeLines.Add("");
 
             InterpretePartFeatures();
-            listOfCodeLines.Add(unionAllExtrusion(endVar));
-            //return 
+            listOfCodeLines.Add(unionAllObjects(endVar));
+
             listOfCodeLines.Add("");
             listOfCodeLines.Add("\t" + "return " + endVar + ";");
             listOfCodeLines.Add("}");
+            listOfCodeLines.Add("");
 
         } //end of method GenerateMainFunction
 
         private void InterpretePartFeatures()
         {
-            foreach (var partFeature in listOfExtrusions)
+            foreach (var partFeature in listOfObjects)
             {
+                //get names:
+                /*
+                partFeature.ExtendedName, //z.B. "Neue Rotation 45°"
+                partFeature.Name, //z.B. "Umdrehung1"
+                */
 
-                //check if partFeature is revolveFeature or extrudeFeature
-                //interprete differently
-                //get name of partFeature and name var of js-code the same
-
-                numberOfSketches++;
-                listOfCodeLines.Add("\t" + "//Sketch" + numberOfSketches + ": ");
-                //get Sketch
+                //create Sketch
+                //find out in which layer the sketch is orientated, eg. XY, XZ or YZ
+                //then rotate sketch if possible
+                _numberOfSketches++;
+                listOfCodeLines.Add("\t" + "//Sketch" + _numberOfSketches + ": ");
                 Sketch actualSketch = partFeature.Profile.Parent;
                 InterpreteSketch(actualSketch);
-
                 listOfCodeLines.Add(UnionSketch());
 
-                //
 
-                //extrusion:
-                //extrude sketch (need height here)
-                //extrusion.Extent.Distance.Value;                  dont work?!
-                //extrusion.Definition.Extent.Distance.Value;       dont work?!
-                double distance = getDistance(partFeature);
-                listOfCodeLines.Add(ExtrudeSketch(distance));
+                //check if partFeature is revolveFeature or extrudeFeature
+                if (partFeature.Type  == ObjectTypeEnum.kExtrudeFeatureObject)
+                {
+                    listOfCodeLines.Add(ExtrudeSketch((ExtrudeFeature) partFeature));
+                }
+                else if (partFeature.Type == ObjectTypeEnum.kRevolveFeatureObject)
+                {
+                    listOfCodeLines.Add(RevolveSketch((RevolveFeature) partFeature));
+                }
+
+                //TODO
+
+                //check for axis
+                //if yes then rotate
+                if (_numberOfSketches == 1)
+                {
+                    RotateObject("x");
+                }
+
+
+                //check for translation
+                bool needToTranslate = true;
+                if (needToTranslate)
+                {
+                    TranslateObject("z");
+                }
+
+
                 listOfCodeLines.Add("");
-
                 listOfEntityNamesOfOneSketch.Clear();
             }
         } //end of method InterpretePartFeatures
@@ -136,10 +153,10 @@ namespace InvAddIn
                 }
 
                 //interprete sketchLine list of one sketch
-                if (needToInterpreteSketchLine)
+                if (_needToInterpreteSketchLine)
                 {
-                    listOfCodeLines.Add(Exporter.ExportPolygon(listOfSketchLines, numberOfSketchEntities));
-                    needToInterpreteSketchLine = false;
+                    listOfCodeLines.Add(Exporter.ExportPolygon(listOfSketchLines, NumberOfSketchEntities));
+                    _needToInterpreteSketchLine = false;
                     listOfSketchLines.Clear();
                 }
 
@@ -158,7 +175,7 @@ namespace InvAddIn
             else if (sketchEntity is SketchLine)
             {
                 //get multiple sketchLine's, put them in list, at end of sketch, interprete all sketchlines
-                needToInterpreteSketchLine = true;
+                _needToInterpreteSketchLine = true;
                 listOfSketchLines.Add((SketchLine) sketchEntity);
                 return;
 
@@ -166,55 +183,63 @@ namespace InvAddIn
             else if (sketchEntity is SketchCircle)
             {
                 entityType = "circle";
-                listOfCodeLines.Add(Exporter.ExportCircle((SketchCircle) sketchEntity, entityType + numberOfSketchEntities));
+                listOfCodeLines.Add(Exporter.ExportCircle((SketchCircle) sketchEntity, entityType + NumberOfSketchEntities));
             }
             else if (sketchEntity is SketchArc)
             {
                 entityType = "arc";
-                listOfCodeLines.Add(Exporter.ExportArc((SketchArc)sketchEntity, entityType + numberOfSketchEntities));
+                listOfCodeLines.Add(Exporter.ExportArc((SketchArc)sketchEntity, entityType + NumberOfSketchEntities));
             }
             else if (sketchEntity is SketchEllipse)
             {
                 entityType = "ellipse";
-                listOfCodeLines.Add(Exporter.ExportEllipseFull((SketchEllipse)sketchEntity, entityType + numberOfSketchEntities));
+                listOfCodeLines.Add(Exporter.ExportEllipseFull((SketchEllipse)sketchEntity, entityType + NumberOfSketchEntities));
             }
             else if (sketchEntity is SketchEllipticalArc)
             {
                 entityType = "ellipseArc";
-                listOfCodeLines.Add(Exporter.ExportEllipticalArc((SketchEllipticalArc)sketchEntity, entityType + numberOfSketchEntities));
+                listOfCodeLines.Add(Exporter.ExportEllipticalArc((SketchEllipticalArc)sketchEntity, entityType + NumberOfSketchEntities));
 
             }
-            listOfEntityNamesOfOneSketch.Add(entityType + numberOfSketchEntities);
-            numberOfSketchEntities++;
+            listOfEntityNamesOfOneSketch.Add(entityType + NumberOfSketchEntities);
+            NumberOfSketchEntities++;
 
 
         } //end of method InterpreteSketchEntity
 
         private void GenerateParameterFunction()
         {
-            listOfCodeLines.Add("function getParameterDefinitions() {");
-            listOfCodeLines.Add("\treturn [");
-
-            foreach (Parameter parameter in ListOfParameter)
+            if (ListOfParameter.Count == 0)
             {
-                listOfCodeLines.Add(parameter.GetParameterString() + ",");
+                return;
+            }
+            else
+            {
+                listOfCodeLines.Add("function getParameterDefinitions() {");
+                listOfCodeLines.Add("\treturn [");
+
+                foreach (Parameter parameter in ListOfParameter)
+                {
+                    listOfCodeLines.Add(parameter.GetParameterString() + ",");
+                }
+
+                //optional: remove the last comma of last element of list
+                //outputParamDef.Remove(outputParamDef.Length - 1, 1);
+
+                listOfCodeLines.Add("\t];");
+                listOfCodeLines.Add("}");
             }
 
-            //optional: remove the last comma of last element of list
-            //outputParamDef.Remove(outputParamDef.Length - 1, 1);
-
-            listOfCodeLines.Add("\t];");
-            listOfCodeLines.Add("}");
 
         } //end of method GenerateParameterFunction
 
         private void WriteIntoJsFile()
         {
             //check for existing file
-            if (File.Exists(jscadPath))
-                File.Delete(jscadPath);
+            if (File.Exists(_jscadPath))
+                File.Delete(_jscadPath);
 
-            using (StreamWriter outputFile = new StreamWriter(jscadPath, true))
+            using (StreamWriter outputFile = new StreamWriter(_jscadPath, true))
             {
                 foreach (var codeLine in listOfCodeLines)
                 {
@@ -224,111 +249,177 @@ namespace InvAddIn
         } //end of method WriteIntoJSFile
 
 
-
         private string UnionSketch()
         {
-            string unionLine = "\t" + "var sketch" + numberOfSketches + " = union(";
+            StringBuilder unionLine = new StringBuilder();
             var lastEntity = listOfEntityNamesOfOneSketch.Last();
 
             if (listOfEntityNamesOfOneSketch.Count == 0)
             {
-                unionLine = "";
+                unionLine.Clear();
             }
             else if (listOfEntityNamesOfOneSketch.Count == 1)
             {
-                unionLine = "\t" + "var sketch" + numberOfSketches + " = " + lastEntity + ";";
+                unionLine.Append("\t" + "var sketch" + _numberOfSketches + " = " + lastEntity + ";");
             }
             else
             {
+                unionLine.Append("\t" + "var sketch" + _numberOfSketches + " = union(");
+
                 foreach (var entityName in listOfEntityNamesOfOneSketch)
                 {
                     if (entityName == lastEntity)
                     {
-                        unionLine += entityName;
+                        unionLine.Append(entityName);
                     }
                     else
                     {
-                        unionLine += entityName + ", ";
+                        unionLine.Append(entityName + ", ");
                     }
                 }
-                unionLine += ");";    
+                unionLine.Append(");");    
             }
-            return unionLine;
+            return unionLine.ToString();
 
         } //end of method UnionSketch
 
 
-        private string ExtrudeSketch(double height) 
+        private string ExtrudeSketch(ExtrudeFeature extrudeFeature)
         {
-            string extrusionLine = "\t" + "var extrusion" + numberOfSketches + " = sketch" + numberOfSketches + ".extrude({ offset: [0,0," + height.ToString(myCultureInfo) + "] });";
-            return extrusionLine;
-
-        } //end of method ExtrudeSketch
-
-        private string unionAllExtrusion(string varName)
-        {
-            string extrusionLine = "";
-            if (numberOfSketches == 0)
+            StringBuilder extrusionLine = new StringBuilder();
+            //add check for direction: PartFeatureExtentDirectionEnum.kNegativeExtentDirection
+            if (extrudeFeature.ExtentType == PartFeatureExtentEnum.kDistanceExtent)
             {
-                extrusionLine = "";
-            }
-            else if (numberOfSketches == 1)
-            {
-                extrusionLine = "\t" + "var " + varName + " = extrusion" + numberOfSketches + "";
+
+                Inventor.Parameter param = (extrudeFeature.Definition.Extent as DistanceExtent).Distance;
+
+                double height = param._Value * factor;
+                extrusionLine.Append("\t" + "var object" + _numberOfSketches + " = sketch" + _numberOfSketches + ".extrude({ offset: [0,0," + height.ToString(myCultureInfo) + "] });");
+
             }
             else
             {
-                extrusionLine = "\t" + "var " + varName + " = union(";
-                for (int i = 1; i <= numberOfSketches; i++)
+                //hopefully we wont come to this point :D
+                //extruding with 10
+                extrusionLine.Append("\t" + "var object" + _numberOfSketches + " = sketch" + _numberOfSketches + ".extrude({ offset: [0,0,10] });");
+            }
+            return extrusionLine.ToString();
+        } //end of method ExtrudeSketch
+
+        private string RevolveSketch(RevolveFeature revolveFeature)
+        {
+            //rotation is always around the z-axis
+            //var object = rotate_extrude({fn:4}, sketch);
+
+            //do we need revolveFeature as parameter here?
+            //we can vary fn?
+
+            string _object = "var object" + _numberOfSketches;
+
+            StringBuilder rotationLine = new StringBuilder();
+            rotationLine.Append("\t" + _object + " = rotate_extrude(sketch" + _numberOfSketches + ");");
+            rotationLine.Append("\n");
+            rotationLine.Append("\t" + _object + " = " + _object + ".rotateX(-90);");
+
+            return rotationLine.ToString();
+
+        } //end of method RevolveSketch
+
+        private string unionAllObjects(string varName)
+        {
+            StringBuilder extrusionLine = new StringBuilder();
+
+            if (_numberOfSketches == 0)
+            {
+                extrusionLine.Clear();
+            }
+            else if (_numberOfSketches == 1)
+            {
+                extrusionLine.Append("\t" + "var " + varName + " = object" + _numberOfSketches + ";");
+            }
+            else
+            {
+                extrusionLine.Append("\t" + "var " + varName + " = union(");
+                for (int i = 1; i <= _numberOfSketches; i++)
                 {
-                    if (i == numberOfSketches)
+                    if (i == _numberOfSketches)
                     {
-                        extrusionLine += "extrusion" + i;
+                        extrusionLine.Append("object" + i);
                     }
                     else
                     {
-                        extrusionLine += "extrusion" + i + ", ";
+                        extrusionLine.Append("object" + i + ", ");
                     }
 
                 }
-                extrusionLine += ");";
+                extrusionLine.Append(");");
                 
             }
-            return extrusionLine;
+            return extrusionLine.ToString();
 
-        } //end of method unionAllExtrusion
+        } //end of method unionAllObjects
 
-        private double getDistance(ExtrudeFeature extrusion)
+        private void RotateObject(string layer)
         {
-            //find out direction 20993 is one, 20994 is other direction
-            //if (extrusion.Extent.Direction == 20993)
-            //cant get it...
+            //todo
+            //this method switches the layer in which the sketch is positioned
 
-            //current method to take a parameter out of the list which fits the best...
-            List<double> listOfParameters = new List<double>();
-            foreach (Inventor.Parameter parameter in extrusion.Parameters)
+            StringBuilder lastLine = new StringBuilder(listOfCodeLines.Last());
+            listOfCodeLines.RemoveAt(listOfCodeLines.Count - 1);
+
+            //remove semicolon at end of line
+            lastLine.Remove(lastLine.Length - 1, 1);
+
+            if (layer == "x")
             {
-                double temp;
-                Double.TryParse(parameter.Value.ToString(), out temp);
-                listOfParameters.Add(temp);
+                lastLine.Append(".rotateX(-90);");
+            }
+            else if (layer == "y")
+            {
+                lastLine.Append(".rotateY(-90);");
+            }
+            else if (layer == "z")
+            {
+                lastLine.Append(".rotateZ(-90);");
             }
 
-            for (int i = 0; i < listOfParameters.Count; i++)
-            {
-                if (i==0)
-                {
-                    continue;
-                }
-                else if (listOfParameters[i] == 0.0)
-                {
-                    continue;
-                }
-                else
-                {
-                    return listOfParameters[i];
-                }
-            }
-            return 10;
+            listOfCodeLines.Add(lastLine.ToString());
         }
+
+        private void TranslateObject(string axis)
+        {
+            //translate only works for 3D objects, after extruding
+            StringBuilder lastLine = new StringBuilder(listOfCodeLines.Last());
+            listOfCodeLines.RemoveAt(listOfCodeLines.Count - 1);
+
+            //remove semicolon at end of line
+            lastLine.Remove(lastLine.Length - 1, 1);
+
+            //get value
+            //TODO
+            double value = 10;
+
+            if (axis == "z")
+            {
+                lastLine.Append(".translate([0,0," + value + "]);");
+            }
+            else if (axis == "y")
+            {
+                lastLine.Append(".translate([0," + value +",0]);");
+            }
+            else if (axis == "x")
+            {
+                lastLine.Append(".translate([" + value + ",0,0]);");
+            }
+            else
+            {
+                return;
+            }
+            
+            listOfCodeLines.Add(lastLine.ToString());
+
+        }
+
+
     } //end of class Shakespeare
 } //end of namespace InvAddIn
