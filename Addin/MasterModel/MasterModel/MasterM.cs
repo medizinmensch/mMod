@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,6 +12,7 @@ namespace InvAddIn
     public class MasterM
     {
         public PartDocument InventorDocument { get; }
+        public TransientGeometry TransientGeometry { get; }
         public List<Sketch> SketchyList
         {
             get
@@ -26,9 +28,25 @@ namespace InvAddIn
 
         public List<string> NotImplementedTypes { get; } = new List<string>();
 
-        public MasterM(PartDocument inventorDocument)
+        public MasterM(PartDocument inventorDocument, TransientGeometry transientGeometry)
         {
             InventorDocument = inventorDocument;
+            TransientGeometry = transientGeometry;
+            GetDistance();
+        }
+
+        public void GetDistance()
+        {
+            PartComponentDefinition partComponentDefinition = InventorDocument.ComponentDefinition;
+            /*Inventor.WorkPlane*/
+            int countWorkPlanes = partComponentDefinition.WorkPlanes.Count;
+            foreach (WorkPlane workPlane in partComponentDefinition.WorkPlanes)
+            {
+                var origin = TransientGeometry.CreatePoint(0, 0, 0);
+                var distance = workPlane.Plane.DistanceTo(origin);
+            }
+
+
         }
 
         public List<Parameter> GetCustomParameters
@@ -64,8 +82,9 @@ namespace InvAddIn
         public List<ExtrudeFeature> GetExtrudeFeatures()
         {
             PartComponentDefinition partComponentDefinition = InventorDocument.ComponentDefinition;
-
             List<ExtrudeFeature> toReturn = new List<ExtrudeFeature>();
+
+
 
             foreach (ExtrudeFeature extrudeFeature in partComponentDefinition.Features.ExtrudeFeatures)
             {
@@ -75,9 +94,7 @@ namespace InvAddIn
                 {
                     Inventor.Parameter param = (extrudeFeature.Definition.Extent as DistanceExtent).Distance; //Value vorbereiten und unten dann abgreifen
 
-
-
-
+                    var componentDefinition = extrudeFeature.Profile.Parent;
 
                     List<string> msg = new List<string>
                     {
