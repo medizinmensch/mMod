@@ -167,7 +167,7 @@ namespace InvAddIn
 
         public static ExtrudeDirection GetDirection(ExtrudeFeature feature)
         {
-            DistanceExtent extrDef = feature.Definition as DistanceExtent;
+            var extrDef = feature.Extent as DistanceExtent;
             PartFeatureExtentDirectionEnum direction = extrDef.Direction;
 
             if (direction == PartFeatureExtentDirectionEnum.kNegativeExtentDirection)
