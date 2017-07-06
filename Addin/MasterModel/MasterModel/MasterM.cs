@@ -176,11 +176,11 @@ namespace InvAddIn
             }
             else if (direction == PartFeatureExtentDirectionEnum.kPositiveExtentDirection)
             {
-                return ExtrudeDirection.Negative;
+                return ExtrudeDirection.Positive;
             }
             else
             {
-                return ExtrudeDirection.Negative;
+                return ExtrudeDirection.Symetric;
             }
         }
 
