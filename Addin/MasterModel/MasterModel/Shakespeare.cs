@@ -122,7 +122,7 @@ namespace InvAddIn
                 }
 
                 //TODO
-
+                /*
                 //check for axis
                 //if yes then rotate
                 if (_numberOfSketches == 1)
@@ -137,7 +137,7 @@ namespace InvAddIn
                 {
                     TranslateObject("z");
                 }
-
+                */
 
                 listOfCodeLines.Add("");
                 listOfEntityNamesOfOneSketch.Clear();
@@ -312,12 +312,12 @@ namespace InvAddIn
             {
                 if (extrudeFeature.ExtentType == PartFeatureExtentEnum.kDistanceExtent)
                 {
-
+                    //because you cant choose a direction we extrude the same direction but then translating in the reversed direction
                     Inventor.Parameter param = (extrudeFeature.Definition.Extent as DistanceExtent).Distance;
 
-                    double height = param._Value * factor * -1;
-                    extrusionLine.Append("\t" + "var object" + _numberOfSketches + " = sketch" + _numberOfSketches + ".extrude({ offset: [0,0," + height.ToString(myCultureInfo) + "] });");
-
+                    double height = param._Value * factor;
+                    extrusionLine.Append("\t" + "var object" + _numberOfSketches + " = sketch" + _numberOfSketches + ".extrude({ offset: [0,0," + height.ToString(myCultureInfo) + "] })");
+                    extrusionLine.Append(TranslateObject("z", height * -1));
                 }
                 else
                 {
@@ -417,7 +417,7 @@ namespace InvAddIn
             listOfCodeLines.Add(lastLine.ToString());
         }
 
-        private void TranslateObject(string axis)
+        private string TranslateObject(string axis, double value)
         {
             //translate only works for 3D objects, after extruding
             StringBuilder lastLine = new StringBuilder(listOfCodeLines.Last());
@@ -426,28 +426,23 @@ namespace InvAddIn
             //remove semicolon at end of line
             lastLine.Remove(lastLine.Length - 1, 1);
 
-            //get value
-            //TODO
-            double value = 10;
 
             if (axis == "z")
             {
-                lastLine.Append(".translate([0,0," + value + "]);");
+                return (".translate([0,0," + value.ToString(myCultureInfo) + "]);");
             }
             else if (axis == "y")
             {
-                lastLine.Append(".translate([0," + value +",0]);");
+                return (".translate([0," + value.ToString(myCultureInfo) + ",0]);");
             }
             else if (axis == "x")
             {
-                lastLine.Append(".translate([" + value + ",0,0]);");
+                return (".translate([" + value.ToString(myCultureInfo) + ",0,0]);");
             }
             else
             {
-                return;
+                return "";
             }
-            
-            listOfCodeLines.Add(lastLine.ToString());
 
         }
 
