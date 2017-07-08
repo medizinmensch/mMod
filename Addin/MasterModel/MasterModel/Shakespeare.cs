@@ -37,6 +37,7 @@ namespace InvAddIn
 
         public static List<string> listOfEntityNamesOfOneSketch = new List<string>();
         private List<ExtrudeFeature> listOfObjects;
+        private List<string> listOfObjectNames = new List<string>();
 
         //temporary lists
         private List<SketchLine> listOfSketchLines = new List<SketchLine>();
@@ -46,6 +47,8 @@ namespace InvAddIn
         CultureInfo myCultureInfo = new CultureInfo("en-GB");
         public static int NumberOfSketchEntities;
         private static int _numberOfSketches;
+        private static int _numberOfSubtractions;
+        private static int _numberOfIntersections;
         private bool _needToInterpreteSketchLine = false;
         private string endVar = "OskarTheGreat";
         private static double factor = 10;
@@ -64,11 +67,14 @@ namespace InvAddIn
             ListOfParameter.Clear();
             listOfEntityNamesOfOneSketch.Clear();
             listOfCodeLines.Clear();
+            listOfObjectNames.Clear();
 
             //get list of partFeatures
             listOfObjects = masterModel.GetExtrudeFeatures();
             NumberOfSketchEntities = 1;
             _numberOfSketches = 0;
+            _numberOfSubtractions = 0;
+            _numberOfIntersections = 0;
 
             GenerateMainFunction();
             GenerateParameterFunction();
@@ -97,7 +103,7 @@ namespace InvAddIn
             {
                 //get names:
                 /*
-                partFeature.ExtendedName, //z.B. "Neue Rotation 45ï¿½"
+                partFeature.ExtendedName, //z.B. "Neue Rotation 45°"
                 partFeature.Name, //z.B. "Umdrehung1"
                 */
 
@@ -110,16 +116,43 @@ namespace InvAddIn
                 InterpreteSketch(actualSketch);
                 listOfCodeLines.Add(UnionSketch());
 
+                string firstObjectName = partFeature.Name;
+                string secondObjectName = "";
 
-                //check if partFeature is revolveFeature or extrudeFeature
-                if (partFeature.Type  == ObjectTypeEnum.kExtrudeFeatureObject)
+                switch (partFeature.Operation)
                 {
-                    listOfCodeLines.Add(ExtrudeSketch((ExtrudeFeature) partFeature));
+                    //it is new extrusion or revolve
+                    case PartFeatureOperationEnum.kNewBodyOperation:
+                        CreateObject(partFeature);
+                        listOfObjectNames.Add(firstObjectName);
+                        break;
+
+                    //this case will create a new element aswell but it gets then cutted with another object
+                    case PartFeatureOperationEnum.kCutOperation:
+                        CreateObject(partFeature);
+
+                        //TODO get other object name
+                        //secondObjectName = ...
+                        _numberOfSubtractions++;
+                        listOfObjectNames.Remove(secondObjectName);
+                        listOfObjectNames.Add("Subtraction" + _numberOfSubtractions);
+                        CutOperation("Extrusion1", firstObjectName);
+                        //TODO remove both object names out of listOfObjectNames, add one name
+                        break;
+
+                    //this case will create a new element aswell but it gets then intersected with another object
+                    case PartFeatureOperationEnum.kIntersectOperation:
+                        CreateObject(partFeature);
+
+                        //TODO get other object name
+                        //secondObjectName = ...
+                        _numberOfIntersections++;
+                        listOfObjectNames.Remove(secondObjectName);
+                        listOfObjectNames.Add("Intersection" + _numberOfIntersections);
+                        IntersectOperation(partFeature.Name, firstObjectName);
+                        break;
                 }
-                else if (partFeature.Type == ObjectTypeEnum.kRevolveFeatureObject)
-                {
-                    listOfCodeLines.Add(RevolveSketch((RevolveFeature) partFeature));
-                }
+
 
 
                 //TODO
@@ -149,7 +182,6 @@ namespace InvAddIn
                     listOfCodeLines.Add(lastLineOfCode.ToString());
                 }
                 */
-
 
                 listOfCodeLines.Add("");
                 listOfEntityNamesOfOneSketch.Clear();
@@ -194,7 +226,8 @@ namespace InvAddIn
                 //skip it
                 return;
             }
-            else if (sketchEntity is SketchLine)
+
+            if (sketchEntity is SketchLine)
             {
                 //get multiple sketchLine's, put them in list, at end of sketch, interprete all sketchlines
                 _needToInterpreteSketchLine = true;
@@ -202,7 +235,8 @@ namespace InvAddIn
                 return;
 
             }
-            else if (sketchEntity is SketchCircle)
+
+            if (sketchEntity is SketchCircle)
             {
                 entityType = "circle";
                 listOfCodeLines.Add(Exporter.ExportCircle((SketchCircle) sketchEntity, entityType + NumberOfSketchEntities));
@@ -305,29 +339,52 @@ namespace InvAddIn
 
         } //end of method UnionSketch
 
+        private void CreateObject(ExtrudeFeature partFeature)
+        {
+            //check if partFeature is revolveFeature or extrudeFeature
+            if (partFeature.Type == ObjectTypeEnum.kExtrudeFeatureObject)
+            {
+                listOfCodeLines.Add(ExtrudeSketch((ExtrudeFeature)partFeature));
+            }
+            else if (partFeature.Type == ObjectTypeEnum.kRevolveFeatureObject)
+            {
+                listOfCodeLines.Add(RevolveSketch((RevolveFeature)partFeature));
+            }
+        } //end of method CreateObject
+
+        private void CutOperation(string actualVar, string oldVar)
+        {
+            //sphere1 = sphere1.subtract(cube1); 
+            listOfCodeLines.Add("\t" + "var Subtraction" + _numberOfSubtractions + " = " + actualVar + ".subtract(" + oldVar + ");");
+        } //end of method CutOperation
+
+        private void IntersectOperation(string actualVar, string oldVar)
+        {
+            //sphere 1 = sphere1.intersect(cube1);
+            listOfCodeLines.Add("\t" + "var " + _numberOfIntersections + " = "+ actualVar + ".intersect(" + oldVar + ");");
+        } //end of method IntersectOperation
 
         private string ExtrudeSketch(ExtrudeFeature extrudeFeature)
         {
             StringBuilder extrusionLine = new StringBuilder();
-
             MasterM.ExtrudeDirection direction = MasterM.GetDirection(extrudeFeature);
+            string objectName = extrudeFeature.Name;
 
             if (direction == MasterM.ExtrudeDirection.Positive)
             {
                 if (extrudeFeature.ExtentType == PartFeatureExtentEnum.kDistanceExtent)
                 {
-
                     Inventor.Parameter param = (extrudeFeature.Definition.Extent as DistanceExtent).Distance;
-
                     double height = param._Value * factor;
-                    extrusionLine.Append("\t" + "var object" + _numberOfSketches + " = sketch" + _numberOfSketches + ".extrude({ offset: [0,0," + height.ToString(myCultureInfo) + "] });");
+
+                    extrusionLine.Append("\t" + "var " + objectName + " = sketch" + _numberOfSketches + ".extrude({ offset: [0,0," + height.ToString(myCultureInfo) + "] });");
 
                 }
                 else
                 {
-                    //hopefully we wont come to this point :D
+                    //hopefully we wont come to this point
                     //extruding with 10
-                    extrusionLine.Append("\t" + "var object" + _numberOfSketches + " = sketch" + _numberOfSketches + ".extrude({ offset: [0,0,10] });");
+                    extrusionLine.Append("\t" + "var " + objectName + " = sketch" + _numberOfSketches + ".extrude({ offset: [0,0,10] });");
                 }
             }
             else if (direction == MasterM.ExtrudeDirection.Negative)
@@ -338,14 +395,14 @@ namespace InvAddIn
                     Inventor.Parameter param = (extrudeFeature.Definition.Extent as DistanceExtent).Distance;
 
                     double height = param._Value * factor;
-                    extrusionLine.Append("\t" + "var object" + _numberOfSketches + " = sketch" + _numberOfSketches + ".extrude({ offset: [0,0," + height.ToString(myCultureInfo) + "] })");
+                    extrusionLine.Append("\t" + "var " + objectName + " = sketch" + _numberOfSketches + ".extrude({ offset: [0,0," + height.ToString(myCultureInfo) + "] })");
                     extrusionLine.Append(TranslateObject("z", height * -1));
                 }
                 else
                 {
                     //hopefully we wont come to this point :D
                     //extruding with 10
-                    extrusionLine.Append("\t" + "var object" + _numberOfSketches + " = sketch" + _numberOfSketches + ".extrude({ offset: [0,0,10] });");
+                    extrusionLine.Append("\t" + "var " + objectName + " = sketch" + _numberOfSketches + ".extrude({ offset: [0,0,10] });");
                 }
             }
             else //if(direction == ExtrudeDirection.Symetric)
@@ -353,8 +410,6 @@ namespace InvAddIn
                 //translate distance/2
                 //extrude distance
             }
-
-
 
             return extrusionLine.ToString();
         } //end of method ExtrudeSketch
@@ -367,12 +422,12 @@ namespace InvAddIn
             //do we need revolveFeature as parameter here?
             //we can vary fn?
 
-            string _object = "var object" + _numberOfSketches;
+            string objectName = revolveFeature.Name;
 
             StringBuilder rotationLine = new StringBuilder();
-            rotationLine.Append("\t" + _object + " = rotate_extrude(sketch" + _numberOfSketches + ");");
+            rotationLine.Append("\t" + "var " + objectName + " = rotate_extrude(sketch" + _numberOfSketches + ");");
             rotationLine.Append("\n");
-            rotationLine.Append("\t" + _object + " = " + _object + ".rotateX(-90);");
+            rotationLine.Append("\t" + objectName + " = " + objectName + ".rotateX(-90);");
 
             return rotationLine.ToString();
 
@@ -381,27 +436,29 @@ namespace InvAddIn
         private string unionAllObjects(string varName)
         {
             StringBuilder extrusionLine = new StringBuilder();
+            int length = listOfObjectNames.Count;
 
-            if (_numberOfSketches == 0)
+            if (length == 0)
             {
                 extrusionLine.Clear();
             }
-            else if (_numberOfSketches == 1)
+            else if (length == 1)
             {
-                extrusionLine.Append("\t" + "var " + varName + " = object" + _numberOfSketches + ";");
+                extrusionLine.Append("\t" + "var " + varName + " = " + listOfObjectNames[0] + ";");
             }
             else
             {
                 extrusionLine.Append("\t" + "var " + varName + " = union(");
-                for (int i = 1; i <= _numberOfSketches; i++)
+
+                for (int i = 0; i < length; i++)
                 {
-                    if (i == _numberOfSketches)
+                    if (i == length-1)
                     {
-                        extrusionLine.Append("object" + i);
+                        extrusionLine.Append(listOfObjectNames[i]);
                     }
                     else
                     {
-                        extrusionLine.Append("object" + i + ", ");
+                        extrusionLine.Append(listOfObjectNames[i] + ", ");
                     }
 
                 }
