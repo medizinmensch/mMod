@@ -26,13 +26,28 @@ namespace InvAddIn
             }
         }
 
+        public List<object> GetFeatures()
+        {
+            List<object> features = new List<object>();
+            features.AddRange(GetExtrudeFeatures());
+            features.AddRange(GetRevolveFeatures());
+
+            //foreach (object feature in features)
+            //{
+            //    string type = Microsoft.VisualBasic.Information.TypeName(feature);
+            //}
+
+            return features;
+        }
+
         public List<string> NotImplementedTypes { get; } = new List<string>();
 
         public MasterM(PartDocument inventorDocument, TransientGeometry transientGeometry)
         {
             InventorDocument = inventorDocument;
             TransientGeometry = transientGeometry;
-            GetDistance();
+            //GetDistance();
+            GetFeatures();
         }
 
         public void GetDistance()
