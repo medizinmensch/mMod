@@ -14,21 +14,8 @@ namespace InvAddIn
     /*
         http://help.autodesk.com/view/INVNTOR/2018/ENU/?guid=GUID-311EC780-354E-4A58-9639-3E186755A498
         https://en.wikibooks.org/wiki/OpenJSCAD_User_Guide
+    */
 
-        /TODO:
-        - export interprete methods, can parameter be added outside of class when public?   check
-        - seperate between 2d and 3d entities. need two list for entities?
-        - use polygon for SketchLine, write SketchLine case
-        - polygones have to be closed by itself not combined with pther entities...
-            modify sketchLineInterpretation
-            concat all entities
-
-        hints, questions:
-        - do we need SketchPoint? at this time they get ignored and it works
-        - try out: in one sketch draw two different polylines and check sketch entities (sketchpoint as separation between?)
-            profile has information which entities belong to each other in one sketch
-    
-     */
     public class Shakespeare
     {
         //main lists
@@ -101,21 +88,15 @@ namespace InvAddIn
         {
             foreach (var partFeature in listOfObjects)
             {
-                //get names:
-                /*
-                partFeature.ExtendedName, //z.B. "Neue Rotation 45°"
-                partFeature.Name, //z.B. "Umdrehung1"
-                */
 
                 //create Sketch
-                //find out in which layer the sketch is orientated, eg. XY, XZ or YZ
-                //then rotate sketch if possible
                 _numberOfSketches++;
                 listOfCodeLines.Add("\t" + "//Sketch" + _numberOfSketches + ": ");
                 Sketch actualSketch = partFeature.Profile.Parent;
                 InterpreteSketch(actualSketch);
                 listOfCodeLines.Add(UnionSketch());
 
+                //do the magic -> make it threedimensional
                 InterpretePartFeature(partFeature);
 
                 listOfCodeLines.Add("");
@@ -172,6 +153,8 @@ namespace InvAddIn
 
 
             //TODO
+            //find out in which layer the sketch is orientated, eg. XY, XZ or YZ
+            //then rotate sketch if possible
             /*
             //check for axis
             //if yes then rotate
