@@ -272,6 +272,42 @@ namespace InvAddIn
 
 	        return javaScriptVariable.ToString();
 	    }
+
+        public static string ExportText(TextBox textbox, string entityName)
+        {
+            string label = textbox.Text;
+            double size = 1; //TODO
+            double posX = textbox.Origin.X;
+            double posY = textbox.Origin.Y - textbox.Height; // inventor uses upper-left, jscad lower-left
+            double extrudeWidth = 1; //TODO
+            double extrudeHeight = 1; //TODO
+
+            string nameLabel = entityName + "_Label";
+            string nameSize = entityName + "_Size";
+            string namePosX = entityName + "_PositionX";
+            string namePosY = entityName + "_PositionY";
+
+            Parameter param1 = new Parameter(nameLabel, "Label of " + entityName, "text", label, size);
+            Parameter param2 = new Parameter(nameSize, "Size of " + entityName, "float", size, 1);
+            Parameter param3 = new Parameter(namePosX, "Position X of " + entityName, "float", extrudeWidth, 0);
+            Parameter param4 = new Parameter(namePosY, "Position Y of " + entityName, "float", extrudeHeight, 0);
+
+            // TODO size 
+
+            string javaScriptVariable = "var " + entityName + " = vector_text(params." + namePosX + ", params." +
+                namePosY + ", params. " + nameLabel + "); \n";
+
+            // rotation?
+            // TODO extrude
+            string extrude = "var o = []\n";
+            extrude += entityName + ".forEach(function(s) {\n";
+            extrude += "\t o.push(rectangular_extrude(s, {w: " +  extrudeWidth + ", h: " + extrudeHeight + "}));\n";
+            extrude += "});\n";
+            extrude += "return union(o);";
+            javaScriptVariable += extrude;
+
+            return javaScriptVariable;
+        }
     }
 }
 

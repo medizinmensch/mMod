@@ -160,6 +160,16 @@ namespace InvAddIn
                     listOfSketchLines.Clear();
                 }
 
+                // for text
+                foreach(TextBox tbox in actualSketch.TextBoxes)
+                {
+                    string entityType = "text";
+                    listOfCodeLines.Add(Exporter.ExportText(tbox, entityType + NumberOfSketchEntities));
+                    listOfEntityNamesOfOneSketch.Add(entityType + NumberOfSketchEntities);
+                    NumberOfSketchEntities++;
+                }
+
+
         } //end of method InterpreteSketch
 
         private void InterpreteSketchEntity(SketchEntity sketchEntity)
