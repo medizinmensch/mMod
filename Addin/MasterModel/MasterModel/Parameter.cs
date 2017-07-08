@@ -24,6 +24,9 @@ namespace InvAddIn
         public double Initial { get; set; }
         public double Step { get; set; }
 
+        public string Initial_str { get; set; }
+        public double Size { get; set; }
+
         //optional parameters
 
         //when slider is used
@@ -55,26 +58,40 @@ namespace InvAddIn
             this.Max = max;
         }
 
+        // for text
+        public Parameter(String name, String caption, String parameterType, string initial,
+            double size)
+        {
+            this.Name = name;
+            this.Caption = caption;
+            this.ParameterType = parameterType;
+            this.Initial_str = initial;
+            this.Size = size;
+        }
 
         public string GetParameterString() {
 
             string completeString = "\t\t";
 
             completeString += "{ ";
+
             completeString += "name: '" + Name + "', ";
             completeString += "caption: '" + Caption + "', ";
             completeString += "type: '" + ParameterType + "', ";
-            completeString += "initial: '" + Initial.ToString(myCultureInfo) + "', ";
-            
-            if(ParameterType == "float")
+                  
+            if(ParameterType == "text")
             {
+                completeString += "initial: '" + Initial_str + "', ";
+                completeString += "size: '" + Size;
+            }else if(ParameterType == "float")
+            {
+                completeString += "initial: '" + Initial.ToString(myCultureInfo) + "', ";
                 completeString += "step: " + Step.ToString(myCultureInfo);
-            }
-
-            if(ParameterType == "slider") {
-                completeString += "step: " + Step.ToString(myCultureInfo) + ", ";     
+            }else if(ParameterType == "slider")
+            {
+                completeString += "step: " + Step.ToString(myCultureInfo) + ", ";
                 completeString += "max: " + Max.ToString(myCultureInfo) + ", ";
-                completeString += "min: " + Min.ToString(myCultureInfo);               
+                completeString += "min: " + Min.ToString(myCultureInfo);
             }
             completeString += " }";
 

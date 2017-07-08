@@ -97,7 +97,7 @@ namespace InvAddIn
             {
                 //get names:
                 /*
-                partFeature.ExtendedName, //z.B. "Neue Rotation 45°"
+                partFeature.ExtendedName, //z.B. "Neue Rotation 45ï¿½"
                 partFeature.Name, //z.B. "Umdrehung1"
                 */
 
@@ -121,6 +121,7 @@ namespace InvAddIn
                     listOfCodeLines.Add(RevolveSketch((RevolveFeature) partFeature));
                 }
 
+
                 //TODO
                 /*
                 //check for axis
@@ -135,9 +136,20 @@ namespace InvAddIn
                 bool needToTranslate = true;
                 if (needToTranslate)
                 {
-                    TranslateObject("z");
+                    StringBuilder lastLineOfCode = new StringBuilder(listOfCodeLines.Last());
+                    listOfCodeLines.RemoveAt(listOfCodeLines.Count - 1);
+
+                    //remove semicolon at end of line
+                    lastLineOfCode.Remove(lastLineOfCode.Length - 1, 1);
+
+                    //TODO
+                    //get value out of sketch or partFeature?!
+
+                    lastLineOfCode.Append(TranslateObject("z", value));
+                    listOfCodeLines.Add(lastLineOfCode.ToString());
                 }
                 */
+
 
                 listOfCodeLines.Add("");
                 listOfEntityNamesOfOneSketch.Clear();
@@ -159,6 +171,16 @@ namespace InvAddIn
                     _needToInterpreteSketchLine = false;
                     listOfSketchLines.Clear();
                 }
+
+                // for text
+                foreach(TextBox tbox in actualSketch.TextBoxes)
+                {
+                    string entityType = "text";
+                    listOfCodeLines.Add(Exporter.ExportText(tbox, entityType + NumberOfSketchEntities));
+                    listOfEntityNamesOfOneSketch.Add(entityType + NumberOfSketchEntities);
+                    NumberOfSketchEntities++;
+                }
+
 
         } //end of method InterpreteSketch
 
@@ -401,14 +423,17 @@ namespace InvAddIn
             //remove semicolon at end of line
             lastLine.Remove(lastLine.Length - 1, 1);
 
+            //switching XY -> XZ layer, rotating along x-axis 
             if (layer == "x")
             {
                 lastLine.Append(".rotateX(-90);");
             }
+            //switching XY -> YZ layer, rotating along x-axis 
             else if (layer == "y")
             {
                 lastLine.Append(".rotateY(-90);");
             }
+            //switching XZ -> YZ layer, rotating along x-axis 
             else if (layer == "z")
             {
                 lastLine.Append(".rotateZ(-90);");
@@ -419,14 +444,7 @@ namespace InvAddIn
 
         private string TranslateObject(string axis, double value)
         {
-            //translate only works for 3D objects, after extruding
-            StringBuilder lastLine = new StringBuilder(listOfCodeLines.Last());
-            listOfCodeLines.RemoveAt(listOfCodeLines.Count - 1);
-
-            //remove semicolon at end of line
-            lastLine.Remove(lastLine.Length - 1, 1);
-
-
+            //translate only works for 3D objects, after sketches got extruded/revolved
             if (axis == "z")
             {
                 return (".translate([0,0," + value.ToString(myCultureInfo) + "]);");
