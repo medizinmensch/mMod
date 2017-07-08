@@ -3,7 +3,6 @@ using System.Runtime.InteropServices;
 using System.Collections;
 using System.Drawing;
 using System.Windows.Forms;
-using Microsoft.VisualBasic.Compatibility.VB6;
 using Inventor;
 
 namespace InvAddIn

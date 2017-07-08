@@ -23,7 +23,8 @@ namespace InvAddIn
         public static List<Parameter> ListOfParameter = new List<Parameter>();
 
         public static List<string> listOfEntityNamesOfOneSketch = new List<string>();
-        private List<ExtrudeFeature> listOfObjects;
+        //consists of extrudeFeatures and revolveFeatures
+        private List<object> listOfObjects;
         private List<string> listOfObjectNames = new List<string>();
 
         //temporary lists
@@ -57,7 +58,7 @@ namespace InvAddIn
             listOfObjectNames.Clear();
 
             //get list of partFeatures
-            listOfObjects = masterModel.GetExtrudeFeatures();
+            listOfObjects = masterModel.GetFeatures();
             NumberOfSketchEntities = 1;
             _numberOfSketches = 0;
             _numberOfSubtractions = 0;
@@ -88,11 +89,26 @@ namespace InvAddIn
         {
             foreach (var partFeature in listOfObjects)
             {
+                Sketch actualSketch;
 
+                if (Microsoft.VisualBasic.Information.TypeName(partFeature) == "ExtrudeFeature")
+                {
+                    var extrudeFeature = (ExtrudeFeature) partFeature;
+                    actualSketch = extrudeFeature.Profile.Parent;
+                }
+                else if (Microsoft.VisualBasic.Information.TypeName(partFeature) == "RevolveFeature")
+                {
+                    var revolveFeature = (RevolveFeature) partFeature;
+                    actualSketch = revolveFeature.Profile.Parent;
+                }
+                else
+                {
+                    actualSketch = null;
+                }
                 //create Sketch
                 _numberOfSketches++;
                 listOfCodeLines.Add("\t" + "//Sketch" + _numberOfSketches + ": ");
-                Sketch actualSketch = partFeature.Profile.Parent;
+
                 InterpreteSketch(actualSketch);
                 listOfCodeLines.Add(UnionSketch());
 
@@ -104,49 +120,100 @@ namespace InvAddIn
             }
         } //end of method InterpretePartFeatures
 
-        private void InterpretePartFeature(ExtrudeFeature partFeature)
+        private void InterpretePartFeature(object partFeature)
         {
-            string firstObjectName = partFeature.Name;
-            string secondObjectName = "";
-
-            switch (partFeature.Operation)
+            if (Microsoft.VisualBasic.Information.TypeName(partFeature) == "ExtrudeFeature")
             {
-                //this is new extrusion or revolve
-                case PartFeatureOperationEnum.kNewBodyOperation:
-                    CreateObject(partFeature);
-                    listOfObjectNames.Add(firstObjectName);
-                    break;
+                var extrudeFeature = (ExtrudeFeature)partFeature;
+                string firstObjectName = extrudeFeature.Name;
+                string secondObjectName = "";
 
-                case PartFeatureOperationEnum.kJoinOperation:
-                    CreateObject(partFeature);
-                    listOfObjectNames.Add(firstObjectName);
-                    break;
+                switch (extrudeFeature.Operation)
+                {
+                    //this is new extrusion or revolve
+                    case PartFeatureOperationEnum.kNewBodyOperation:
+                        CreateExtrusion(extrudeFeature);
+                        listOfObjectNames.Add(firstObjectName);
+                        break;
 
-                //this case will create a new element aswell but it gets then cutted with another object
-                case PartFeatureOperationEnum.kCutOperation:
-                    CreateObject(partFeature);
+                    case PartFeatureOperationEnum.kJoinOperation:
+                        CreateExtrusion(extrudeFeature);
+                        listOfObjectNames.Add(firstObjectName);
+                        break;
 
-                    //TODO get other object name
-                    //secondObjectName = ...
-                    _numberOfSubtractions++;
-                    listOfObjectNames.Remove(secondObjectName);
-                    listOfObjectNames.Add("Subtraction" + _numberOfSubtractions);
-                    CutOperation("Extrusion1", firstObjectName);
-                    //TODO remove both object names out of listOfObjectNames, add one name
-                    break;
+                    //this case will create a new element aswell but it gets then cutted with another object
+                    case PartFeatureOperationEnum.kCutOperation:
+                        CreateExtrusion(extrudeFeature);
 
-                //this case will create a new element aswell but it gets then intersected with another object
-                case PartFeatureOperationEnum.kIntersectOperation:
-                    CreateObject(partFeature);
+                        //TODO get other object name
+                        //secondObjectName = ...
+                        _numberOfSubtractions++;
+                        listOfObjectNames.Remove(secondObjectName);
+                        listOfObjectNames.Add("Subtraction" + _numberOfSubtractions);
+                        CutOperation("Extrusion1", firstObjectName);
+                        //TODO remove both object names out of listOfObjectNames, add one name
+                        break;
 
-                    //TODO get other object name
-                    //secondObjectName = ...
-                    _numberOfIntersections++;
-                    listOfObjectNames.Remove(secondObjectName);
-                    listOfObjectNames.Add("Intersection" + _numberOfIntersections);
-                    IntersectOperation(partFeature.Name, firstObjectName);
-                    break;
+                    //this case will create a new element aswell but it gets then intersected with another object
+                    case PartFeatureOperationEnum.kIntersectOperation:
+                        CreateExtrusion(extrudeFeature);
+
+                        //TODO get other object name
+                        //secondObjectName = ...
+                        _numberOfIntersections++;
+                        listOfObjectNames.Remove(secondObjectName);
+                        listOfObjectNames.Add("Intersection" + _numberOfIntersections);
+                        IntersectOperation(extrudeFeature.Name, firstObjectName);
+                        break;
+                }
             }
+            else if (Microsoft.VisualBasic.Information.TypeName(partFeature) == "RevolveFeature")
+            {
+                var revolveFeature = (RevolveFeature)partFeature;
+                string firstObjectName = revolveFeature.Name;
+                string secondObjectName = "";
+
+                switch (revolveFeature.Operation)
+                {
+                    //this is new extrusion or revolve
+                    case PartFeatureOperationEnum.kNewBodyOperation:
+                        CreateRevolve(revolveFeature);
+                        listOfObjectNames.Add(firstObjectName);
+                        break;
+
+                    case PartFeatureOperationEnum.kJoinOperation:
+                        CreateRevolve(revolveFeature);
+                        listOfObjectNames.Add(firstObjectName);
+                        break;
+
+                    //this case will create a new element aswell but it gets then cutted with another object
+                    case PartFeatureOperationEnum.kCutOperation:
+                        CreateRevolve(revolveFeature);
+
+                        //TODO get other object name
+                        //secondObjectName = ...
+                        _numberOfSubtractions++;
+                        listOfObjectNames.Remove(secondObjectName);
+                        listOfObjectNames.Add("Subtraction" + _numberOfSubtractions);
+                        CutOperation("Extrusion1", firstObjectName);
+                        //TODO remove both object names out of listOfObjectNames, add one name
+                        break;
+
+                    //this case will create a new element aswell but it gets then intersected with another object
+                    case PartFeatureOperationEnum.kIntersectOperation:
+                        CreateRevolve(revolveFeature);
+
+                        //TODO get other object name
+                        //secondObjectName = ...
+                        _numberOfIntersections++;
+                        listOfObjectNames.Remove(secondObjectName);
+                        listOfObjectNames.Add("Intersection" + _numberOfIntersections);
+                        IntersectOperation(revolveFeature.Name, firstObjectName);
+                        break;
+                }
+            }
+
+            
 
 
 
@@ -347,7 +414,7 @@ namespace InvAddIn
             listOfCodeLines.Add("\t" + "var " + _numberOfIntersections + " = "+ actualVar + ".intersect(" + oldVar + ");");
         } //end of method IntersectOperation
 
-        private void CreateObject(ExtrudeFeature partFeature)
+        private void CreateExtrusion(ExtrudeFeature partFeature)
         {
             //check if partFeature is revolveFeature or extrudeFeature
             if (partFeature.Type == ObjectTypeEnum.kExtrudeFeatureObject)
@@ -358,7 +425,20 @@ namespace InvAddIn
             {
                 listOfCodeLines.Add(RevolveSketch((RevolveFeature)partFeature));
             }
-        } //end of method CreateObject
+        } //end of method CreateExtrusion
+
+        private void CreateRevolve(RevolveFeature partFeature)
+        {
+            //check if partFeature is revolveFeature or extrudeFeature
+            if (partFeature.Type == ObjectTypeEnum.kExtrudeFeatureObject)
+            {
+                listOfCodeLines.Add(ExtrudeSketch((ExtrudeFeature)partFeature));
+            }
+            else if (partFeature.Type == ObjectTypeEnum.kRevolveFeatureObject)
+            {
+                listOfCodeLines.Add(RevolveSketch((RevolveFeature)partFeature));
+            }
+        } //end of method CreateRevolve
 
         private string ExtrudeSketch(ExtrudeFeature extrudeFeature)
         {
