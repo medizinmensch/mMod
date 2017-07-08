@@ -97,12 +97,12 @@ namespace MasterModel
                 ButtON = new BenjaminButton(
                     "MasterModel", "MasterModel:StandardAddInServer:BenjaminBUTTON", CommandTypesEnum.kShapeEditCmdType,
                     addInCLSIDString, "Create a Master Model File",
-                    "keep the model simple", createMasterMIcon, createMasterMICON, ButtonDisplayEnum.kDisplayTextInLearningMode);
+                    "keep the model simple", createMasterMIcon, createMasterMICON, ButtonDisplayEnum.kDisplayTextInLearningMode,false);
                 //ButtON.HeySherlock = (PartDocument) m_inventorApplication.ActiveDocument;
                 Help = new BenjaminButton(
                     "Help", "Help:StandardAddInServer:BenjaminBUTTON", CommandTypesEnum.kShapeEditCmdType,
                     addInCLSIDString, "Help Create a Master Model File",
-                    "keep the model simple", createMasterMIcon, createMasterMICON, ButtonDisplayEnum.kDisplayTextInLearningMode);
+                    "keep the model simple", createMasterMIcon, createMasterMICON, ButtonDisplayEnum.kDisplayTextInLearningMode,true);
                 //create the command category
                 CommandCategory MasterMCmdCategory = m_inventorApplication.CommandManager.CommandCategories.Add("Master Model", "MasterModel:StandardAddInServer:BenjaminBUTTON", addInCLSIDString);
 
