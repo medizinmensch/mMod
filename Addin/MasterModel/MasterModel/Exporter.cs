@@ -276,7 +276,7 @@ namespace InvAddIn
         public static string ExportText(TextBox textbox, string entityName)
         {
             string label = textbox.Text;
-            double size = 1; //TODO
+            double size = 1; //TODO inventor uses height-width, jscad uses one size value
             double posX = textbox.Origin.X;
             double posY = textbox.Origin.Y - textbox.Height; // inventor uses upper-left, jscad lower-left
             double extrudeWidth = 1; //TODO
