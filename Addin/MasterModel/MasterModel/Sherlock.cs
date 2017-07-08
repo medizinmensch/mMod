@@ -15,14 +15,14 @@ namespace InvAddIn
     {
         //public PartDocument suspect;
         private readonly MasterM Partypart;
-
         /// <summary>
         /// Sherlock lets you Read all relevant Information for the jsCad processing from a PartDocument Inventor File
         /// </summary>
         /// <param name="suspect">your PartDocument you want to get information about</param>
-        public Sherlock(PartDocument suspect)
+        public Sherlock(PartDocument suspect, TransientGeometry transGeometry)
         {
-            Partypart = new MasterM(suspect);
+            Partypart = new MasterM(suspect, transGeometry);
+            
 
             WhatWhereWhy windowDialoge = new WhatWhereWhy(this);
             windowDialoge.Show();

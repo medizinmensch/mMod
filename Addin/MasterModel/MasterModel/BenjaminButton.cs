@@ -29,7 +29,8 @@ namespace InvAddIn
             try
             {
                 PartDocument wholeDocument = Button.InventorApplication.ActiveDocument as PartDocument;
-                Sherlock sherlockReader = new Sherlock(wholeDocument);
+                var transGeo = Button.InventorApplication.TransientGeometry;
+                Sherlock sherlockReader = new Sherlock(wholeDocument, transGeo);
 
             }
             catch (Exception e)
