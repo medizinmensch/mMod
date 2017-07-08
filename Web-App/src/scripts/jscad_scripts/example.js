@@ -23,7 +23,7 @@ function main(params) {
 function getParameterDefinitions() {
 	return [
 		{ name: 'circle1_Radius', caption: 'radius of circle1', type: 'float', initial: '12.7', step: 0.1 },
-		{ name: 'circle1_CenterX', caption: 'X-Coordinate of circle1', type: 'float', initial: '-5.057', step: 0.1 },
+		{ name: 'circle1_CenterX', caption: 'X-Coordinate of circle1', type: 'float', initial: '24', step: 0.1 },
 		{ name: 'circle1_CenterY', caption: 'Y-Coordinate of circle1', type: 'float', initial: '0', step: 0.1 },
 		{ name: 'circle2_Radius', caption: 'radius of circle2', type: 'float', initial: '25.4', step: 0.1 },
 		{ name: 'circle2_CenterX', caption: 'X-Coordinate of circle2', type: 'float', initial: '-21.233', step: 0.1 },

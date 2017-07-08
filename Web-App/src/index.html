@@ -38,7 +38,7 @@ History:
             <div class="dropdown">
                 <!--ein weiteres dropdown menü, dass etwas schicker aussieht und später verwendet wird.
                 zum jetztigen zeitpunkt noch nicht eingebunden-->
-                <button onclick="myFunction()" class="dropbtn">Mastermodell</button>
+                <button onclick="myFunction()" class="dropbtn">Mastermodel</button>
                 <div id="myDropdown" class="dropdown-content">
                     <a id="example" href="#">Example</a>
                     <a id="parametricAxisCoupler" href="#">Parametric Axis Coupler</a>
@@ -65,19 +65,20 @@ History:
 
     <!--3YOURMIND upload-->
     <script>
+
         var QueryString = function () {
             // Helper to get URL paraeters
             var query_string = {};
             var query = window.location.search.substring(1);
             var vars = query.split("&");
-            for (var i = 0; i < vars.length; i++) {
+            for (var i=0;i<vars.length;i++) {
                 var pair = vars[i].split("=");
                 // If first entry with this name
                 if (typeof query_string[pair[0]] === "undefined") {
                     query_string[pair[0]] = decodeURIComponent(pair[1]);
                     // If second entry with this name
                 } else if (typeof query_string[pair[0]] === "string") {
-                    var arr = [query_string[pair[0]], decodeURIComponent(pair[1])];
+                    var arr = [ query_string[pair[0]],decodeURIComponent(pair[1]) ];
                     query_string[pair[0]] = arr;
                     // If third or later entry with this name
                 } else {
@@ -86,20 +87,24 @@ History:
             }
             return query_string;
         }();
+
+
         function upload() {
             var form_data = new FormData();
             form_data.append('file', configurator.get_stl(), 'generated-model.stl');
             form_data.append('origin', 'jscad_app');
             form_data.append('domain', QueryString.domain);
+
             // API call via AJAX (POST)
             var req = $.ajax({
-                headers: { Accept: 'application/json' },
+                headers: {Accept: 'application/json'},
                 url: 'https://api.3yourmind.com/upload',
                 type: 'POST',
                 data: form_data,
                 processData: false,
                 contentType: false
             });
+
             req.done(function (results) {
                 if (results.success) {
                     console.log(results.url);
@@ -109,11 +114,14 @@ History:
                     console.log(results)
                 }
             });
+
             req.fail(function (results) {
                 console.log("error sending request");
                 console.log(results);
             });
+
         }
+
         /* When the user clicks on the button, 
         toggle between hiding and showing the dropdown content */
         function myFunction() {
@@ -158,7 +166,7 @@ History:
                 configurator.processor.setJsCad(source, actualPath);
             };
             xhr.send();
-            //globale variable den aktuellen pfad geben
+            //globaler variable den aktuellen pfad geben
             jscad_script = actualPath;
         }
 
