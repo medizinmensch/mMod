@@ -35,6 +35,7 @@ namespace MasterModel
 
         //buttons
         private BenjaminButton ButtON;
+        private BenjaminButton Help;
 
         //user interface event
         private UserInterfaceEvents m_userInterfaceEvents;
@@ -98,10 +99,15 @@ namespace MasterModel
                     addInCLSIDString, "Create a Master Model File",
                     "keep the model simple", createMasterMIcon, createMasterMICON, ButtonDisplayEnum.kDisplayTextInLearningMode);
                 //ButtON.HeySherlock = (PartDocument) m_inventorApplication.ActiveDocument;
+                Help = new BenjaminButton(
+                    "Help", "Help:StandardAddInServer:BenjaminBUTTON", CommandTypesEnum.kShapeEditCmdType,
+                    addInCLSIDString, "Help Create a Master Model File",
+                    "keep the model simple", createMasterMIcon, createMasterMICON, ButtonDisplayEnum.kDisplayTextInLearningMode);
                 //create the command category
                 CommandCategory MasterMCmdCategory = m_inventorApplication.CommandManager.CommandCategories.Add("Master Model", "MasterModel:StandardAddInServer:BenjaminBUTTON", addInCLSIDString);
 
                 MasterMCmdCategory.Add(ButtON.ButtonDefinition);
+                MasterMCmdCategory.Add(Help.ButtonDefinition);
 
                 if (firstTime == true)
                 {
@@ -121,7 +127,8 @@ namespace MasterModel
 
                         //add buttons to toolbar
                         MasterCommander.Controls.AddButton(ButtON.ButtonDefinition, 0);
-                        
+                        MasterCommander.Controls.AddButton(Help.ButtonDefinition, 0);
+
                         //Get the 2d sketch environment base object
                         Inventor.Environment partToolEnvironment;
                         partToolEnvironment = userInterfaceManager.Environments["PMxPartSkEnvironment"];
@@ -160,6 +167,7 @@ namespace MasterModel
                         //add the buttons to the ribbon panel
                         CommandControl MasterMoRiPaCtrl;
                         MasterMoRiPaCtrl = partToolMasterRibbonPanelCtrls.AddButton(ButtON.ButtonDefinition, false, true, "", false);
+                        MasterMoRiPaCtrl = partToolMasterRibbonPanelCtrls.AddButton(Help.ButtonDefinition, false, true, "", false);
                     }
                 }
             }
@@ -234,6 +242,7 @@ namespace MasterModel
 
                         //add buttons to toolbar
                         commandBar.Controls.AddButton(ButtON.ButtonDefinition, 0);
+                        commandBar.Controls.AddButton(Help.ButtonDefinition, 0);
 
                         return;
                     }
@@ -304,6 +313,7 @@ namespace MasterModel
                 //add the buttons to the ribbon panel
                 CommandControl MasterCommander;
                 MasterCommander = partSketchMasterMoRiPaCtrl.AddButton(ButtON.ButtonDefinition, false, true, "", false);
+                MasterCommander = partSketchMasterMoRiPaCtrl.AddButton(Help.ButtonDefinition, false, true, "", false);
             }
             catch (Exception e)
             {
