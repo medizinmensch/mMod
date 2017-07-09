@@ -38,16 +38,16 @@ History:
             <div class="dropdown">
                 <!--ein weiteres dropdown menü, dass etwas schicker aussieht und später verwendet wird.
                 zum jetztigen zeitpunkt noch nicht eingebunden-->
-                <button onclick="myFunction()" class="dropbtn">Mastermodel</button>
+                <button onclick="myFunction()" id="dropbtn" class="dropbtn">Mastermodel</button>
                 <div id="myDropdown" class="dropdown-content">
-                    <a id="example" href="#">Example</a>
-                    <a id="parametricAxisCoupler" href="#">Parametric Axis Coupler</a>
-                    <a id="parametricGrille" href="#">Parametric Grille</a>
-                    <a id="involuteGear" href="#">Involute Gear</a>
+                    <a id="dropdown_example" href="#">Example</a>
+                    <a id="dropdown_parametricAxisCoupler" href="#">Parametric Axis Coupler</a>
+                    <a id="dropdown_parametricGrille" href="#">Parametric Grille</a>
+                    <a id="dropdown_involuteGear" href="#">Involute Gear</a>
                 </div>
             </div>
             <input type="hidden" name="hiddenInput" id="hiddenInput" value="" />
-            <button class="testButton" onclick="reset()">Reset</button>
+            <button id="reset" class="testButton" onclick="reset()">Reset</button>
             <button class="testButton" onclick="upload()">Print it!</button>
         </div>
         <div id="parametersdiv" style="display: block;"></div>
@@ -157,7 +157,7 @@ History:
 
         function switchMMB(fileName) {
             //sicherheitsabfrage einbauen
-            alert("Ihr Mastermodell wird geändert.");
+            //alert("Ihr Mastermodell wird geändert.");
             var actualPath = "scripts/jscad_scripts/" + fileName;
             var xhr = new XMLHttpRequest();
             xhr.open("GET", actualPath, true);
@@ -168,26 +168,17 @@ History:
             xhr.send();
             //globaler variable den aktuellen pfad geben
             jscad_script = actualPath;
+            str = "dropbtn";
+            str2= "dropdown_";
+            document.getElementById(str).innerHTML = document.getElementById(str2.concat(fileName).slice()).innerHTML; //fileName.substring(0,fileName.length-3)
         }
 
-        function reset() {
-            //sicherheitsabfrage einbauen
-            alert("Ihr Mastermodell wird zurückgesetzt. Bitte warten...");
-            var actualPath = jscad_script;
-            //var actualPath = "scripts/jscad_scripts/parametricGrille.js";
-            var xhr = new XMLHttpRequest();
-            xhr.open("GET", actualPath, true);
-            xhr.onload = function () {
-                var source = this.responseText;
-                configurator.processor.setJsCad(source, actualPath);
-            };
-            xhr.send();
-        }
+        document.getElementById("reset").addEventListener("click", function () { switchMMB("example.js"); }, false)
 
-        document.getElementById("example").addEventListener("click", function () { switchMMB("example.js"); }, false)
-        document.getElementById("parametricAxisCoupler").addEventListener("click", function () { switchMMB("parametricAxisCoupler.js"); }, false);
-        document.getElementById("parametricGrille").addEventListener("click", function () { switchMMB("parametricGrille.js"); }, false)
-        document.getElementById("involuteGear").addEventListener("click", function () { switchMMB("involuteGear.js"); }, false)
+        document.getElementById("dropdown_example").addEventListener("click", function () { switchMMB("example.js"); }, false)
+        document.getElementById("dropdown_parametricAxisCoupler").addEventListener("click", function () { switchMMB("parametricAxisCoupler.js"); }, false);
+        document.getElementById("dropdown_parametricGrille").addEventListener("click", function () { switchMMB("parametricGrille.js"); }, false)
+        document.getElementById("dropdown_involuteGear").addEventListener("click", function () { switchMMB("involuteGear.js"); }, false)
         
     </script>
 </body>

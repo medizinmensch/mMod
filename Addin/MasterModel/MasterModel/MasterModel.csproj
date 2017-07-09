@@ -91,12 +91,6 @@
     <Compile Include="StandardAddInServer.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="WhatWhereWhy.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="WhatWhereWhy.Designer.cs">
-      <DependentUpon>WhatWhereWhy.cs</DependentUpon>
-    </Compile>
     <Compile Include="Exporter.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -113,15 +107,18 @@
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Include="WhatWhereWhy.resx">
-      <DependentUpon>WhatWhereWhy.cs</DependentUpon>
-    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\CreateMasterM.ico" />
   </ItemGroup>
   <ItemGroup>
     <None Include="CreateMasterM.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\How_To.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\icon1.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
