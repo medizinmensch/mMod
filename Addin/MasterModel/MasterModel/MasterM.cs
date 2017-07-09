@@ -140,42 +140,19 @@ namespace InvAddIn
             Symetric
         }
 
-        public static List<string> GetAffectedBodyNames(object extrudeOrRevolveFeature)
+        public static List<string> GetAffectedBodyNames(ExtrudeFeature extrudeFeature)
         {
             List<string> affecdedBodyList = new List<string>();
 
-            var type = Microsoft.VisualBasic.Information.TypeName(extrudeOrRevolveFeature);
-            if (type == "RevolveFeature")
+            if (extrudeFeature.Operation == PartFeatureOperationEnum.kIntersectOperation ||
+                extrudeFeature.Operation == PartFeatureOperationEnum.kCutOperation) //Intersect & Cut
             {
-                var extrudeFeature = extrudeOrRevolveFeature as RevolveFeature;
-
-                if (extrudeFeature.Operation == PartFeatureOperationEnum.kIntersectOperation ||
-                    extrudeFeature.Operation == PartFeatureOperationEnum.kCutOperation) //Intersect & Cut
+                foreach (object affectedBody in extrudeFeature.Definition.AffectedBodies)
                 {
-                    foreach (object affectedBody in extrudeFeature.Definition.AffectedBodies)
+                    string tmp = Microsoft.VisualBasic.Information.TypeName(affectedBody);
+                    if (Microsoft.VisualBasic.Information.TypeName(affectedBody) == "SurfaceBody")
                     {
-                        string tmp = Microsoft.VisualBasic.Information.TypeName(affectedBody);
-                        if (Microsoft.VisualBasic.Information.TypeName(affectedBody) == "SurfaceBody")
-                        {
-                            affecdedBodyList.Add((affectedBody as SurfaceBody).Name);
-                        }
-                    }
-                }
-            }
-            else
-            {
-                var extrudeFeature = extrudeOrRevolveFeature as ExtrudeFeature;
-
-                if (extrudeFeature.Operation == PartFeatureOperationEnum.kIntersectOperation ||
-                    extrudeFeature.Operation == PartFeatureOperationEnum.kCutOperation) //Intersect & Cut
-                {
-                    foreach (object affectedBody in extrudeFeature.Definition.AffectedBodies)
-                    {
-                        string tmp = Microsoft.VisualBasic.Information.TypeName(affectedBody);
-                        if (Microsoft.VisualBasic.Information.TypeName(affectedBody) == "SurfaceBody")
-                        {
-                            affecdedBodyList.Add((affectedBody as SurfaceBody).Name);
-                        }
+                        affecdedBodyList.Add((affectedBody as SurfaceBody).Name);
                     }
                 }
             }
@@ -189,9 +166,6 @@ namespace InvAddIn
             toReturn.AddRange(GetRevolveFeatures());
             return toReturn;
         }
-
-
-
 
         #region Instructions
 
