@@ -38,6 +38,17 @@ namespace InvAddIn
                 else
                 {
                     Sherlock sherlockReader = new Sherlock(wholeDocument, transGeo);
+
+                    // Displays a SaveFileDialog so the user can save the File
+                    SaveFileDialog saveFileDialog = new SaveFileDialog()
+                    {
+                        Filter = "OpenJSCAD / JavaScript|*.js",
+                        Title = "Save as MasterModel",
+                        CheckPathExists = true
+                    };
+
+                    if (saveFileDialog.ShowDialog() == DialogResult.OK && !string.IsNullOrEmpty(saveFileDialog.FileName))
+                        sherlockReader.ShowShakespeare(saveFileDialog.FileName);
                 }
 
             }
