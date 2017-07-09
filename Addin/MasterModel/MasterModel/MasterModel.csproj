@@ -123,6 +123,12 @@
   <ItemGroup>
     <None Include="CreateMasterM.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\How_To.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\icon1.ico" />
+  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>

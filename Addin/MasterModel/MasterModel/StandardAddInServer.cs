@@ -83,9 +83,11 @@ namespace MasterModel
                 m_userInterfaceEvents.OnResetRibbonInterface += UserInterfaceEventsSink_OnResetRibbonInterfaceEventDelegate;
 
                 //load image icons for UI items
-                //Icon createMasterMIcon = new Icon(this.GetType(), "CreateMasterM.ico");
                 IPictureDisp createMasterMIcon = AxHostConverter.ImageToPictureDisp(Resources.CreateMasterM.ToBitmap());
                 IPictureDisp createMasterMICON = AxHostConverter.ImageToPictureDisp(Resources.CreateMasterM.ToBitmap());
+
+                IPictureDisp helpIcon = AxHostConverter.ImageToPictureDisp(Resources.icon1.ToBitmap());
+                IPictureDisp helpICON = AxHostConverter.ImageToPictureDisp(Resources.icon1.ToBitmap());
 
                 //retrieve the GUID for this class
                 GuidAttribute addInCLSID;
@@ -100,9 +102,9 @@ namespace MasterModel
                     "keep the model simple", createMasterMIcon, createMasterMICON, ButtonDisplayEnum.kDisplayTextInLearningMode,false);
                 //ButtON.HeySherlock = (PartDocument) m_inventorApplication.ActiveDocument;
                 Help = new BenjaminButton(
-                    "Help", "Help:StandardAddInServer:BenjaminBUTTON", CommandTypesEnum.kShapeEditCmdType,
-                    addInCLSIDString, "Help Create a Master Model File",
-                    "keep the model simple", createMasterMIcon, createMasterMICON, ButtonDisplayEnum.kDisplayTextInLearningMode,true);
+                    "How to", "Help:StandardAddInServer:BenjaminBUTTON", CommandTypesEnum.kShapeEditCmdType,
+                    addInCLSIDString, "Help Creating a Master Model File",
+                    "keep the model simple", helpIcon, helpICON, ButtonDisplayEnum.kDisplayTextInLearningMode,true);
                 //create the command category
                 CommandCategory MasterMCmdCategory = m_inventorApplication.CommandManager.CommandCategories.Add("Master Model", "MasterModel:StandardAddInServer:BenjaminBUTTON", addInCLSIDString);
 
