@@ -57,10 +57,10 @@ namespace InvAddIn
             listOfCodeLines.Clear();
             listOfObjectNames.Clear();
 
-            //get list of partFeatures
+            //get list of partFeatures (extrudeFeatures & RevolveFeature)
             listOfObjects = masterModel.GetFeatures();
             NumberOfSketchEntities = 1;
-            _numberOfSketches = 0;
+            _numberOfSketches = 1;
             _numberOfSubtractions = 0;
             _numberOfIntersections = 0;
 
@@ -91,6 +91,7 @@ namespace InvAddIn
             {
                 Sketch actualSketch;
 
+                //could not find a simpler method to determine which type the object is
                 if (Microsoft.VisualBasic.Information.TypeName(partFeature) == "ExtrudeFeature")
                 {
                     var extrudeFeature = (ExtrudeFeature) partFeature;
@@ -103,152 +104,128 @@ namespace InvAddIn
                 }
                 else
                 {
-                    actualSketch = null;
+                    //do not interprete because we just cant...
+                    continue;
                 }
-                //create Sketch
-                _numberOfSketches++;
-                listOfCodeLines.Add("\t" + "//Sketch" + _numberOfSketches + ": ");
 
+                //create Sketch
+                listOfCodeLines.Add("\t" + "//Sketch" + _numberOfSketches + ": ");
                 InterpreteSketch(actualSketch);
                 listOfCodeLines.Add(UnionSketch());
+                listOfEntityNamesOfOneSketch.Clear();
 
-                //do the magic -> make it threedimensional
+                //do the magic -> make the sketch threedimensional
                 InterpretePartFeature(partFeature);
 
                 listOfCodeLines.Add("");
-                listOfEntityNamesOfOneSketch.Clear();
+                _numberOfSketches++;
             }
         } //end of method InterpretePartFeatures
 
         private void InterpretePartFeature(object partFeature)
         {
-            if (Microsoft.VisualBasic.Information.TypeName(partFeature) == "ExtrudeFeature")
+            switch (Microsoft.VisualBasic.Information.TypeName(partFeature))
             {
-                var extrudeFeature = (ExtrudeFeature)partFeature;
-                string firstObjectName = extrudeFeature.Name;
-                string secondObjectName = "";
-
-                switch (extrudeFeature.Operation)
+                case "ExtrudeFeature":
                 {
-                    //this is new extrusion or revolve
-                    case PartFeatureOperationEnum.kNewBodyOperation:
-                        CreateExtrusion(extrudeFeature);
-                        listOfObjectNames.Add(firstObjectName);
-                        break;
+                    ExtrudeFeature extrudeFeature = (ExtrudeFeature)partFeature;
+                    string firstObjectName = extrudeFeature.Name;
+                    string secondObjectName;
 
-                    case PartFeatureOperationEnum.kJoinOperation:
-                        CreateExtrusion(extrudeFeature);
-                        listOfObjectNames.Add(firstObjectName);
-                        break;
+                    //no matter which operation will be executed, object gets created
+                    listOfCodeLines.Add(ExtrudeSketch(extrudeFeature));
 
-                    //this case will create a new element aswell but it gets then cutted with another object
-                    case PartFeatureOperationEnum.kCutOperation:
-                        CreateExtrusion(extrudeFeature);
+                    switch (extrudeFeature.Operation)
+                    {
+                        //this is new extrusion or revolve
+                        case PartFeatureOperationEnum.kNewBodyOperation:
+                            listOfObjectNames.Add(firstObjectName);
+                            break;
 
-                        //TODO get other object name
-                        //secondObjectName = ...
-                        _numberOfSubtractions++;
-                        listOfObjectNames.Remove(secondObjectName);
-                        listOfObjectNames.Add("Subtraction" + _numberOfSubtractions);
-                        CutOperation("Extrusion1", firstObjectName);
-                        //TODO remove both object names out of listOfObjectNames, add one name
-                        break;
+                        case PartFeatureOperationEnum.kJoinOperation:
+                            listOfObjectNames.Add(firstObjectName);
+                            break;
 
-                    //this case will create a new element aswell but it gets then intersected with another object
-                    case PartFeatureOperationEnum.kIntersectOperation:
-                        CreateExtrusion(extrudeFeature);
+                        //this case uses new created object and will cut it with another object
+                        case PartFeatureOperationEnum.kCutOperation:
 
-                        //TODO get other object name
-                        //secondObjectName = ...
-                        _numberOfIntersections++;
-                        listOfObjectNames.Remove(secondObjectName);
-                        listOfObjectNames.Add("Intersection" + _numberOfIntersections);
-                        IntersectOperation(extrudeFeature.Name, firstObjectName);
-                        break;
+                            //TODO get other object name(s), which interfere with object
+                            //method kinda works. not returning the name i am using
+                            secondObjectName = string.Join(",", MasterM.GetAffectedBodyNames(extrudeFeature));
+
+                            //old object gets deleted, new subtraction gets created which includs both objects
+                            _numberOfSubtractions++;
+                            listOfObjectNames.Remove(secondObjectName);
+                            listOfObjectNames.Add("Subtraction" + _numberOfSubtractions);
+                            CutOperation(secondObjectName, firstObjectName);
+                            break;
+
+                        //this case uses new created object and will intersect it with another object
+                        case PartFeatureOperationEnum.kIntersectOperation:
+
+                            //method kinda works. not returning the name i am using
+                            secondObjectName = string.Join(",", MasterM.GetAffectedBodyNames(extrudeFeature));
+
+                            //old object gets deleted, new intersection gets created which includs both objects
+                            _numberOfIntersections++;
+                            listOfObjectNames.Remove(secondObjectName);
+                            listOfObjectNames.Add("Intersection" + _numberOfIntersections);
+                            IntersectOperation(secondObjectName, firstObjectName);
+                            break;
+                    }
                 }
-            }
-            else if (Microsoft.VisualBasic.Information.TypeName(partFeature) == "RevolveFeature")
-            {
-                var revolveFeature = (RevolveFeature)partFeature;
-                string firstObjectName = revolveFeature.Name;
-                string secondObjectName = "";
-
-                switch (revolveFeature.Operation)
+                break;
+                case "RevolveFeature":
                 {
-                    //this is new extrusion or revolve
-                    case PartFeatureOperationEnum.kNewBodyOperation:
-                        CreateRevolve(revolveFeature);
-                        listOfObjectNames.Add(firstObjectName);
-                        break;
+                    //revolving is not really working like in inventor. openjscad is always revolving around y-axis
+                    //so when revolveFeature is used we will create it but it will be at a different spot
+                    //and maybe interfere with another object
+                    var revolveFeature = (RevolveFeature)partFeature;
+                    string firstObjectName = revolveFeature.Name;
 
-                    case PartFeatureOperationEnum.kJoinOperation:
-                        CreateRevolve(revolveFeature);
-                        listOfObjectNames.Add(firstObjectName);
-                        break;
+                    //no matter which operation will be executed, object gets created
+                    listOfCodeLines.Add(RevolveSketch(revolveFeature));
 
-                    //this case will create a new element aswell but it gets then cutted with another object
-                    case PartFeatureOperationEnum.kCutOperation:
-                        CreateRevolve(revolveFeature);
+                    switch (revolveFeature.Operation)
+                    {
+                        case PartFeatureOperationEnum.kNewBodyOperation:
+                            listOfObjectNames.Add(firstObjectName);
+                            break;
 
-                        //TODO get other object name
-                        //secondObjectName = ...
-                        _numberOfSubtractions++;
-                        listOfObjectNames.Remove(secondObjectName);
-                        listOfObjectNames.Add("Subtraction" + _numberOfSubtractions);
-                        CutOperation("Extrusion1", firstObjectName);
-                        //TODO remove both object names out of listOfObjectNames, add one name
-                        break;
+                        case PartFeatureOperationEnum.kJoinOperation:
+                            listOfObjectNames.Add(firstObjectName);
+                            break;
 
-                    //this case will create a new element aswell but it gets then intersected with another object
-                    case PartFeatureOperationEnum.kIntersectOperation:
-                        CreateRevolve(revolveFeature);
-
-                        //TODO get other object name
-                        //secondObjectName = ...
-                        _numberOfIntersections++;
-                        listOfObjectNames.Remove(secondObjectName);
-                        listOfObjectNames.Add("Intersection" + _numberOfIntersections);
-                        IntersectOperation(revolveFeature.Name, firstObjectName);
-                        break;
+                        case PartFeatureOperationEnum.kCutOperation:
+                            listOfObjectNames.Add(firstObjectName);
+                            break;
+                        case PartFeatureOperationEnum.kIntersectOperation:
+                            listOfObjectNames.Add(firstObjectName);
+                            break;
+                    }
                 }
+                break;
             }
 
-            
-
-
-
-
-
+            /*
             //TODO
             //find out in which layer the sketch is orientated, eg. XY, XZ or YZ
             //then rotate sketch if possible
-            /*
-            //check for axis
-            //if yes then rotate
-            if (_numberOfSketches == 1)
+
+            bool needToRotate = true;
+            if (rotationIsNeeded)
             {
-                RotateObject("x");
+                AppendToLastLineOfCode(RotateObject("x"));
+                
             }
 
-
-            //check for translation
+            //if sketch is not on BasePlane it has to be translated
             bool needToTranslate = true;
             if (needToTranslate)
             {
-                StringBuilder lastLineOfCode = new StringBuilder(listOfCodeLines.Last());
-                listOfCodeLines.RemoveAt(listOfCodeLines.Count - 1);
-
-                //remove semicolon at end of line
-                lastLineOfCode.Remove(lastLineOfCode.Length - 1, 1);
-
-                //TODO
-                //get value out of sketch or partFeature?!
-
-                lastLineOfCode.Append(TranslateObject("z", value));
-                listOfCodeLines.Add(lastLineOfCode.ToString());
+                AppendToLastLineOfCode(TranslateObject("z", value, false));
             }
             */
-
         } //end of method InterpretePartFeature
 
         private void InterpreteSketch(Sketch actualSketch) 
@@ -414,57 +391,31 @@ namespace InvAddIn
             listOfCodeLines.Add("\t" + "var " + _numberOfIntersections + " = "+ actualVar + ".intersect(" + oldVar + ");");
         } //end of method IntersectOperation
 
-        private void CreateExtrusion(ExtrudeFeature partFeature)
-        {
-            //check if partFeature is revolveFeature or extrudeFeature
-            if (partFeature.Type == ObjectTypeEnum.kExtrudeFeatureObject)
-            {
-                listOfCodeLines.Add(ExtrudeSketch((ExtrudeFeature)partFeature));
-            }
-            else if (partFeature.Type == ObjectTypeEnum.kRevolveFeatureObject)
-            {
-                listOfCodeLines.Add(RevolveSketch((RevolveFeature)partFeature));
-            }
-        } //end of method CreateExtrusion
-
-        private void CreateRevolve(RevolveFeature partFeature)
-        {
-            //check if partFeature is revolveFeature or extrudeFeature
-            if (partFeature.Type == ObjectTypeEnum.kExtrudeFeatureObject)
-            {
-                listOfCodeLines.Add(ExtrudeSketch((ExtrudeFeature)partFeature));
-            }
-            else if (partFeature.Type == ObjectTypeEnum.kRevolveFeatureObject)
-            {
-                listOfCodeLines.Add(RevolveSketch((RevolveFeature)partFeature));
-            }
-        } //end of method CreateRevolve
-
         private string ExtrudeSketch(ExtrudeFeature extrudeFeature)
         {
             StringBuilder extrusionLine = new StringBuilder();
             MasterM.ExtrudeDirection direction = MasterM.GetDirection(extrudeFeature);
             string objectName = extrudeFeature.Name;
+            string name = "Extrusion" + _numberOfSketches;
 
             if (direction == MasterM.ExtrudeDirection.Positive)
             {
                 if (extrudeFeature.ExtentType == PartFeatureExtentEnum.kDistanceExtent)
                 {
+                    //get length of extrusion
                     Inventor.Parameter param = (extrudeFeature.Definition.Extent as DistanceExtent).Distance;
-                    double height = param._Value * factor;
-                    string name = "Extrusion" + _numberOfSketches;
+                    double length = param._Value * factor;
                     string paramString = "params." + name;
-                    Parameter extrusionParameter = new Parameter(name, "Length of " + name, "float", height, 0.1);
+                    Parameter extrusionParameter = new Parameter(name, "Length of " + name, "float", length, 0.1);
                     ListOfParameter.Add(extrusionParameter);
 
-                    //extrusionLine.Append("\t" + "var " + objectName + " = sketch" + _numberOfSketches + ".extrude({ offset: [0,0," + height.ToString(myCultureInfo) + "] });");
+                    //with parameter:
                     extrusionLine.Append("\t" + "var " + objectName + " = sketch" + _numberOfSketches + ".extrude({ offset: [0,0," + paramString + "] });");
-
+                    //without parameter:
+                    //extrusionLine.Append("\t" + "var " + objectName + " = sketch" + _numberOfSketches + ".extrude({ offset: [0,0," + height.ToString(myCultureInfo) + "] });");
                 }
-                else
-                {
-                    //hopefully we wont come to this point
-                    //extruding with 10
+                else //default: extruding with 10
+                { 
                     extrusionLine.Append("\t" + "var " + objectName + " = sketch" + _numberOfSketches + ".extrude({ offset: [0,0,10] });");
                 }
             }
@@ -472,34 +423,33 @@ namespace InvAddIn
             {
                 if (extrudeFeature.ExtentType == PartFeatureExtentEnum.kDistanceExtent)
                 {
-                    //because you cant choose a direction we extrude the same direction but then translating in the reversed direction
-                    Inventor.Parameter param = (extrudeFeature.Definition.Extent as DistanceExtent).Distance;
+                    //because when extruding in openjscad you cant choose a direction 
+                    //we extrude in the same direction but then translating same length in reversed direction
 
-                    double height = param._Value * factor;
-                    string name = "Extrusion" + _numberOfSketches;
+                    //get length of extrusion
+                    Inventor.Parameter param = (extrudeFeature.Definition.Extent as DistanceExtent).Distance;
+                    double length = param._Value * factor;
                     string paramString = "params." + name;
-                    Parameter extrusionParameter = new Parameter(name, "Length of " + name, "float", height, 0.1);
+                    Parameter extrusionParameter = new Parameter(name, "Length of " + name, "float", length, 0.1);
                     ListOfParameter.Add(extrusionParameter);
 
-                    //extrusionLine.Append("\t" + "var " + objectName + " = sketch" + _numberOfSketches + ".extrude({ offset: [0,0," + height.ToString(myCultureInfo) + "] });");
+                    //with parameter:
                     extrusionLine.Append("\t" + "var " + objectName + " = sketch" + _numberOfSketches + ".extrude({ offset: [0,0," + paramString + "] })");
-
-                    //parameter:
                     extrusionLine.Append(TranslateObject("z", paramString, true));
-                    //without parameter
+
+                    //without parameter:
+                    //extrusionLine.Append("\t" + "var " + objectName + " = sketch" + _numberOfSketches + ".extrude({ offset: [0,0," + height.ToString(myCultureInfo) + "] });");
                     //extrusionLine.Append(TranslateObject("z", height.ToString(myCultureInfo), true));
                 }
-                else
+                else //default: extruding with 10
                 {
-                    //hopefully we wont come to this point :D
-                    //extruding with 10
                     extrusionLine.Append("\t" + "var " + objectName + " = sketch" + _numberOfSketches + ".extrude({ offset: [0,0,10] });");
                 }
             }
             else //if(direction == ExtrudeDirection.Symetric)
             {
-                //translate distance/2
                 //extrude distance
+                //translate distance/2
             }
 
             return extrusionLine.ToString();
@@ -507,18 +457,19 @@ namespace InvAddIn
 
         private string RevolveSketch(RevolveFeature revolveFeature)
         {
-            //rotation is always around the z-axis
-            //var object = rotate_extrude({fn:4}, sketch);
-
-            //do we need revolveFeature as parameter here?
-            //we can vary fn?
+            //revolving a sketch in openjscad will result in a rotation around the z-axis (y-axis in inventor)
+            //so the resulting object will be orientated differently then the one in inventor (probably)
 
             string objectName = revolveFeature.Name;
-
             StringBuilder rotationLine = new StringBuilder();
+
+            //var object = rotate_extrude({fn:4}, sketch);
             rotationLine.Append("\t" + "var " + objectName + " = rotate_extrude(sketch" + _numberOfSketches + ");");
-            rotationLine.Append("\n");
-            rotationLine.Append("\t" + objectName + " = " + objectName + ".rotateX(-90);");
+
+            //if we could find out on which plane the sketch was orientated originally
+            //we could rotate the new object so it is an the right plane again
+            //rotationLine.Append("\n");
+            //rotationLine.Append("\t" + objectName + " = " + objectName + RotateObject("x"));
 
             return rotationLine.ToString();
 
@@ -560,34 +511,24 @@ namespace InvAddIn
 
         } //end of method UnionAllObjects
 
-        private void RotateObject(string layer)
+        private string RotateObject(string layer)
         {
-            //todo
             //this method switches the layer in which the sketch is positioned
 
-            StringBuilder lastLine = new StringBuilder(listOfCodeLines.Last());
-            listOfCodeLines.RemoveAt(listOfCodeLines.Count - 1);
-
-            //remove semicolon at end of line
-            lastLine.Remove(lastLine.Length - 1, 1);
-
-            //switching XY -> XZ layer, rotating along x-axis 
-            if (layer == "x")
+            switch (layer)
             {
-                lastLine.Append(".rotateX(-90);");
+                //switching XY -> XZ layer, rotating along x-axis 
+                case "x":
+                    return(".rotateX(-90);");
+                //switching XY -> YZ layer, rotating along y-axis 
+                case "y":
+                    return (".rotateY(-90);");
+                //switching XZ -> YZ layer, rotating along z-axis 
+                case "z":
+                    return (".rotateZ(-90);");
+                default:
+                    return ";";
             }
-            //switching XY -> YZ layer, rotating along x-axis 
-            else if (layer == "y")
-            {
-                lastLine.Append(".rotateY(-90);");
-            }
-            //switching XZ -> YZ layer, rotating along x-axis 
-            else if (layer == "z")
-            {
-                lastLine.Append(".rotateZ(-90);");
-            }
-
-            listOfCodeLines.Add(lastLine.ToString());
         }
 
         private string TranslateObject(string axis, string value, bool withNegativeFactor)
@@ -605,7 +546,7 @@ namespace InvAddIn
                     case "x":
                         return (".translate([-1*" + value + ",0,0]);");
                     default:
-                        return "";
+                        return ";";
                 }
             }
             else
@@ -619,14 +560,45 @@ namespace InvAddIn
                     case "x":
                         return (".translate([" + value + ",0,0]);");
                     default:
-                        return "";
+                        return ";";
                 }
             }
 
 
 
+        } //end of method TranslateObject
+
+        private void AppendToLastLineOfCode(string stringToAppend)
+        {
+            //this method removes lastElement of list
+            //the lastElement can then be edited (remove semicolon and append "transformation")
+            //and then gets added to list again
+
+            StringBuilder lastLine = new StringBuilder(listOfCodeLines.Last());
+            listOfCodeLines.RemoveAt(listOfCodeLines.Count - 1);
+
+            //remove semicolon at end of line
+            lastLine.Remove(lastLine.Length - 1, 1);
+
+            lastLine.Append(stringToAppend);
+
+            listOfCodeLines.Add(lastLine.ToString());
         }
 
 
     } //end of class Shakespeare
 } //end of namespace InvAddIn
+
+
+/*
+old check:
+//check if partFeature is revolveFeature or extrudeFeature
+            if (partFeature.Type == ObjectTypeEnum.kExtrudeFeatureObject)
+            {
+                listOfCodeLines.Add(ExtrudeSketch((ExtrudeFeature)partFeature));
+            }
+            else if (partFeature.Type == ObjectTypeEnum.kRevolveFeatureObject)
+            {
+                listOfCodeLines.Add(RevolveSketch((RevolveFeature)partFeature));
+            }
+*/

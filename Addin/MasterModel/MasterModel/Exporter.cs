@@ -51,8 +51,8 @@ namespace InvAddIn
 
             double radius = Math.Round(arc.Radius, 4) * factor;
 
-            double startAngle = arc.StartAngle * (180 / Math.PI);
-            double sweepAngle = arc.SweepAngle * (180 / Math.PI);
+            double startAngle = Math.Round(arc.StartAngle * (180 / Math.PI), 4);
+            double sweepAngle = Math.Round(arc.SweepAngle * (180 / Math.PI), 4);
 
             string nameCenterX = entityName + "_CenterX";
             string nameCenterY = entityName + "_CenterY";
@@ -66,20 +66,18 @@ namespace InvAddIn
                centerY, 0.1);
             Parameter param3 = new Parameter(nameRadius, "Radius of " + entityName, "float",
                radius, 0.1);
-            Parameter param4 = new Parameter(nameStartAngle, "Start angle of " + entityName, "float",
-               startAngle, 1);
-            Parameter param5 = new Parameter(nameSweepAngle, "Sweep angle of " + entityName, "float",
-               sweepAngle, 1);
+            //Parameter param4 = new Parameter(nameStartAngle, "Start angle of " + entityName, "float",startAngle, 1);
+            //Parameter param5 = new Parameter(nameSweepAngle, "Sweep angle of " + entityName, "float",sweepAngle, 1);
 
             Shakespeare.ListOfParameter.Add(param1);
             Shakespeare.ListOfParameter.Add(param2);
             Shakespeare.ListOfParameter.Add(param3);
-            Shakespeare.ListOfParameter.Add(param4);
-            Shakespeare.ListOfParameter.Add(param5);
+            //Shakespeare.ListOfParameter.Add(param4);
+            //Shakespeare.ListOfParameter.Add(param5);
 
             string javaScriptVariable = "var " + entityName + " = CSG.Path2D.arc({center: [params." + nameCenterX +
                     ", params." + nameCenterY + ",0], radius: params." + nameRadius +
-                    ", startangle: params." + nameStartAngle + ",  endangle: params." + nameSweepAngle + "}).close().innerToCAG();";
+                    ", startangle: " + startAngle.ToString(myCultureInfo) + ",  endangle: " + sweepAngle.ToString(myCultureInfo) + "}).close().innerToCAG();";
 
             return ("\t" + javaScriptVariable);
         }
@@ -180,6 +178,8 @@ namespace InvAddIn
         //polygon (finished)
         public static string ExportPolygon(List<SketchLine> listOfSketchLines, int numberOfSketches)
 	    {
+            //we can only draw polygons if the lines are created on the endpoint of the last line
+            //else we wont create a polygon because
 
 	        int numberOfSketchesInExporter = numberOfSketches;
             StringBuilder javaScriptVariable = new StringBuilder();
@@ -212,15 +212,23 @@ namespace InvAddIn
 
                     tempX = Math.Round(sketchLine.Geometry.EndPoint.X, 4);
                     tempY = Math.Round(sketchLine.Geometry.EndPoint.Y, 4);
-                    first = false;
 
                 }
                 else
                 {
                     //next line does not belong to "old system", create new polygon
-                    javaScriptVariable.Append(CreatePolygonVariable(numberOfSketchesInExporter, xCoordinates, yCoordinates));
-                    javaScriptVariable.Append("\n\t");
-                    numberOfSketchesInExporter++;
+                    //add endpoint of last SketchLine
+                    xCoordinates.Add(tempX * factor);
+                    yCoordinates.Add(tempY * factor);
+
+                    //polygon can only be created with at least 3 points
+                    if (xCoordinates.Count >= 3 && yCoordinates.Count >= 3)
+                    {
+                        javaScriptVariable.Append(CreatePolygonVariable(numberOfSketchesInExporter, xCoordinates, yCoordinates));
+                        javaScriptVariable.Append("\n\t");
+                        numberOfSketchesInExporter++;
+                    }
+
 
                     //reset arrays
                     xCoordinates.Clear();
@@ -234,21 +242,29 @@ namespace InvAddIn
                     tempX = Math.Round(sketchLine.Geometry.EndPoint.X, 4);
                     tempY = Math.Round(sketchLine.Geometry.EndPoint.Y, 4);
 
-
-
-
                 }
                 
+                if (sketchLine == listOfSketchLines.Last())
+                {
+                    xCoordinates.Add(tempX * factor);
+                    yCoordinates.Add(tempY * factor);
+                }
+
                 counter++;
             }
 
-	        javaScriptVariable.Append(CreatePolygonVariable(numberOfSketchesInExporter, xCoordinates, yCoordinates));
+            //polygon can only be created with at least 3 points
+            if (xCoordinates.Count >= 3 && yCoordinates.Count >= 3)
+            {
+                javaScriptVariable.Append(CreatePolygonVariable(numberOfSketchesInExporter, xCoordinates, yCoordinates));
+            }
 
             return "\t" + javaScriptVariable;
 	    }
 
 	    private static string CreatePolygonVariable(int numberOfSketch, List<double> xCoordinates, List<double> yCoordinates)
 	    {
+            //TODO if xcoordinates.count = 1 oder = 0
             Shakespeare.listOfEntityNamesOfOneSketch.Add("polygon" + numberOfSketch);
             Shakespeare.NumberOfSketchEntities++;
 
