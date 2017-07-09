@@ -40,7 +40,10 @@ History:
                 zum jetztigen zeitpunkt noch nicht eingebunden-->
                 <button onclick="myFunction()" id="dropbtn" class="dropbtn">Mastermodel</button>
                 <div id="myDropdown" class="dropdown-content">
-                    <a id="dropdown_example" href="#">Example</a>
+                    <a id="dropdown_example" href="#">Donut</a>
+					<a id="dropdown_Keyhole" href="#">Keyhole</a>
+					<a id="dropdown_Small_Symbol" href="#">Small Symbol</a>
+					<a id="dropdown_Three_Cylinder" href="#">Three Cylinder</a>
                     <a id="dropdown_parametricAxisCoupler" href="#">Parametric Axis Coupler</a>
                     <a id="dropdown_parametricGrille" href="#">Parametric Grille</a>
                     <a id="dropdown_involuteGear" href="#">Involute Gear</a>
@@ -58,7 +61,7 @@ History:
 
     <!--OpenJSCAD and BezierControl setup-->
     <script>
-        var jscad_script = "scripts/jscad_scripts/example.js";
+        var jscad_script = "scripts/jscad_scripts/Donut.js";
         configurator = new Configurator(jscad_script);
     </script>
 
@@ -173,9 +176,12 @@ History:
             document.getElementById(str).innerHTML = document.getElementById(str2.concat(fileName).slice()).innerHTML; //fileName.substring(0,fileName.length-3)
         }
 
-        document.getElementById("reset").addEventListener("click", function () { switchMMB("example.js"); }, false)
+        document.getElementById("reset").addEventListener("click", function () { switchMMB("Donut.js"); }, false)
 
-        document.getElementById("dropdown_example").addEventListener("click", function () { switchMMB("example.js"); }, false)
+        document.getElementById("dropdown_donut").addEventListener("click", function () { switchMMB("Donut.js"); }, false)
+		document.getElementById("dropdown_Keyhole").addEventListener("click", function () { switchMMB("Keyhole.js"); }, false)
+		document.getElementById("dropdown_Small_Symbol").addEventListener("click", function () { switchMMB("Small_Symbol.js"); }, false)
+		document.getElementById("dropdown_Three_Cylinder").addEventListener("click", function () { switchMMB("Three_Cylinder.js"); }, false)
         document.getElementById("dropdown_parametricAxisCoupler").addEventListener("click", function () { switchMMB("parametricAxisCoupler.js"); }, false);
         document.getElementById("dropdown_parametricGrille").addEventListener("click", function () { switchMMB("parametricGrille.js"); }, false)
         document.getElementById("dropdown_involuteGear").addEventListener("click", function () { switchMMB("involuteGear.js"); }, false)
