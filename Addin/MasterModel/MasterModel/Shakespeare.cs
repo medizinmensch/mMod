@@ -388,7 +388,7 @@ namespace InvAddIn
         private void IntersectOperation(string actualVar, string oldVar)
         {
             //sphere 1 = sphere1.intersect(cube1);
-            listOfCodeLines.Add("\t" + "var " + _numberOfIntersections + " = "+ actualVar + ".intersect(" + oldVar + ");");
+            listOfCodeLines.Add("\t" + "var Intersection" + _numberOfIntersections + " = "+ actualVar + ".intersect(" + oldVar + ");");
         } //end of method IntersectOperation
 
         private string ExtrudeSketch(ExtrudeFeature extrudeFeature)
