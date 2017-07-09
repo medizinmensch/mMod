@@ -22,10 +22,6 @@ namespace InvAddIn
         public Sherlock(PartDocument suspect, TransientGeometry transGeometry)
         {
             Partypart = new MasterM(suspect, transGeometry);
-            
-
-            WhatWhereWhy windowDialoge = new WhatWhereWhy(this);
-            windowDialoge.Show();
 
 #if DEBUG
             //ShowTestDialoges();
