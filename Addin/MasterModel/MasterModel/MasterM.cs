@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Forms;
 using Inventor;
 
@@ -26,7 +27,6 @@ namespace InvAddIn
         {
             InventorDocument = inventorDocument;
             TransientGeometry = transientGeometry;
-            GetCustomParameters();
         }
 
         public void GetDistance()
@@ -57,7 +57,6 @@ namespace InvAddIn
                             Name = inventorParameters[i].Name,
                             Initial = inventorParameters[i]._Value,
                             Caption = inventorParameters[i].Comment
-
                         };
 
                     toReturn.Add(tmpParam);
@@ -92,12 +91,7 @@ namespace InvAddIn
         /// <returns>List of Entitys (Containing stuff like Arcs, )</returns>
         public static List<SketchEntity> GetSketchParts(Sketch sketchy)
         {
-            List<SketchEntity> sketchParts = new List<SketchEntity>();
-            foreach (SketchEntity part in sketchy.SketchEntities)
-            {
-                sketchParts.Add(part);
-            }
-            return sketchParts;
+            return sketchy.SketchEntities.Cast<SketchEntity>().ToList();
         }
 
         public List<EmbossFeature> GetEmbossFeatures()
@@ -145,6 +139,25 @@ namespace InvAddIn
             Symetric
         }
 
+        public static List<string> GetAffectedBodyNames(ExtrudeFeature extrudeFeature)
+        {
+            List<string> affecdedBodyList = new List<string>();
+
+            if (extrudeFeature.Operation == PartFeatureOperationEnum.kIntersectOperation || extrudeFeature.Operation == PartFeatureOperationEnum.kCutOperation) //Intersect & Cut
+            {
+                foreach (object affectedBody in extrudeFeature.Definition.AffectedBodies)
+                {
+                    string tmp = Microsoft.VisualBasic.Information.TypeName(affectedBody);
+                    if (Microsoft.VisualBasic.Information.TypeName(affectedBody) == "SurfaceBody")
+                    {
+                        affecdedBodyList.Add((affectedBody as SurfaceBody).Name);
+                    }
+                }
+            }
+
+            return affecdedBodyList;
+        }
+
         #region Instructions
         /// <summary>
         /// Everything you need to know about ExtrudeFeature
@@ -175,11 +188,12 @@ namespace InvAddIn
                         extrudeFeature.Definition.IsTwoDirectional.ToString(),// bei der angabe kannste abbrechen da die Extrusion in beide richtungen geht. Es sind generell auch asyncrone Bidirektionale Extrude operationen möglich, ich weiß allerdings noch nicht inwiefern uns dieses eNum uns darüber informationen gibt
                         param._Value.ToString() // ENDLICH! die Extrusion-Distance als double Value!
                     };
-
-                    if (extrudeFeature.Operation == PartFeatureOperationEnum.kIntersectOperation)
+                    List<string> tmp = GetAffectedBodyNames(extrudeFeature);
+                    if (tmp.Count != 0)
                     {
-                        //extrudeFeature.ExtentTwo.Parent.
+                        MessageBox.Show(String.Join(", ", tmp));
                     }
+                    
                 }
 
 
