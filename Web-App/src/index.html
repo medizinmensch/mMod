@@ -50,7 +50,7 @@ History:
                 </div>
             </div>
             <input type="hidden" name="hiddenInput" id="hiddenInput" value="" />
-            <button id="reset" class="testButton" onclick="reset()">Reset</button>
+            <button id="reset" class="testButton">Reset parameters</button>
             <button class="testButton" onclick="upload()">Print it!</button>
         </div>
         <div id="parametersdiv" style="display: block;"></div>
@@ -176,7 +176,21 @@ History:
             document.getElementById(str).innerHTML = document.getElementById(str2.concat(fileName).slice()).innerHTML; //fileName.substring(0,fileName.length-3)
         }
 
-        document.getElementById("reset").addEventListener("click", function () { switchMMB("Donut.js"); }, false)
+        function reset() {
+            //sicherheitsabfrage einbauen
+            alert("Ihr Mastermodell wird zurückgesetzt. Bitte warten...");
+            var actualPath = jscad_script;
+            //var actualPath = "scripts/jscad_scripts/parametricGrille.js";
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", actualPath, true);
+            xhr.onload = function () {
+                var source = this.responseText;
+                configurator.processor.setJsCad(source, actualPath);
+            };
+            xhr.send();
+        }
+
+        document.getElementById("reset").addEventListener("click", function () { reset(); }, false)
 
         document.getElementById("dropdown_donut").addEventListener("click", function () { switchMMB("Donut.js"); }, false)
 		document.getElementById("dropdown_Keyhole").addEventListener("click", function () { switchMMB("Keyhole.js"); }, false)
