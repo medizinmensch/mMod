@@ -33,7 +33,12 @@ namespace InvAddIn
                 var transGeo = Button.InventorApplication.TransientGeometry;
                 if (IsHelp)
                 {
-                    MessageBox.Show("-Standart Ebenen benutzen\r\n-2D Skizze ohne Splines erstellen\r\n-Nur ein Profil pro Skizze nutzen\r\n-Profile nur für Extrusion oder Drehung nutzen\r\n-Für Drehungen ausschließlich die Z-Achse als Rotationsachse nutzen");
+                    MessageBox.Show("-Nur eine Ebenen benutzen\r\n" +
+                                    "-2D Skizze ohne Splines erstellen\r\n" +
+                                    "-Nur ein Profil pro Skizze nutzen\r\n" +
+                                    "-Profile nur für Extrusion oder Drehung nutzen\r\n" +
+                                    "-Für Drehungen ausschließlich die Z-Achse als Rotationsachse nutzen\r\n" +
+                                    "-Parameter die auch später genutzt werden sollen müssen unter Verwalten => Parameter als Benutzerparameter angelegt werden und als Exportparameter makiert sein");
                 }
                 else
                 {
