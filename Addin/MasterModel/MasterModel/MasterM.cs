@@ -4,6 +4,7 @@ using System.Linq;
 using System.Windows.Forms;
 using Inventor;
 
+
 namespace InvAddIn
 {
     public class MasterM
@@ -49,15 +50,15 @@ namespace InvAddIn
             Parameters inventorParameters = InventorDocument.ComponentDefinition.Parameters;
             for (int i = 1; i < inventorParameters.Count; i++)
             {
-                if (inventorParameters[i].ParameterType == ParameterTypeEnum.kUserParameter && inventorParameters[i].ExposedAsProperty)
+                if (inventorParameters[i].ParameterType == ParameterTypeEnum.kUserParameter &&
+                    inventorParameters[i].ExposedAsProperty)
                 {
-                    Parameter tmpParam =
-                        new Parameter
-                        {
-                            Name = inventorParameters[i].Name,
-                            Initial = inventorParameters[i]._Value,
-                            Caption = inventorParameters[i].Comment
-                        };
+                    Parameter tmpParam = new Parameter
+                    {
+                        Name = inventorParameters[i].Name,
+                        Initial = inventorParameters[i]._Value,
+                        Caption = inventorParameters[i].Comment
+                    };
 
                     toReturn.Add(tmpParam);
                 }
@@ -111,7 +112,7 @@ namespace InvAddIn
 
         }
 
-        public List<object> GetFeatures()
+        /*public List<object> GetFeatures()
         {
             List<object> myFeatures = new List<object>();
 
@@ -130,7 +131,7 @@ namespace InvAddIn
                 }
             }
             return myFeatures;
-        }
+        }*/
 
         public enum ExtrudeDirection
         {
@@ -139,31 +140,66 @@ namespace InvAddIn
             Symetric
         }
 
-        public static List<string> GetAffectedBodyNames(ExtrudeFeature extrudeFeature)
+        public static List<string> GetAffectedBodyNames(object extrudeOrRevolveFeature)
         {
             List<string> affecdedBodyList = new List<string>();
 
-            if (extrudeFeature.Operation == PartFeatureOperationEnum.kIntersectOperation || extrudeFeature.Operation == PartFeatureOperationEnum.kCutOperation) //Intersect & Cut
+            var type = Microsoft.VisualBasic.Information.TypeName(extrudeOrRevolveFeature);
+            if (type == "RevolveFeature")
             {
-                foreach (object affectedBody in extrudeFeature.Definition.AffectedBodies)
+                var extrudeFeature = extrudeOrRevolveFeature as RevolveFeature;
+
+                if (extrudeFeature.Operation == PartFeatureOperationEnum.kIntersectOperation ||
+                    extrudeFeature.Operation == PartFeatureOperationEnum.kCutOperation) //Intersect & Cut
                 {
-                    string tmp = Microsoft.VisualBasic.Information.TypeName(affectedBody);
-                    if (Microsoft.VisualBasic.Information.TypeName(affectedBody) == "SurfaceBody")
+                    foreach (object affectedBody in extrudeFeature.Definition.AffectedBodies)
                     {
-                        affecdedBodyList.Add((affectedBody as SurfaceBody).Name);
+                        string tmp = Microsoft.VisualBasic.Information.TypeName(affectedBody);
+                        if (Microsoft.VisualBasic.Information.TypeName(affectedBody) == "SurfaceBody")
+                        {
+                            affecdedBodyList.Add((affectedBody as SurfaceBody).Name);
+                        }
                     }
                 }
             }
+            else
+            {
+                var extrudeFeature = extrudeOrRevolveFeature as ExtrudeFeature;
 
+                if (extrudeFeature.Operation == PartFeatureOperationEnum.kIntersectOperation ||
+                    extrudeFeature.Operation == PartFeatureOperationEnum.kCutOperation) //Intersect & Cut
+                {
+                    foreach (object affectedBody in extrudeFeature.Definition.AffectedBodies)
+                    {
+                        string tmp = Microsoft.VisualBasic.Information.TypeName(affectedBody);
+                        if (Microsoft.VisualBasic.Information.TypeName(affectedBody) == "SurfaceBody")
+                        {
+                            affecdedBodyList.Add((affectedBody as SurfaceBody).Name);
+                        }
+                    }
+                }
+            }
             return affecdedBodyList;
         }
 
+        public List<object> GetFeatures()
+        {
+            List<object> toReturn = new List<object>();
+            toReturn.AddRange(GetExtrudeFeatures());
+            toReturn.AddRange(GetRevolveFeatures());
+            return toReturn;
+        }
+
+
+
+
         #region Instructions
+
         /// <summary>
         /// Everything you need to know about ExtrudeFeature
         /// </summary>
         /// <returns>List of "ExtrudeFeature"s</returns>
-        /*public List<ExtrudeFeature> GetExtrudeFeatures()
+        public List<ExtrudeFeature> GetExtrudeFeatures()
         {
             PartComponentDefinition partComponentDefinition = InventorDocument.ComponentDefinition;
             List<ExtrudeFeature> toReturn = new List<ExtrudeFeature>();
@@ -171,10 +207,12 @@ namespace InvAddIn
             foreach (ExtrudeFeature extrudeFeature in partComponentDefinition.Features.ExtrudeFeatures)
             {
                 toReturn.Add(extrudeFeature);
-                
-                if (extrudeFeature.ExtentType == PartFeatureExtentEnum.kDistanceExtent) //wir können nur Distance extend benutzen!
+
+                if (extrudeFeature.ExtentType == PartFeatureExtentEnum.kDistanceExtent
+                ) //wir können nur Distance extend benutzen!
                 {
-                    Inventor.Parameter param = (extrudeFeature.Definition.Extent as DistanceExtent).Distance; //Value vorbereiten und unten dann abgreifen
+                    Inventor.Parameter param = (extrudeFeature.Definition.Extent as DistanceExtent)
+                        .Distance; //Value vorbereiten und unten dann abgreifen
 
                     var componentDefinition = extrudeFeature.Profile.Parent;
 
@@ -182,10 +220,14 @@ namespace InvAddIn
                     {
                         extrudeFeature.ExtendedName, //z.B. "Neuer Volumenkörper x 17mm"
                         extrudeFeature.Name, //z.B. "Extrusion1"
-                        extrudeFeature.Profile.Type.ToString(),//enthält das Profil (Profil.Parent sollte die Skizze enthalten)
-                        extrudeFeature.ExtentType.ToString(),// enthält die möglichen ExtentType typen. Z.B. kDistanceExtend, kThroughAllExtent, kFromToExtent, kToNextExtent. Wir gehen mal von kDistanceExtend aus - das ist das normale mit "17 mm" oder so.
-                        extrudeFeature.Operation.ToString(),// z.B. kNewBodyOperation, kIntersectOperation, kCutOperation, kJoinOperation
-                        extrudeFeature.Definition.IsTwoDirectional.ToString(),// bei der angabe kannste abbrechen da die Extrusion in beide richtungen geht. Es sind generell auch asyncrone Bidirektionale Extrude operationen möglich, ich weiß allerdings noch nicht inwiefern uns dieses eNum uns darüber informationen gibt
+                        extrudeFeature.Profile.Type
+                            .ToString(), //enthält das Profil (Profil.Parent sollte die Skizze enthalten)
+                        extrudeFeature.ExtentType
+                            .ToString(), // enthält die möglichen ExtentType typen. Z.B. kDistanceExtend, kThroughAllExtent, kFromToExtent, kToNextExtent. Wir gehen mal von kDistanceExtend aus - das ist das normale mit "17 mm" oder so.
+                        extrudeFeature.Operation
+                            .ToString(), // z.B. kNewBodyOperation, kIntersectOperation, kCutOperation, kJoinOperation
+                        extrudeFeature.Definition.IsTwoDirectional
+                            .ToString(), // bei der angabe kannste abbrechen da die Extrusion in beide richtungen geht. Es sind generell auch asyncrone Bidirektionale Extrude operationen möglich, ich weiß allerdings noch nicht inwiefern uns dieses eNum uns darüber informationen gibt
                         param._Value.ToString() // ENDLICH! die Extrusion-Distance als double Value!
                     };
                     List<string> tmp = GetAffectedBodyNames(extrudeFeature);
@@ -193,7 +235,7 @@ namespace InvAddIn
                     {
                         MessageBox.Show(String.Join(", ", tmp));
                     }
-                    
+
                 }
 
 
@@ -207,7 +249,8 @@ namespace InvAddIn
                 }
                 if (extrudeFeature.Operation != PartFeatureOperationEnum.kNewBodyOperation)
                 {
-                    NotImplementedTypes.Add("extrudeFeature " + extrudeFeature.Name + ": only kNewBodyOperation allowed");
+                    NotImplementedTypes.Add(
+                        "extrudeFeature " + extrudeFeature.Name + ": only kNewBodyOperation allowed");
                 }
                 if (extrudeFeature.ExtentType != PartFeatureExtentEnum.kDistanceExtent)
                 {
@@ -217,7 +260,7 @@ namespace InvAddIn
             }
 
             return toReturn;
-
+            /*
             foreach (PlanarSketch planarSketch in partComponentDefinition.Sketches)
             {
                 foreach (Profile planarSketchProfile in planarSketch.Profiles)
@@ -251,15 +294,15 @@ namespace InvAddIn
             }
 
             partComponentDefinition.Features.ExtrudeFeatures.AddByToExtent(
-                partComponentDefinition.Sketches[1].Profiles[1], "30 In", PartFeatureOperationEnum.kJoinOperation);
+                partComponentDefinition.Sketches[1].Profiles[1], "30 In", PartFeatureOperationEnum.kJoinOperation);*/
 
-        }*/
+        }
 
         /// <summary>
         /// Everything you need to know about RevolveFeatures
         /// </summary>
         /// <returns>List of "RevolveFeature"s</returns>
-        /*public List<RevolveFeature> GetRevolveFeatures()
+        public List<RevolveFeature> GetRevolveFeatures()
         {
             PartComponentDefinition partComponentDefinition = InventorDocument.ComponentDefinition;
 
@@ -274,41 +317,52 @@ namespace InvAddIn
                 {
 
                     List<string> msg = new List<string>
-                    {
-                        revolveFeature.ExtendedName, //z.B. "Neue Rotation 45°"
-                        revolveFeature.Name, //z.B. "Umdrehung1"
-                        revolveFeature.Profile.Type.ToString(), //enthält das Profil (Profil.Parent sollte die Skizze enthalten)
-                        revolveFeature.ExtentType.ToString(), // enthält die möglichen ExtentType typen. Z.B. kAngleExtent oder kFullSweepExtent.
-                        revolveFeature.Operation.ToString(), // z.B. kNewBodyOperation, kIntersectOperation, kCutOperation, kJoinOperation
-                        revolveFeature.AxisEntity.ToString(), // gibt die Rotationsachse zurück
-                        "360" // Der Rotationswinkel
-                    };
+                        {
+                            revolveFeature.ExtendedName, //z.B. "Neue Rotation 45°"
+                            revolveFeature.Name, //z.B. "Umdrehung1"
+                            revolveFeature.Profile.Type
+                                .ToString(), //enthält das Profil (Profil.Parent sollte die Skizze enthalten)
+                            revolveFeature.ExtentType
+                                .ToString(), // enthält die möglichen ExtentType typen. Z.B. kAngleExtent oder kFullSweepExtent.
+                            revolveFeature.Operation
+                                .ToString(), // z.B. kNewBodyOperation, kIntersectOperation, kCutOperation, kJoinOperation
+                            revolveFeature.AxisEntity.ToString(), // gibt die Rotationsachse zurück
+                            "360" // Der Rotationswinkel
+                        };
                 }
-                if (revolveFeature.ExtentType == PartFeatureExtentEnum.kAngleExtent) //wenn drehung mit bestimmten Winkel
+                if (revolveFeature.ExtentType == PartFeatureExtentEnum.kAngleExtent
+                ) //wenn drehung mit bestimmten Winkel
                 {
-                    double Rotationswinkel = 360 / (2 * Math.PI) * double.Parse(revolveFeature.Parameters[revolveFeature.Parameters.Count].Value.ToString());
+                    double Rotationswinkel = 360 / (2 * Math.PI) *
+                                             double.Parse(revolveFeature.Parameters[revolveFeature.Parameters.Count]
+                                                 .Value.ToString());
 
                     List<string> msg = new List<string>
-                    {
-                        revolveFeature.ExtendedName, //z.B. "Neue Rotation 45°"
-                        revolveFeature.Name, //z.B. "Umdrehung1"
-                        revolveFeature.Profile.Type.ToString(), //enthält das Profil (Profil.Parent sollte die Skizze enthalten)
-                        revolveFeature.ExtentType.ToString(), // enthält die möglichen ExtentType typen. Z.B. kAngleExtent oder kFullSweepExtent.
-                        revolveFeature.Operation.ToString(), // z.B. kNewBodyOperation, kIntersectOperation, kCutOperation, kJoinOperation
-                        revolveFeature.AxisEntity.ToString(), // gibt die Rotationsachse zurück
-                        revolveFeature.Parameters[revolveFeature.Parameters.Count].Name, // Der Rotationswinkelparametername
-                        Rotationswinkel.ToString() // Der Rotationswinkelwert
-                    };
+                        {
+                            revolveFeature.ExtendedName, //z.B. "Neue Rotation 45°"
+                            revolveFeature.Name, //z.B. "Umdrehung1"
+                            revolveFeature.Profile.Type
+                                .ToString(), //enthält das Profil (Profil.Parent sollte die Skizze enthalten)
+                            revolveFeature.ExtentType
+                                .ToString(), // enthält die möglichen ExtentType typen. Z.B. kAngleExtent oder kFullSweepExtent.
+                            revolveFeature.Operation
+                                .ToString(), // z.B. kNewBodyOperation, kIntersectOperation, kCutOperation, kJoinOperation
+                            revolveFeature.AxisEntity.ToString(), // gibt die Rotationsachse zurück
+                            revolveFeature.Parameters[revolveFeature.Parameters.Count]
+                                .Name, // Der Rotationswinkelparametername
+                            Rotationswinkel.ToString() // Der Rotationswinkelwert
+                        };
                 }
 
                 if (revolveFeature.Profile.Count > 1)
                 {
-                    NotImplementedTypes.Add("revolveFeature " + revolveFeature.Name + ": Only 1 Profile per Sketch");
+                    NotImplementedTypes.Add("revolveFeature " + revolveFeature.Name +
+                                            ": Only 1 Profile per Sketch");
                 }
 
             }
             return toReturn;
-        }*/
+        }
 
 
         #endregion
