@@ -41,13 +41,15 @@ History:
                 <button onclick="myFunction()" id="dropbtn" class="dropbtn">Mastermodel</button>
                 <div id="myDropdown" class="dropdown-content">
                     <a id="dropdown_donut" href="#">Donut</a>
-					<a id="dropdown_handyhuelle" href="#">Handyhuelle</a>
-					<a id="dropdown_Three_Cylinder" href="#">Three Cylinder</a>
-					<a id="dropdown_Small_Symbol" href="#">Small Symbol</a>
 					<a id="dropdown_Keyhole" href="#">Keyhole</a>
+					<a id="dropdown_Small_Symbol" href="#">Small Symbol</a>
+					<a id="dropdown_Three_Cylinder" href="#">Three Cylinder</a>
                     <a id="dropdown_parametricAxisCoupler" href="#">Parametric Axis Coupler</a>
                     <a id="dropdown_parametricGrille" href="#">Parametric Grille</a>
                     <a id="dropdown_involuteGear" href="#">Involute Gear</a>
+                    <a id="dropdown_placeholderA" href="#">Placeholder A</a>
+                    <a id="dropdown_placeholderB" href="#">Placeholder B</a>
+
                 </div>
             </div>
             <input type="hidden" name="hiddenInput" id="hiddenInput" value="" />
@@ -144,6 +146,7 @@ History:
                 }
             }
         }
+        
         function switchMasterModel(objDropDown) {
             //sicherheitsabfrage einbauen
             alert("Ihr Mastermodell wird geändert.");
@@ -179,7 +182,7 @@ History:
 
         function reset() {
             //sicherheitsabfrage einbauen
-            alert("Ihr Mastermodell wird zurückgesetzt. Bitte warten...");
+            alert("Die parameter ihres Mastermodell werden zurückgesetzt.");
             var actualPath = jscad_script;
             //var actualPath = "scripts/jscad_scripts/parametricGrille.js";
             var xhr = new XMLHttpRequest();
@@ -194,13 +197,14 @@ History:
         document.getElementById("reset").addEventListener("click", function () { reset(); }, false)
 
         document.getElementById("dropdown_donut").addEventListener("click", function () { switchMMB("Donut.js"); }, false)
-		document.getElementById("dropdown_handyhuelle").addEventListener("click", function () { switchMMB("Handyhuelle.js"); }, false)
 		document.getElementById("dropdown_Keyhole").addEventListener("click", function () { switchMMB("Keyhole.js"); }, false)
 		document.getElementById("dropdown_Small_Symbol").addEventListener("click", function () { switchMMB("Small_Symbol.js"); }, false)
 		document.getElementById("dropdown_Three_Cylinder").addEventListener("click", function () { switchMMB("Three_Cylinder.js"); }, false)
         document.getElementById("dropdown_parametricAxisCoupler").addEventListener("click", function () { switchMMB("parametricAxisCoupler.js"); }, false);
         document.getElementById("dropdown_parametricGrille").addEventListener("click", function () { switchMMB("parametricGrille.js"); }, false)
         document.getElementById("dropdown_involuteGear").addEventListener("click", function () { switchMMB("involuteGear.js"); }, false)
+        document.getElementById("dropdown_placeholderA").addEventListener("click", function () { switchMMB("placeholderA.js"); }, false)
+        document.getElementById("dropdown_placeholderB").addEventListener("click", function () { switchMMB("placeholderB.js"); }, false)
         
     </script>
 </body>
